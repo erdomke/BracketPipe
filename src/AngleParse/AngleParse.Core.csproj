@@ -46,6 +46,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="DomDescriptionAttribute.cs" />
+    <Compile Include="Html\NamespaceNames.cs" />
     <Compile Include="Parser\HtmlErrorEvent.cs" />
     <Compile Include="Extensions\CharExtensions.cs" />
     <Compile Include="Extensions\ObjectExtensions.cs" />
@@ -62,6 +63,8 @@
     <Compile Include="Parser\HtmlParseMode.cs" />
     <Compile Include="Extensions\HtmlParserExtensions.cs" />
     <Compile Include="Parser\HtmlTextWriter.cs" />
+    <Compile Include="Parser\HtmlWriterSettings.cs" />
+    <Compile Include="Parser\ParserExtensions.cs" />
     <Compile Include="Services\IEntityProvider.cs" />
     <Compile Include="TextEncoding.cs" />
     <Compile Include="TextPosition.cs" />

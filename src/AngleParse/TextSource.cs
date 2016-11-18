@@ -436,5 +436,10 @@
     }
 
     #endregion
+
+    public static implicit operator TextSource(string value)
+    {
+      return new TextSource(value);
+    }
   }
 }

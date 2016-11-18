@@ -2592,6 +2592,7 @@
       while (token.Type != HtmlTokenType.EndOfFile)
       {
         yield return token;
+        token = this.Read();
       }
     }
 
