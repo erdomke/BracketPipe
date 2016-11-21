@@ -2,7 +2,6 @@
 {
   using AngleParse.Extensions;
   using AngleParse.Html;
-  using AngleParse.Services;
   using System;
   using System.Collections.Generic;
   using System.Collections;
@@ -11,13 +10,15 @@
   /// Performs the tokenization of the source code. Follows the tokenization algorithm at:
   /// http://www.w3.org/html/wg/drafts/html/master/syntax.html
   /// </summary>
-  public sealed class HtmlReader : BaseTokenizer, IEnumerable<HtmlToken>
+  public sealed class HtmlReader : BaseTokenizer, IEnumerable<HtmlNode>
   {
     #region Fields
 
-    private readonly IEntityProvider _resolver;
+    private readonly HtmlEntityService _resolver;
     private String _lastStartTag;
     private TextPosition _position;
+    private int _svgDepth = -1;
+    private int _mathMlDepth = -1;
 
     #endregion
 
@@ -85,26 +86,78 @@
     /// Gets the next available token.
     /// </summary>
     /// <returns>The next available token.</returns>
-    public HtmlToken Read()
+    public HtmlNode Read()
     {
       var current = GetNext();
       _position = GetCurrentPosition();
 
       if (current != Symbols.EndOfFile)
       {
+        var result = default(HtmlNode);
         switch (State)
         {
           case HtmlParseMode.PCData:
-            return Data(current);
+            result = Data(current);
+            break;
           case HtmlParseMode.RCData:
-            return RCData(current);
+            result = RCData(current);
+            break;
           case HtmlParseMode.Plaintext:
-            return Plaintext(current);
+            result = Plaintext(current);
+            break;
           case HtmlParseMode.Rawtext:
-            return Rawtext(current);
+            result = Rawtext(current);
+            break;
           case HtmlParseMode.Script:
-            return ScriptData(current);
+            result = ScriptData(current);
+            break;
         }
+
+        var tag = result as HtmlTagNode;
+        if (_svgDepth < 0
+          && tag != null
+          && result.Type == HtmlTokenType.StartTag
+          && result.Value.Is(TagNames.Svg))
+        {
+          _svgDepth = 0;
+          return HtmlForeign.SvgConfig(tag);
+        }
+        else if (_svgDepth >= 0 && tag != null)
+        {
+          switch (tag.Type)
+          {
+            case HtmlTokenType.StartTag:
+              if (!tag.IsSelfClosing)
+                _svgDepth++;
+              return HtmlForeign.SvgConfig(tag);
+            case HtmlTokenType.EndTag:
+              _svgDepth--;
+              break;
+          }
+        }
+        else if (_mathMlDepth < 0
+          && tag != null
+          && result.Type == HtmlTokenType.StartTag
+          && result.Value.Is(TagNames.Math))
+        {
+          _mathMlDepth = 0;
+          return HtmlForeign.MathMlConfig(tag);
+        }
+        else if (_mathMlDepth >= 0 && tag != null)
+        {
+          switch (tag.Type)
+          {
+            case HtmlTokenType.StartTag:
+              if (!tag.IsSelfClosing)
+                _mathMlDepth++;
+              return HtmlForeign.MathMlConfig(tag);
+            case HtmlTokenType.EndTag:
+              _mathMlDepth--;
+              break;
+          }
+        }
+
+        return result;
       }
 
       return NewEof(acceptable: true);
@@ -134,12 +187,12 @@
     /// See 8.2.4.1 Data state
     /// </summary>
     /// <param name="c">The next input character.</param>
-    private HtmlToken Data(Char c)
+    private HtmlNode Data(Char c)
     {
       return c == Symbols.LessThan ? TagOpen(GetNext()) : DataText(c);
     }
 
-    private HtmlToken DataText(Char c)
+    private HtmlNode DataText(Char c)
     {
       while (true)
       {
@@ -175,7 +228,7 @@
     /// See 8.2.4.7 PLAINTEXT state
     /// </summary>
     /// <param name="c">The next input character.</param>
-    private HtmlToken Plaintext(Char c)
+    private HtmlNode Plaintext(Char c)
     {
       while (true)
       {
@@ -206,12 +259,12 @@
     /// See 8.2.4.3 RCDATA state
     /// </summary>
     /// <param name="c">The next input character.</param>
-    private HtmlToken RCData(Char c)
+    private HtmlNode RCData(Char c)
     {
       return c == Symbols.LessThan ? RCDataLt(GetNext()) : RCDataText(c);
     }
 
-    private HtmlToken RCDataText(Char c)
+    private HtmlNode RCDataText(Char c)
     {
       while (true)
       {
@@ -243,7 +296,7 @@
     /// See 8.2.4.11 RCDATA less-than sign state
     /// </summary>
     /// <param name="c">The next input character.</param>
-    private HtmlToken RCDataLt(Char c)
+    private HtmlNode RCDataLt(Char c)
     {
       if (c == Symbols.Solidus)
       {
@@ -277,7 +330,7 @@
     /// See 8.2.4.13 RCDATA end tag name state
     /// </summary>
     /// <param name="c">The next input character.</param>
-    private HtmlToken RCDataNameEndTag(Char c)
+    private HtmlNode RCDataNameEndTag(Char c)
     {
       while (true)
       {
@@ -313,12 +366,12 @@
     /// See 8.2.4.5 RAWTEXT state
     /// </summary>
     /// <param name="c">The next input character.</param>
-    private HtmlToken Rawtext(Char c)
+    private HtmlNode Rawtext(Char c)
     {
       return c == Symbols.LessThan ? RawtextLT(GetNext()) : RawtextText(c);
     }
 
-    private HtmlToken RawtextText(Char c)
+    private HtmlNode RawtextText(Char c)
     {
       while (true)
       {
@@ -346,7 +399,7 @@
     /// See 8.2.4.14 RAWTEXT less-than sign state
     /// </summary>
     /// <param name="c">The next input character.</param>
-    private HtmlToken RawtextLT(Char c)
+    private HtmlNode RawtextLT(Char c)
     {
       if (c == Symbols.Solidus)
       {
@@ -380,7 +433,7 @@
     /// See 8.2.4.16 RAWTEXT end tag name state
     /// </summary>
     /// <param name="c">The next input character.</param>
-    private HtmlToken RawtextNameEndTag(Char c)
+    private HtmlNode RawtextNameEndTag(Char c)
     {
       while (true)
       {
@@ -416,7 +469,7 @@
     /// See 8.2.4.68 CDATA section state
     /// </summary>
     /// <param name="c">The next input character.</param>
-    private HtmlToken CharacterData(Char c)
+    private HtmlNode CharacterData(Char c)
     {
       while (true)
       {
@@ -613,7 +666,7 @@
     /// See 8.2.4.8 Tag open state
     /// </summary>
     /// <param name="c">The next input character.</param>
-    private HtmlToken TagOpen(Char c)
+    private HtmlNode TagOpen(Char c)
     {
       if (c == Symbols.Solidus)
       {
@@ -651,7 +704,7 @@
     /// See 8.2.4.9 End tag open state
     /// </summary>
     /// <param name="c">The next input character.</param>
-    private HtmlToken TagEnd(Char c)
+    private HtmlNode TagEnd(Char c)
     {
       if (c.IsLowercaseAscii())
       {
@@ -687,7 +740,7 @@
     /// See 8.2.4.10 Tag name state
     /// </summary>
     /// <param name="tag">The current tag token.</param>
-    private HtmlToken TagName(HtmlTagToken tag)
+    private HtmlNode TagName(HtmlTagNode tag)
     {
       while (true)
       {
@@ -695,17 +748,17 @@
 
         if (c == Symbols.GreaterThan)
         {
-          tag.Name = FlushBuffer();
+          tag.Value = FlushBuffer();
           return EmitTag(tag);
         }
         else if (c.IsSpaceCharacter())
         {
-          tag.Name = FlushBuffer();
+          tag.Value = FlushBuffer();
           return ParseAttributes(tag);
         }
         else if (c == Symbols.Solidus)
         {
-          tag.Name = FlushBuffer();
+          tag.Value = FlushBuffer();
           return TagSelfClosing(tag);
         }
         else if (c.IsUppercaseAscii())
@@ -731,7 +784,7 @@
     /// See 8.2.4.43 Self-closing start tag state
     /// </summary>
     /// <param name="tag">The current tag token.</param>
-    private HtmlToken TagSelfClosing(HtmlTagToken tag)
+    private HtmlNode TagSelfClosing(HtmlTagNode tag)
     {
       switch (GetNext())
       {
@@ -751,7 +804,7 @@
     /// See 8.2.4.45 Markup declaration open state
     /// </summary>
     /// <param name="c">The next input character.</param>
-    private HtmlToken MarkupDeclaration(Char c)
+    private HtmlNode MarkupDeclaration(Char c)
     {
       if (ContinuesWithSensitive("--"))
       {
@@ -783,7 +836,7 @@
     /// See 8.2.4.44 Bogus comment state
     /// </summary>
     /// <param name="c">The current character.</param>
-    private HtmlToken BogusComment(Char c)
+    private HtmlNode BogusComment(Char c)
     {
       StringBuffer.Clear();
 
@@ -814,7 +867,7 @@
     /// See 8.2.4.46 Comment start state
     /// </summary>
     /// <param name="c">The next input character.</param>
-    private HtmlToken CommentStart(Char c)
+    private HtmlNode CommentStart(Char c)
     {
       StringBuffer.Clear();
 
@@ -845,7 +898,7 @@
     /// See 8.2.4.47 Comment start dash state
     /// </summary>
     /// <param name="c">The next input character.</param>
-    private HtmlToken CommentDashStart(Char c)
+    private HtmlNode CommentDashStart(Char c)
     {
       switch (c)
       {
@@ -875,7 +928,7 @@
     /// See 8.2.4.48 Comment state
     /// </summary>
     /// <param name="c">The next input character.</param>
-    private HtmlToken Comment(Char c)
+    private HtmlNode Comment(Char c)
     {
       while (true)
       {
@@ -910,7 +963,7 @@
     /// See 8.2.4.49 Comment end dash state
     /// </summary>
     /// <param name="c">The next input character.</param>
-    private HtmlToken CommentDashEnd(Char c)
+    private HtmlNode CommentDashEnd(Char c)
     {
       switch (c)
       {
@@ -934,7 +987,7 @@
     /// See 8.2.4.50 Comment end state
     /// </summary>
     /// <param name="c">The next input character.</param>
-    private HtmlToken CommentEnd(Char c)
+    private HtmlNode CommentEnd(Char c)
     {
       while (true)
       {
@@ -972,7 +1025,7 @@
     /// See 8.2.4.51 Comment end bang state
     /// </summary>
     /// <param name="c">The next input character.</param>
-    private HtmlToken CommentBangEnd(Char c)
+    private HtmlNode CommentBangEnd(Char c)
     {
       switch (c)
       {
@@ -1006,7 +1059,7 @@
     /// See 8.2.4.52 DOCTYPE state
     /// </summary>
     /// <param name="c">The next input character.</param>
-    private HtmlToken Doctype(Char c)
+    private HtmlNode Doctype(Char c)
     {
       if (c.IsSpaceCharacter())
       {
@@ -1029,7 +1082,7 @@
     /// See 8.2.4.53 Before DOCTYPE name state
     /// </summary>
     /// <param name="c">The next input character.</param>
-    private HtmlToken DoctypeNameBefore(Char c)
+    private HtmlNode DoctypeNameBefore(Char c)
     {
       while (c.IsSpaceCharacter())
         c = GetNext();
@@ -1072,7 +1125,7 @@
     /// See 8.2.4.54 DOCTYPE name state
     /// </summary>
     /// <param name="doctype">The current doctype token.</param>
-    private HtmlToken DoctypeName(HtmlDoctypeToken doctype)
+    private HtmlNode DoctypeName(HtmlDoctypeNode doctype)
     {
       while (true)
       {
@@ -1080,13 +1133,13 @@
 
         if (c.IsSpaceCharacter())
         {
-          doctype.Name = FlushBuffer();
+          doctype.Value = FlushBuffer();
           return DoctypeNameAfter(doctype);
         }
         else if (c == Symbols.GreaterThan)
         {
           State = HtmlParseMode.PCData;
-          doctype.Name = FlushBuffer();
+          doctype.Value = FlushBuffer();
           break;
         }
         else if (c.IsUppercaseAscii())
@@ -1102,7 +1155,7 @@
           RaiseErrorOccurred(HtmlParseError.EOF);
           Back();
           doctype.IsQuirksForced = true;
-          doctype.Name = FlushBuffer();
+          doctype.Value = FlushBuffer();
           break;
         }
         else
@@ -1118,7 +1171,7 @@
     /// See 8.2.4.55 After DOCTYPE name state
     /// </summary>
     /// <param name="doctype">The current doctype token.</param>
-    private HtmlToken DoctypeNameAfter(HtmlDoctypeToken doctype)
+    private HtmlNode DoctypeNameAfter(HtmlDoctypeNode doctype)
     {
       var c = SkipSpaces();
 
@@ -1156,7 +1209,7 @@
     /// See 8.2.4.56 After DOCTYPE public keyword state
     /// </summary>
     /// <param name="doctype">The current doctype token.</param>
-    private HtmlToken DoctypePublic(HtmlDoctypeToken doctype)
+    private HtmlNode DoctypePublic(HtmlDoctypeNode doctype)
     {
       var c = GetNext();
 
@@ -1202,7 +1255,7 @@
     /// See 8.2.4.57 Before DOCTYPE public identifier state
     /// </summary>
     /// <param name="doctype">The current doctype token.</param>
-    private HtmlToken DoctypePublicIdentifierBefore(HtmlDoctypeToken doctype)
+    private HtmlNode DoctypePublicIdentifierBefore(HtmlDoctypeNode doctype)
     {
       var c = SkipSpaces();
 
@@ -1242,7 +1295,7 @@
     /// See 8.2.4.58 DOCTYPE public identifier (double-quoted) state
     /// </summary>
     /// <param name="doctype">The current doctype token.</param>
-    private HtmlToken DoctypePublicIdentifierDoubleQuoted(HtmlDoctypeToken doctype)
+    private HtmlNode DoctypePublicIdentifierDoubleQuoted(HtmlDoctypeNode doctype)
     {
       while (true)
       {
@@ -1286,7 +1339,7 @@
     /// See 8.2.4.59 DOCTYPE public identifier (single-quoted) state
     /// </summary>
     /// <param name="doctype">The current doctype token.</param>
-    private HtmlToken DoctypePublicIdentifierSingleQuoted(HtmlDoctypeToken doctype)
+    private HtmlNode DoctypePublicIdentifierSingleQuoted(HtmlDoctypeNode doctype)
     {
       while (true)
       {
@@ -1330,7 +1383,7 @@
     /// See 8.2.4.60 After DOCTYPE public identifier state
     /// </summary>
     /// <param name="doctype">The current doctype token.</param>
-    private HtmlToken DoctypePublicIdentifierAfter(HtmlDoctypeToken doctype)
+    private HtmlNode DoctypePublicIdentifierAfter(HtmlDoctypeNode doctype)
     {
       var c = GetNext();
 
@@ -1374,7 +1427,7 @@
     /// See 8.2.4.61 Between DOCTYPE public and system identifiers state
     /// </summary>
     /// <param name="doctype">The current doctype token.</param>
-    private HtmlToken DoctypeBetween(HtmlDoctypeToken doctype)
+    private HtmlNode DoctypeBetween(HtmlDoctypeNode doctype)
     {
       var c = SkipSpaces();
 
@@ -1412,7 +1465,7 @@
     /// See 8.2.4.62 After DOCTYPE system keyword state
     /// </summary>
     /// <param name="doctype">The current doctype token.</param>
-    private HtmlToken DoctypeSystem(HtmlDoctypeToken doctype)
+    private HtmlNode DoctypeSystem(HtmlDoctypeNode doctype)
     {
       var c = GetNext();
 
@@ -1459,7 +1512,7 @@
     /// See 8.2.4.63 Before DOCTYPE system identifier state
     /// </summary>
     /// <param name="doctype">The current doctype token.</param>
-    private HtmlToken DoctypeSystemIdentifierBefore(HtmlDoctypeToken doctype)
+    private HtmlNode DoctypeSystemIdentifierBefore(HtmlDoctypeNode doctype)
     {
       var c = SkipSpaces();
 
@@ -1501,7 +1554,7 @@
     /// See 8.2.4.64 DOCTYPE system identifier (double-quoted) state
     /// </summary>
     /// <param name="doctype">The current doctype token.</param>
-    private HtmlToken DoctypeSystemIdentifierDoubleQuoted(HtmlDoctypeToken doctype)
+    private HtmlNode DoctypeSystemIdentifierDoubleQuoted(HtmlDoctypeNode doctype)
     {
       while (true)
       {
@@ -1545,7 +1598,7 @@
     /// See 8.2.4.65 DOCTYPE system identifier (single-quoted) state
     /// </summary>
     /// <param name="doctype">The current doctype token.</param>
-    private HtmlToken DoctypeSystemIdentifierSingleQuoted(HtmlDoctypeToken doctype)
+    private HtmlNode DoctypeSystemIdentifierSingleQuoted(HtmlDoctypeNode doctype)
     {
       while (true)
       {
@@ -1584,7 +1637,7 @@
     /// See 8.2.4.66 After DOCTYPE system identifier state
     /// </summary>
     /// <param name="doctype">The current doctype token.</param>
-    private HtmlToken DoctypeSystemIdentifierAfter(HtmlDoctypeToken doctype)
+    private HtmlNode DoctypeSystemIdentifierAfter(HtmlDoctypeNode doctype)
     {
       var c = SkipSpaces();
 
@@ -1610,7 +1663,7 @@
     /// See 8.2.4.67 Bogus DOCTYPE state
     /// </summary>
     /// <param name="doctype">The current doctype token.</param>
-    private HtmlToken BogusDoctype(HtmlDoctypeToken doctype)
+    private HtmlNode BogusDoctype(HtmlDoctypeNode doctype)
     {
       while (true)
       {
@@ -1645,7 +1698,7 @@
       UnquotedValue
     }
 
-    private HtmlToken ParseAttributes(HtmlTagToken tag)
+    private HtmlNode ParseAttributes(HtmlTagNode tag)
     {
       var state = AttributeState.BeforeName;
       var quote = Symbols.DoubleQuote;
@@ -1971,7 +2024,7 @@
       EndDoubleEscape
     }
 
-    private HtmlToken ScriptData(Char c)
+    private HtmlNode ScriptData(Char c)
     {
       var length = _lastStartTag.Length;
       var scriptLength = TagNames.Script.Length;
@@ -2101,17 +2154,17 @@
 
                     if (isspace)
                     {
-                      tag.Name = _lastStartTag;
+                      tag.Value = _lastStartTag;
                       return ParseAttributes(tag);
                     }
                     else if (isslash)
                     {
-                      tag.Name = _lastStartTag;
+                      tag.Value = _lastStartTag;
                       return TagSelfClosing(tag);
                     }
                     else if (isclosed)
                     {
-                      tag.Name = _lastStartTag;
+                      tag.Value = _lastStartTag;
                       return EmitTag(tag);
                     }
                   }
@@ -2462,41 +2515,41 @@
 
     #region Tokens
 
-    private HtmlToken NewCharacter()
+    private HtmlNode NewCharacter()
     {
       var content = FlushBuffer();
-      return new HtmlToken(HtmlTokenType.Character, _position, content);
+      return new HtmlNode(HtmlTokenType.Text, _position, content);
     }
 
-    private HtmlToken NewComment()
+    private HtmlNode NewComment()
     {
       var content = FlushBuffer();
-      return new HtmlToken(HtmlTokenType.Comment, _position, content);
+      return new HtmlNode(HtmlTokenType.Comment, _position, content);
     }
 
-    private HtmlToken NewEof(Boolean acceptable = false)
+    private HtmlNode NewEof(Boolean acceptable = false)
     {
       if (!acceptable)
       {
         RaiseErrorOccurred(HtmlParseError.EOF);
       }
 
-      return new HtmlToken(HtmlTokenType.EndOfFile, _position);
+      return new HtmlNode(HtmlTokenType.EndOfFile, _position);
     }
 
-    private HtmlDoctypeToken NewDoctype(Boolean quirksForced)
+    private HtmlDoctypeNode NewDoctype(Boolean quirksForced)
     {
-      return new HtmlDoctypeToken(quirksForced, _position);
+      return new HtmlDoctypeNode(quirksForced, _position);
     }
 
-    private HtmlTagToken NewTagOpen()
+    private HtmlTagNode NewTagOpen()
     {
-      return new HtmlTagToken(HtmlTokenType.StartTag, _position);
+      return new HtmlTagNode(HtmlTokenType.StartTag, _position);
     }
 
-    private HtmlTagToken NewTagClose()
+    private HtmlTagNode NewTagClose()
     {
-      return new HtmlTagToken(HtmlTokenType.EndTag, _position);
+      return new HtmlTagNode(HtmlTokenType.EndTag, _position);
     }
 
     #endregion
@@ -2514,7 +2567,7 @@
       StringBuffer.Append(Symbols.Replacement);
     }
 
-    private HtmlToken CreateIfAppropriate(Char c)
+    private HtmlNode CreateIfAppropriate(Char c)
     {
       var isspace = c.IsSpaceCharacter();
       var isclosed = c == Symbols.GreaterThan;
@@ -2528,17 +2581,17 @@
 
         if (isspace)
         {
-          tag.Name = _lastStartTag;
+          tag.Value = _lastStartTag;
           return ParseAttributes(tag);
         }
         else if (isslash)
         {
-          tag.Name = _lastStartTag;
+          tag.Value = _lastStartTag;
           return TagSelfClosing(tag);
         }
         else if (isclosed)
         {
-          tag.Name = _lastStartTag;
+          tag.Value = _lastStartTag;
           return EmitTag(tag);
         }
       }
@@ -2546,7 +2599,7 @@
       return null;
     }
 
-    private HtmlToken EmitTag(HtmlTagToken tag)
+    private HtmlNode EmitTag(HtmlTagNode tag)
     {
       var attributes = tag.Attributes;
       State = HtmlParseMode.PCData;
@@ -2567,7 +2620,10 @@
             }
           }
 
-          _lastStartTag = tag.Name;
+          if (tag.Value.Is(TagNames.Script))
+            State = HtmlParseMode.Script;
+
+          _lastStartTag = tag.Value;
           break;
         case HtmlTokenType.EndTag:
           if (tag.IsSelfClosing)
@@ -2586,7 +2642,7 @@
       return tag;
     }
 
-    public IEnumerator<HtmlToken> GetEnumerator()
+    public IEnumerator<HtmlNode> GetEnumerator()
     {
       var token = this.Read();
       while (token.Type != HtmlTokenType.EndOfFile)

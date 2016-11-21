@@ -171,8 +171,19 @@ namespace AngleParse.Core.Tests
 </html>";
       using (var reader = new HtmlReader(html))
       {
-        var rendered = reader.ToHtml(new HtmlWriterSettings());
+        var rendered = reader.ToHtml();
         Assert.AreEqual(html, rendered);
+      }
+    }
+
+    [Test]
+    public void RoundTrip_VoidElementCloseTag()
+    {
+      var html = @"<p><img src></img></p>";
+      using (var reader = new HtmlReader(html))
+      {
+        var rendered = reader.ToHtml();
+        Assert.AreEqual(@"<p><img src></p>", rendered);
       }
     }
 
@@ -207,15 +218,64 @@ namespace AngleParse.Core.Tests
   c-21.326-24.978-47.502-25.803-77.339-17.365c-23.461,6.634-39.234-7.117-52.98-31.273C318.42,87.525,265.838,64.927,210.333,65.331
   z M445.731,203.01c6.12,0,11.112,4.919,11.112,11.038c0,6.119-4.994,11.111-11.112,11.111s-11.038-4.994-11.038-11.111
   C434.693,207.929,439.613,203.01,445.731,203.01z""/>
-<filter id=""pictureFilter"" >
-  <feGaussianBlur stdDeviation=""15"" />
+<filter id=""pictureFilter"">
+  <feGaussianBlur stdDeviation=""15""/>
 </filter>
 </svg>
 </body>
 </html>";
       using (var reader = new HtmlReader(html))
       {
-        var rendered = reader.ToHtml(new HtmlWriterSettings());
+        var rendered = reader.ToHtml();
+        Assert.AreEqual(html, rendered);
+      }
+    }
+
+    [Test]
+    public void RoundTrip_EntityName()
+    {
+      var html = @"<p>a&PlusMinus;b</p>";
+      using (var reader = new HtmlReader(html))
+      {
+        var rendered = reader.ToHtml();
+        Assert.AreEqual(@"<p>a±b</p>", rendered);
+      }
+    }
+
+
+    [Test]
+    public void RoundTrip_MathMl()
+    {
+      var html = @"<html xmlns=""http://www.w3.org/1999/xhtml"" lang=""en"" xml:lang=""en"">
+
+<head>
+<title>MathML's Hello Square</title>
+</head>
+
+<body>
+
+<p> This is a perfect square:</p>
+
+<math xmlns=""http://www.w3.org/1998/Math/MathML"">
+  <mrow>
+   <msup>
+     <mfenced>
+       <mrow>
+         <mi>a</mi>
+         <mo>+</mo>
+         <mi>b</mi>
+       </mrow>
+     </mfenced>
+     <mn>2</mn>
+   </msup>
+ </mrow>
+</math>
+
+</body>
+</html>";
+      using (var reader = new HtmlReader(html))
+      {
+        var rendered = reader.ToHtml();
         Assert.AreEqual(html, rendered);
       }
     }

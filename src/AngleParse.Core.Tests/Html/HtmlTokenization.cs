@@ -33,8 +33,8 @@
       var s = new TextSource(content);
       var t = CreateTokenizer(s);
       var token = t.Read();
-      Assert.AreEqual(HtmlTokenType.Character, token.Type);
-      Assert.AreEqual(content, token.Data);
+      Assert.AreEqual(HtmlTokenType.Text, token.Type);
+      Assert.AreEqual(content, token.Value);
     }
 
     [Test]
@@ -44,7 +44,7 @@
       var t = CreateTokenizer(s);
       var token = t.Read();
       Assert.AreEqual(HtmlTokenType.StartTag, token.Type);
-      Assert.AreEqual("p", ((HtmlTagToken)token).Name);
+      Assert.AreEqual("p", ((HtmlTagNode)token).Value);
     }
 
     [Test]
@@ -54,7 +54,7 @@
       var t = CreateTokenizer(s);
       var token = t.Read();
       Assert.AreEqual(HtmlTokenType.Comment, token.Type);
-      Assert.AreEqual(String.Empty, token.Data);
+      Assert.AreEqual(String.Empty, token.Value);
     }
 
     [Test]
@@ -64,7 +64,7 @@
       var t = CreateTokenizer(s);
       var token = t.Read();
       Assert.AreEqual(HtmlTokenType.Comment, token.Type);
-      Assert.AreEqual("?", token.Data);
+      Assert.AreEqual("?", token.Value);
     }
 
     [Test]
@@ -74,7 +74,7 @@
       var t = CreateTokenizer(s);
       var token = t.Read();
       Assert.AreEqual(HtmlTokenType.Comment, token.Type);
-      Assert.AreEqual(" ", token.Data);
+      Assert.AreEqual(" ", token.Value);
     }
 
     [Test]
@@ -83,7 +83,7 @@
       var s = new TextSource("<span>");
       var t = CreateTokenizer(s);
       var token = t.Read();
-      Assert.AreEqual("span", ((HtmlTagToken)token).Name);
+      Assert.AreEqual("span", ((HtmlTagNode)token).Value);
     }
 
     [Test]
@@ -92,7 +92,7 @@
       var s = new TextSource("<img />");
       var t = CreateTokenizer(s);
       var token = t.Read();
-      Assert.AreEqual(true, ((HtmlTagToken)token).IsSelfClosing);
+      Assert.AreEqual(true, ((HtmlTagNode)token).IsSelfClosing);
     }
 
     [Test]
@@ -101,7 +101,7 @@
       var s = new TextSource("<a target='_blank' href='http://whatever' title='ho'>");
       var t = CreateTokenizer(s);
       var token = t.Read();
-      Assert.AreEqual(3, ((HtmlTagToken)token).Attributes.Count);
+      Assert.AreEqual(3, ((HtmlTagNode)token).Attributes.Count);
     }
 
     [Test]
@@ -110,7 +110,7 @@
       var s = new TextSource("<input required>");
       var t = CreateTokenizer(s);
       var token = t.Read();
-      Assert.AreEqual("required", ((HtmlTagToken)token).Attributes[0].Key);
+      Assert.AreEqual("required", ((HtmlTagNode)token).Attributes[0].Key);
     }
 
     [Test]
@@ -119,7 +119,7 @@
       var s = new TextSource("<InpUT>");
       var t = CreateTokenizer(s);
       var token = t.Read();
-      Assert.AreEqual("input", ((HtmlTagToken)token).Name);
+      Assert.AreEqual("input", ((HtmlTagNode)token).Value);
     }
 
     [Test]
@@ -128,7 +128,7 @@
       var s = new TextSource("<i   >");
       var t = CreateTokenizer(s);
       var token = t.Read();
-      Assert.AreEqual("i", ((HtmlTagToken)token).Name);
+      Assert.AreEqual("i", ((HtmlTagNode)token).Value);
     }
 
     [Test]
@@ -138,14 +138,14 @@
       var src = "I'm &notin; I tell you";
       var s = new TextSource(src);
       var t = CreateTokenizer(s);
-      var token = default(HtmlToken);
+      var token = default(HtmlNode);
 
       do
       {
         token = t.Read();
 
-        if (token.Type == HtmlTokenType.Character)
-          str += token.Data;
+        if (token.Type == HtmlTokenType.Text)
+          str += token.Value;
       }
       while (token.Type != HtmlTokenType.EndOfFile);
 
@@ -159,14 +159,14 @@
       var src = "I'm &notit; I tell you";
       var s = new TextSource(src);
       var t = CreateTokenizer(s);
-      var token = default(HtmlToken);
+      var token = default(HtmlNode);
 
       do
       {
         token = t.Read();
 
-        if (token.Type == HtmlTokenType.Character)
-          str += token.Data;
+        if (token.Type == HtmlTokenType.Text)
+          str += token.Value;
       }
       while (token.Type != HtmlTokenType.EndOfFile);
 
@@ -198,7 +198,7 @@
       var t = CreateTokenizer(s);
       t.IsAcceptingCharacterData = true;
       var token = t.Read();
-      Assert.AreEqual(HtmlTokenType.Character, token.Type);
+      Assert.AreEqual(HtmlTokenType.Text, token.Type);
     }
 
     [Test]
@@ -207,15 +207,15 @@
       StringBuilder sb = new StringBuilder();
       var s = new TextSource("<![CDATA[hi mum how <!-- are you doing />]]>");
       var t = CreateTokenizer(s);
-      var token = default(HtmlToken);
+      var token = default(HtmlNode);
       t.IsAcceptingCharacterData = true;
 
       do
       {
         token = t.Read();
 
-        if (token.Type == HtmlTokenType.Character)
-          sb.Append(token.Data);
+        if (token.Type == HtmlTokenType.Text)
+          sb.Append(token.Value);
       }
       while (token.Type != HtmlTokenType.EndOfFile);
 
@@ -229,9 +229,9 @@
       var t = CreateTokenizer(s);
       var e = t.Read();
       Assert.AreEqual(HtmlTokenType.Doctype, e.Type);
-      var d = (HtmlDoctypeToken)e;
-      Assert.IsNotNull(d.Name);
-      Assert.AreEqual("root_element", d.Name);
+      var d = (HtmlDoctypeNode)e;
+      Assert.IsNotNull(d.Value);
+      Assert.AreEqual("root_element", d.Value);
       Assert.IsFalse(d.IsSystemIdentifierMissing);
       Assert.AreEqual("DTD_location", d.SystemIdentifier);
     }
@@ -242,8 +242,8 @@
       var s = new TextSource("\r");
       var t = CreateTokenizer(s);
       var e = t.Read();
-      Assert.AreEqual(HtmlTokenType.Character, e.Type);
-      Assert.AreEqual("\n", e.Data);
+      Assert.AreEqual(HtmlTokenType.Text, e.Type);
+      Assert.AreEqual("\n", e.Value);
     }
 
     [Test]
@@ -252,8 +252,8 @@
       var s = new TextSource("\n");
       var t = CreateTokenizer(s);
       var e = t.Read();
-      Assert.AreEqual(HtmlTokenType.Character, e.Type);
-      Assert.AreEqual("\n", e.Data);
+      Assert.AreEqual(HtmlTokenType.Text, e.Type);
+      Assert.AreEqual("\n", e.Value);
     }
 
     [Test]
@@ -262,8 +262,8 @@
       var s = new TextSource("\r\n");
       var t = CreateTokenizer(s);
       var e = t.Read();
-      Assert.AreEqual(HtmlTokenType.Character, e.Type);
-      Assert.AreEqual("\n", e.Data);
+      Assert.AreEqual(HtmlTokenType.Text, e.Type);
+      Assert.AreEqual("\n", e.Value);
     }
 
     [Test]
@@ -283,7 +283,7 @@
         var token = t.Read();
         Assert.IsTrue(s.CurrentEncoding == TextEncoding.Utf8);
         Assert.IsTrue(s.CurrentEncoding != encoding);
-        Assert.AreEqual(content, token.Data);
+        Assert.AreEqual(content, token.Value);
       }
     }
 
@@ -294,8 +294,8 @@
       var s = new TextSource(content);
       var t = CreateTokenizer(s);
       var token = t.Read();
-      Assert.AreEqual(HtmlTokenType.Character, token.Type);
-      Assert.AreEqual("∳", token.Data);
+      Assert.AreEqual(HtmlTokenType.Text, token.Type);
+      Assert.AreEqual("∳", token.Value);
     }
 
     [Test]
@@ -305,8 +305,8 @@
       var s = new TextSource(content);
       var t = CreateTokenizer(s);
       var token = t.Read();
-      Assert.AreEqual(HtmlTokenType.Character, token.Type);
-      Assert.AreEqual("&CounterClockwiseContourIntegralWithWrongName;", token.Data);
+      Assert.AreEqual(HtmlTokenType.Text, token.Type);
+      Assert.AreEqual("&CounterClockwiseContourIntegralWithWrongName;", token.Value);
     }
 
     [Test]
@@ -317,7 +317,7 @@
       var t = CreateTokenizer(s);
       var token = t.Read();
       Assert.IsNotNull(token);
-      Assert.IsInstanceOf<HtmlTagToken>(token);
+      Assert.IsInstanceOf<HtmlTagNode>(token);
     }
 
     [Test]
@@ -328,7 +328,7 @@
       var t = CreateTokenizer(s);
       var token = t.Read();
       Assert.IsNotNull(token);
-      Assert.IsInstanceOf<HtmlTagToken>(token);
+      Assert.IsInstanceOf<HtmlTagNode>(token);
     }
   }
 }

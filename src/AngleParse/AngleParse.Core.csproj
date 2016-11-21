@@ -58,14 +58,15 @@
     <Compile Include="Html\AttributeNames.cs" />
     <Compile Include="Html\HtmlEntityService.cs" />
     <Compile Include="Html\TagNames.cs" />
+    <Compile Include="Parser\HtmlForeign.cs" />
     <Compile Include="Parser\HtmlParseError.cs" />
     <Compile Include="Parser\HtmlParseException.cs" />
     <Compile Include="Parser\HtmlParseMode.cs" />
     <Compile Include="Extensions\HtmlParserExtensions.cs" />
+    <Compile Include="Parser\HtmlSanitizeSettings.cs" />
     <Compile Include="Parser\HtmlTextWriter.cs" />
     <Compile Include="Parser\HtmlWriterSettings.cs" />
-    <Compile Include="Parser\ParserExtensions.cs" />
-    <Compile Include="Services\IEntityProvider.cs" />
+    <Compile Include="Parser\HtmlExtensions.cs" />
     <Compile Include="TextEncoding.cs" />
     <Compile Include="TextPosition.cs" />
     <Compile Include="TextSource.cs" />
@@ -73,9 +74,9 @@
     <Compile Include="Parser\HtmlTokenType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Parser\HtmlReader.cs" />
-    <Compile Include="Parser\Tokens\HtmlToken.cs" />
-    <Compile Include="Parser\Tokens\HtmlDoctypeToken.cs" />
-    <Compile Include="Parser\Tokens\HtmlTagToken.cs" />
+    <Compile Include="Parser\Tokens\HtmlNode.cs" />
+    <Compile Include="Parser\Tokens\HtmlDoctypeNode.cs" />
+    <Compile Include="Parser\Tokens\HtmlTagNode.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />

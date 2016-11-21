@@ -6,7 +6,7 @@
   /// <summary>
   /// Class for StartTagToken and EndTagToken.
   /// </summary>
-  public sealed class HtmlTagToken : HtmlToken
+  public sealed class HtmlTagNode : HtmlNode
   {
     #region Fields
 
@@ -23,7 +23,7 @@
     /// </summary>
     /// <param name="type">The type of the tag token.</param>
     /// <param name="position">The token's position.</param>
-    public HtmlTagToken(HtmlTokenType type, TextPosition position)
+    public HtmlTagNode(HtmlTokenType type, TextPosition position)
         : this(type, position, String.Empty)
     {
     }
@@ -34,7 +34,7 @@
     /// <param name="type">The type of the tag token.</param>
     /// <param name="position">The token's position.</param>
     /// <param name="name">The name of the tag.</param>
-    public HtmlTagToken(HtmlTokenType type, TextPosition position, String name)
+    public HtmlTagNode(HtmlTokenType type, TextPosition position, String name)
         : base(type, position, name)
     {
       _attributes = new List<KeyValuePair<String, String>>();
@@ -49,9 +49,9 @@
     /// </summary>
     /// <param name="name">The name of the tag.</param>
     /// <returns>The new HTML tag token.</returns>
-    public static HtmlTagToken Open(String name)
+    internal static HtmlTagNode Open(String name)
     {
-      return new HtmlTagToken(HtmlTokenType.StartTag, TextPosition.Empty, name);
+      return new HtmlTagNode(HtmlTokenType.StartTag, TextPosition.Empty, name);
     }
 
     /// <summary>
@@ -59,9 +59,9 @@
     /// </summary>
     /// <param name="name">The name of the tag.</param>
     /// <returns>The new HTML tag token.</returns>
-    public static HtmlTagToken Close(String name)
+    internal static HtmlTagNode Close(String name)
     {
-      return new HtmlTagToken(HtmlTokenType.EndTag, TextPosition.Empty, name);
+      return new HtmlTagNode(HtmlTokenType.EndTag, TextPosition.Empty, name);
     }
 
     #endregion
@@ -94,7 +94,7 @@
     /// be set to an empty string.
     /// </summary>
     /// <param name="name">The name of the attribute.</param>
-    public void AddAttribute(String name)
+    internal void AddAttribute(String name)
     {
       _attributes.Add(new KeyValuePair<String, String>(name, String.Empty));
     }
@@ -104,7 +104,7 @@
     /// </summary>
     /// <param name="name">The name of the attribute.</param>
     /// <param name="value">The value of the attribute.</param>
-    public void AddAttribute(String name, String value)
+    internal void AddAttribute(String name, String value)
     {
       _attributes.Add(new KeyValuePair<String, String>(name, value));
     }
@@ -113,7 +113,7 @@
     /// Sets the value of the last added attribute.
     /// </summary>
     /// <param name="value">The value to set.</param>
-    public void SetAttributeValue(String value)
+    internal void SetAttributeValue(String value)
     {
       _attributes[_attributes.Count - 1] = new KeyValuePair<String, String>(_attributes[_attributes.Count - 1].Key, value);
     }
@@ -126,7 +126,7 @@
     /// <returns>The value of the attribute.</returns>
     public String GetAttribute(String name)
     {
-      for (var i = 0; i != _attributes.Count; i++)
+      for (var i = 0; i < _attributes.Count; i++)
       {
         if (_attributes[i].Key == name)
           return _attributes[i].Value;

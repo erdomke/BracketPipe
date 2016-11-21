@@ -6,7 +6,7 @@
   /// <summary>
   /// The DOCTYPE token.
   /// </summary>
-  public sealed class HtmlDoctypeToken : HtmlToken
+  public sealed class HtmlDoctypeNode : HtmlNode
   {
     #region Fields
 
@@ -23,7 +23,7 @@
     /// </summary>
     /// <param name="quirksForced">The state of the force-quirks flag.</param>
     /// <param name="position">The token's position.</param>
-    public HtmlDoctypeToken(Boolean quirksForced, TextPosition position)
+    public HtmlDoctypeNode(Boolean quirksForced, TextPosition position)
         : base(HtmlTokenType.Doctype, position)
     {
       _publicIdentifier = null;
@@ -107,7 +107,7 @@
       {
         if (IsQuirksForced)
           return true;
-        else if (!Name.Is("html"))
+        else if (!Value.Is("html"))
           return true;
         else if (PublicIdentifier.StartsWith("+//Silmaril//dtd html Pro v0r11 19970101//", StringComparison.OrdinalIgnoreCase))
           return true;
@@ -243,7 +243,7 @@
     {
       get
       {
-        if (Name.Is("html"))
+        if (Value.Is("html"))
         {
           if (IsPublicIdentifierMissing)
             return IsSystemIdentifierMissing || SystemIdentifier.Is("about:legacy-compat");

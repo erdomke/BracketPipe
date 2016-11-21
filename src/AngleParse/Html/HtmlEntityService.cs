@@ -1,14 +1,13 @@
 ﻿namespace AngleParse.Html
 {
   using AngleParse.Extensions;
-  using AngleParse.Services;
   using System;
   using System.Collections.Generic;
 
   /// <summary>
   /// Represents the list of all Html entities.
   /// </summary>
-  internal sealed class HtmlEntityService : IEntityProvider
+  internal sealed class HtmlEntityService
   {
     #region Fields
 
@@ -21,7 +20,7 @@
     /// <summary>
     /// Gets the instance to resolve entities.
     /// </summary>
-    public static readonly IEntityProvider Resolver = new HtmlEntityService();
+    public static readonly HtmlEntityService Resolver = new HtmlEntityService();
 
     #endregion
 
@@ -30,86 +29,60 @@
     private HtmlEntityService()
     {
       _entities = new Dictionary<Char, Dictionary<String, String>>
-                            {
-                                { 'a', this.GetSymbolLittleA() },
-                                { 'A', this.GetSymbolBigA() },
-                                { 'b', this.GetSymbolLittleB() },
-                                { 'B', this.GetSymbolBigB() },
-                                { 'c', this.GetSymbolLittleC() },
-                                { 'C', this.GetSymbolBigC() },
-                                { 'd', this.GetSymbolLittleD() },
-                                { 'D', this.GetSymbolBigD() },
-                                { 'e', this.GetSymbolLittleE() },
-                                { 'E', this.GetSymbolBigE() },
-                                { 'f', this.GetSymbolLittleF() },
-                                { 'F', this.GetSymbolBigF() },
-                                { 'g', this.GetSymbolLittleG() },
-                                { 'G', this.GetSymbolBigG() },
-                                { 'h', this.GetSymbolLittleH() },
-                                { 'H', this.GetSymbolBigH() },
-                                { 'i', this.GetSymbolLittleI() },
-                                { 'I', this.GetSymbolBigI() },
-                                { 'j', this.GetSymbolLittleJ() },
-                                { 'J', this.GetSymbolBigJ() },
-                                { 'k', this.GetSymbolLittleK() },
-                                { 'K', this.GetSymbolBigK() },
-                                { 'l', this.GetSymbolLittleL() },
-                                { 'L', this.GetSymbolBigL() },
-                                { 'm', this.GetSymbolLittleM() },
-                                { 'M', this.GetSymbolBigM() },
-                                { 'n', this.GetSymbolLittleN() },
-                                { 'N', this.GetSymbolBigN() },
-                                { 'o', this.GetSymbolLittleO() },
-                                { 'O', this.GetSymbolBigO() },
-                                { 'p', this.GetSymbolLittleP() },
-                                { 'P', this.GetSymbolBigP() },
-                                { 'q', this.GetSymbolLittleQ() },
-                                { 'Q', this.GetSymbolBigQ() },
-                                { 'r', this.GetSymbolLittleR() },
-                                { 'R', this.GetSymbolBigR() },
-                                { 's', this.GetSymbolLittleS() },
-                                { 'S', this.GetSymbolBigS() },
-                                { 't', this.GetSymbolLittleT() },
-                                { 'T', this.GetSymbolBigT() },
-                                { 'u', this.GetSymbolLittleU() },
-                                { 'U', this.GetSymbolBigU() },
-                                { 'v', this.GetSymbolLittleV() },
-                                { 'V', this.GetSymbolBigV() },
-                                { 'w', this.GetSymbolLittleW() },
-                                { 'W', this.GetSymbolBigW() },
-                                { 'x', this.GetSymbolLittleX() },
-                                { 'X', this.GetSymbolBigX() },
-                                { 'y', this.GetSymbolLittleY() },
-                                { 'Y', this.GetSymbolBigY() },
-                                { 'z', this.GetSymbolLittleZ() },
-                                { 'Z', this.GetSymbolBigZ() }
-                            };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+      {
+        { 'a', this.GetSymbolLittleA() },
+        { 'A', this.GetSymbolBigA() },
+        { 'b', this.GetSymbolLittleB() },
+        { 'B', this.GetSymbolBigB() },
+        { 'c', this.GetSymbolLittleC() },
+        { 'C', this.GetSymbolBigC() },
+        { 'd', this.GetSymbolLittleD() },
+        { 'D', this.GetSymbolBigD() },
+        { 'e', this.GetSymbolLittleE() },
+        { 'E', this.GetSymbolBigE() },
+        { 'f', this.GetSymbolLittleF() },
+        { 'F', this.GetSymbolBigF() },
+        { 'g', this.GetSymbolLittleG() },
+        { 'G', this.GetSymbolBigG() },
+        { 'h', this.GetSymbolLittleH() },
+        { 'H', this.GetSymbolBigH() },
+        { 'i', this.GetSymbolLittleI() },
+        { 'I', this.GetSymbolBigI() },
+        { 'j', this.GetSymbolLittleJ() },
+        { 'J', this.GetSymbolBigJ() },
+        { 'k', this.GetSymbolLittleK() },
+        { 'K', this.GetSymbolBigK() },
+        { 'l', this.GetSymbolLittleL() },
+        { 'L', this.GetSymbolBigL() },
+        { 'm', this.GetSymbolLittleM() },
+        { 'M', this.GetSymbolBigM() },
+        { 'n', this.GetSymbolLittleN() },
+        { 'N', this.GetSymbolBigN() },
+        { 'o', this.GetSymbolLittleO() },
+        { 'O', this.GetSymbolBigO() },
+        { 'p', this.GetSymbolLittleP() },
+        { 'P', this.GetSymbolBigP() },
+        { 'q', this.GetSymbolLittleQ() },
+        { 'Q', this.GetSymbolBigQ() },
+        { 'r', this.GetSymbolLittleR() },
+        { 'R', this.GetSymbolBigR() },
+        { 's', this.GetSymbolLittleS() },
+        { 'S', this.GetSymbolBigS() },
+        { 't', this.GetSymbolLittleT() },
+        { 'T', this.GetSymbolBigT() },
+        { 'u', this.GetSymbolLittleU() },
+        { 'U', this.GetSymbolBigU() },
+        { 'v', this.GetSymbolLittleV() },
+        { 'V', this.GetSymbolBigV() },
+        { 'w', this.GetSymbolLittleW() },
+        { 'W', this.GetSymbolBigW() },
+        { 'x', this.GetSymbolLittleX() },
+        { 'X', this.GetSymbolBigX() },
+        { 'y', this.GetSymbolLittleY() },
+        { 'Y', this.GetSymbolBigY() },
+        { 'z', this.GetSymbolLittleZ() },
+        { 'Z', this.GetSymbolBigZ() }
+      };
     }
 
     #endregion

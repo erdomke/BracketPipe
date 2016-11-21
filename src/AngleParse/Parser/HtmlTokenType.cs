@@ -8,26 +8,26 @@
     /// <summary>
     /// The DOCTYPE token.
     /// </summary>
-    Doctype,
+    Doctype = 10,
     /// <summary>
     /// The start tag token to mark open tags.
     /// </summary>
-    StartTag,
+    StartTag = 1,
     /// <summary>
     /// The end tag token to mark ending tags.
     /// </summary>
-    EndTag,
+    EndTag = 15,
     /// <summary>
     /// The comment tag to mark comments.
     /// </summary>
-    Comment,
+    Comment = 8,
     /// <summary>
     /// The character token to mark a character data.
     /// </summary>
-    Character,
+    Text = 3,
     /// <summary>
     /// The End-Of-File token to mark the end.
     /// </summary>
-    EndOfFile
+    EndOfFile = 18
   }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AngleParse.Html;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -19,12 +20,15 @@ namespace AngleParse
       "area", "base", "br", "col", "embed", "hr", "img", "input", "keygen", "link", "meta", "param", "source", "track", "wbr"
     }, StringComparer.OrdinalIgnoreCase);
 
+    private StringBuilder _attrValue;
+    private string _lastTagName;
     private int _line = 1;
     private Stack<TagInfo> _openTags = new Stack<TagInfo>();
+    private string _prefixForXmlNs = null;
     private List<NamespaceScope> _scopes = new List<NamespaceScope>();
     private InternalState _state = InternalState.Start;
-    private string prefixForXmlNs = null;
-    private StringBuilder attrValue;
+    private bool _xHtml;
+    private int _xmlDepth = -1;
 
 
     public HtmlTextWriter(TextWriter writer) : this(writer, new HtmlWriterSettings()) { }
@@ -41,12 +45,12 @@ namespace AngleParse
 
     public override void Flush()
     {
-      CloseCurrElement();
+      CloseCurrElement(false);
       _writer.Flush();
     }
     public override Task FlushAsync()
     {
-      CloseCurrElement();
+      CloseCurrElement(false);
       return _writer.FlushAsync();
     }
 
@@ -110,7 +114,7 @@ namespace AngleParse
 
     public override void WriteComment(string text)
     {
-      CloseCurrElement();
+      CloseCurrElement(false);
       RenderIndent();
       _writer.Write("<!--");
       for (var i = 0; i < text.Length; i++)
@@ -130,14 +134,19 @@ namespace AngleParse
       _writer.Write(name);
       if (!string.IsNullOrEmpty(pubid))
       {
+        if (pubid.StartsWith("-//W3C//DTD XHTML", StringComparison.OrdinalIgnoreCase))
+          _xHtml = true;
         _writer.Write(" PUBLIC ");
         _writer.Write(_settings.QuoteChar);
         _writer.Write(pubid);
         _writer.Write(_settings.QuoteChar);
-        _writer.Write(' ');
-        _writer.Write(_settings.QuoteChar);
-        _writer.Write(sysid);
-        _writer.Write(_settings.QuoteChar);
+        if (!string.IsNullOrEmpty(sysid))
+        {
+          _writer.Write(' ');
+          _writer.Write(_settings.QuoteChar);
+          _writer.Write(sysid);
+          _writer.Write(_settings.QuoteChar);
+        }
       }
       else if (!string.IsNullOrEmpty(sysid))
       {
@@ -157,10 +166,10 @@ namespace AngleParse
 
     public override void WriteEndAttribute()
     {
-      if (this.attrValue != null)
+      if (this._attrValue != null)
       {
-        PushNamespace(this.prefixForXmlNs, this.attrValue.ToString());
-        this.attrValue.ToPool();
+        PushNamespace(this._prefixForXmlNs, this._attrValue.ToString());
+        this._attrValue.ToPool();
       }
       if (_state == InternalState.Attribute)
         _writer.Write(_settings.QuoteChar);
@@ -178,29 +187,36 @@ namespace AngleParse
     }
     public void WriteEndElement(string name)
     {
-      var info = WriteEndElement(false);
-      while (info.Name != name)
+      if (!VoidElements.Contains(name) || _lastTagName != name)
       {
-        info = WriteEndElement(false);
+        var info = WriteEndElement(false, name);
+        while (info.Name != name && !string.IsNullOrEmpty(info.Name))
+        {
+          info = WriteEndElement(false, name);
+        }
       }
+      _lastTagName = name;
     }
-    private TagInfo WriteEndElement(bool forceFull)
+    private TagInfo WriteEndElement(bool forceFull, string name = null)
     {
       var tag = _openTags.Count > 0 ? _openTags.Pop() : new TagInfo();
+      name = tag.Name ?? name;
+
+      var inXml = _xmlDepth >= 0;
       if (_state == InternalState.Element)
       {
-        CloseCurrElement();
-        if (!forceFull && VoidElements.Contains(tag.Name))
+        CloseCurrElement(inXml);
+        if (!forceFull && (VoidElements.Contains(name) || inXml))
           return tag;
       }
-      _scopes.RemoveAt(_scopes.Count - 1);
-
-      if (_state != InternalState.Content)
-        throw new InvalidOperationException();
+      if (inXml)
+        _xmlDepth--;
+      if (_scopes.Count > 0)
+        _scopes.RemoveAt(_scopes.Count - 1);
 
       if (tag.Line != _line) RenderIndent();
       _writer.Write("</");
-      _writer.Write(tag.Name);
+      _writer.Write(name);
       _writer.Write('>');
       return tag;
     }
@@ -234,13 +250,16 @@ namespace AngleParse
 
     public override void WriteStartAttribute(string prefix, string localName, string ns)
     {
+      if (localName == null)
+        throw new ArgumentException("Invalid attribute name", localName);
+
       if (_state != InternalState.Element)
         throw new InvalidOperationException();
       if (_settings.NewLineOnAttributes) RenderIndent(_openTags.Count + 1);
       _writer.Write(' ');
 
-      this.attrValue = null;
-      this.prefixForXmlNs = null;
+      this._attrValue = null;
+      this._prefixForXmlNs = null;
       if (prefix != null && prefix.Length == 0)
         prefix = null;
 
@@ -256,19 +275,19 @@ namespace AngleParse
         {
           localName = prefix;
           prefix = null;
-          this.prefixForXmlNs = null;
+          this._prefixForXmlNs = null;
         }
         else
         {
-          this.prefixForXmlNs = localName;
-          this.attrValue = Pool.NewStringBuilder();
+          this._prefixForXmlNs = localName;
+          this._attrValue = Pool.NewStringBuilder();
         }
       }
       else if (prefix == null && localName == "xmlns")
       {
         if ("http://www.w3.org/2000/xmlns/" != ns && ns != null)
           throw new ArgumentException("Reserved prefix");
-        this.prefixForXmlNs = null;
+        this._prefixForXmlNs = null;
       }
       else if (ns == null)
       {
@@ -354,11 +373,21 @@ namespace AngleParse
 
     public override void WriteStartElement(string prefix, string localName, string ns)
     {
-      CloseCurrElement();
+      _lastTagName = null;
+      CloseCurrElement(false);
       RenderIndent();
 
       _writer.Write('<');
       var name = localName;
+      if (_xmlDepth >= 0)
+        _xmlDepth++;
+      else if (localName == TagNames.Svg
+        && (string.IsNullOrEmpty(ns) || ns == "http://www.w3.org/2000/svg"))
+        _xmlDepth = 0;
+      else if (localName == TagNames.Math
+        && (string.IsNullOrEmpty(ns) || ns == "http://www.w3.org/1998/Math/MathML"))
+        _xmlDepth = 0;
+
       if (string.IsNullOrEmpty(prefix) && string.IsNullOrEmpty(ns))
       {
         _scopes.Add(null);
@@ -421,13 +450,18 @@ namespace AngleParse
           {
             case Symbols.Ampersand: WriteInternal("&amp;"); break;
             case Symbols.NoBreakSpace: WriteInternal("&nbsp;"); break;
+            case Symbols.LessThan: _writer.Write("&lt;"); break;
             case Symbols.DoubleQuote:
               if (_settings.QuoteChar == Symbols.DoubleQuote)
                 WriteInternal("&quot;");
+              else
+                WriteInternal('"');
               break;
             case Symbols.SingleQuote:
               if (_settings.QuoteChar == Symbols.SingleQuote)
                 WriteInternal("&apos;");
+              else
+                WriteInternal("'");
               break;
             case Symbols.LineFeed: WriteInternal(_settings.NewLineChars); break;
             default: WriteInternal(text[i]); break;
@@ -436,20 +470,33 @@ namespace AngleParse
         return;
       }
 
-      CloseCurrElement();
-      if ((_state == InternalState.Content || _state == InternalState.Start)
-        && !(_openTags.Count > 0 && string.Equals(_openTags.Peek().Name, "script", StringComparison.OrdinalIgnoreCase)))
+      CloseCurrElement(false);
+      if (_state == InternalState.Content || _state == InternalState.Start)
       {
-        for (var i = 0; i < text.Length; i++)
+        if (_openTags.Count > 0 && string.Equals(_openTags.Peek().Name, "script", StringComparison.OrdinalIgnoreCase))
         {
-          switch (text[i])
+          for (var i = 0; i < text.Length; i++)
           {
-            case Symbols.Ampersand: _writer.Write("&amp;"); break;
-            case Symbols.NoBreakSpace: _writer.Write("&nbsp;"); break;
-            case Symbols.GreaterThan: _writer.Write("&gt;"); break;
-            case Symbols.LessThan: _writer.Write("&lt;"); break;
-            case Symbols.LineFeed: _writer.Write(_settings.NewLineChars); break;
-            default: _writer.Write(text[i]); break;
+            switch (text[i])
+            {
+              case Symbols.LineFeed: _writer.Write(_settings.NewLineChars); break;
+              default: _writer.Write(text[i]); break;
+            }
+          }
+        }
+        else
+        {
+          for (var i = 0; i < text.Length; i++)
+          {
+            switch (text[i])
+            {
+              case Symbols.Ampersand: _writer.Write("&amp;"); break;
+              case Symbols.NoBreakSpace: _writer.Write("&nbsp;"); break;
+              case Symbols.GreaterThan: _writer.Write("&gt;"); break;
+              case Symbols.LessThan: _writer.Write("&lt;"); break;
+              case Symbols.LineFeed: _writer.Write(_settings.NewLineChars); break;
+              default: _writer.Write(text[i]); break;
+            }
           }
         }
       }
@@ -475,7 +522,7 @@ namespace AngleParse
       WriteString(ws);
     }
 
-    private void CloseCurrElement()
+    private void CloseCurrElement(bool selfClose)
     {
       if (_state == InternalState.Element)
       {
@@ -503,6 +550,8 @@ namespace AngleParse
           }
         }
 
+        if (selfClose)
+          _writer.Write('/');
         _writer.Write('>');
         _state = InternalState.Content;
       }
@@ -543,26 +592,26 @@ namespace AngleParse
 
     private void WriteInternal(char value)
     {
-      if (this.attrValue != null)
-        this.attrValue.Append(value);
+      if (this._attrValue != null)
+        this._attrValue.Append(value);
       _writer.Write(value);
     }
     private void WriteInternal(string value)
     {
-      if (this.attrValue != null)
-        this.attrValue.Append(value);
+      if (this._attrValue != null)
+        this._attrValue.Append(value);
       _writer.Write(value);
     }
     private Task WriteInternalAsync(char value)
     {
-      if (this.attrValue != null)
-        this.attrValue.Append(value);
+      if (this._attrValue != null)
+        this._attrValue.Append(value);
       return _writer.WriteAsync(value);
     }
     private Task WriteInternalAsync(string value)
     {
-      if (this.attrValue != null)
-        this.attrValue.Append(value);
+      if (this._attrValue != null)
+        this._attrValue.Append(value);
       return _writer.WriteAsync(value);
     }
 
