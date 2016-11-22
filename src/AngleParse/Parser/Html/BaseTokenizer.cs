@@ -17,7 +17,7 @@
 
     UInt16 _column;
     UInt16 _row;
-    Char _current;
+    Char _currentChar;
 
     #endregion
 
@@ -28,7 +28,7 @@
       StringBuffer = Pool.NewStringBuilder();
       _columns = new Stack<UInt16>();
       _source = source;
-      _current = Symbols.Null;
+      _currentChar = Symbols.Null;
       _column = 0;
       _row = 1;
     }
@@ -84,9 +84,9 @@
       get { return _source.Index; }
     }
 
-    protected Char Current
+    protected Char CurrentChar
     {
-      get { return _current; }
+      get { return _currentChar; }
     }
 
     #endregion
@@ -158,18 +158,18 @@
     protected Char GetNext()
     {
       Advance();
-      return _current;
+      return _currentChar;
     }
 
     protected Char GetPrevious()
     {
       Back();
-      return _current;
+      return _currentChar;
     }
 
     protected void Advance()
     {
-      if (_current != Symbols.EndOfFile)
+      if (_currentChar != Symbols.EndOfFile)
       {
         AdvanceUnsafe();
       }
@@ -177,7 +177,7 @@
 
     protected void Advance(Int32 n)
     {
-      while (n-- > 0 && _current != Symbols.EndOfFile)
+      while (n-- > 0 && _currentChar != Symbols.EndOfFile)
       {
         AdvanceUnsafe();
       }
@@ -205,7 +205,7 @@
 
     void AdvanceUnsafe()
     {
-      if (_current == Symbols.LineFeed)
+      if (_currentChar == Symbols.LineFeed)
       {
         _columns.Push(_column);
         _column = 1;
@@ -216,7 +216,7 @@
         _column++;
       }
 
-      _current = NormalizeForward(_source.ReadCharacter());
+      _currentChar = NormalizeForward(_source.ReadCharacter());
     }
 
     void BackUnsafe()
@@ -226,7 +226,7 @@
       if (_source.Index == 0)
       {
         _column = 0;
-        _current = Symbols.Null;
+        _currentChar = Symbols.Null;
         return;
       }
 
@@ -236,11 +236,11 @@
       {
         _column = _columns.Count != 0 ? _columns.Pop() : (UInt16)1;
         _row--;
-        _current = c;
+        _currentChar = c;
       }
       else if (c != Symbols.Null)
       {
-        _current = c;
+        _currentChar = c;
         _column--;
       }
     }

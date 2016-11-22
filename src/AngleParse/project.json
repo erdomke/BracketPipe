@@ -11,7 +11,7 @@
     "iconUrl": "https://raw.githubusercontent.com/AngleSharp/AngleSharp/master/logo.png",
     "repository": {
       "type": "git",
-      "url": "https://github.com/AngleSharp/AngleSharp.git"
+      "url": "https://github.com/AngleSharp/AngleParse.git"
     }
   },
 

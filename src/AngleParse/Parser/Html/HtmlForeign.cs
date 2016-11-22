@@ -1,7 +1,6 @@
 ﻿namespace AngleParse
 {
   using AngleParse.Extensions;
-  using AngleParse.Html;
   using System;
   using System.Collections.Generic;
 

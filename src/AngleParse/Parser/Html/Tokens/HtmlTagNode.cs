@@ -80,7 +80,7 @@
     /// <summary>
     /// Gets the list of attributes.
     /// </summary>
-    public List<KeyValuePair<String, String>> Attributes
+    public IList<KeyValuePair<String, String>> Attributes
     {
       get { return _attributes; }
     }
@@ -94,7 +94,7 @@
     /// be set to an empty string.
     /// </summary>
     /// <param name="name">The name of the attribute.</param>
-    internal void AddAttribute(String name)
+    public void AddAttribute(String name)
     {
       _attributes.Add(new KeyValuePair<String, String>(name, String.Empty));
     }
@@ -104,7 +104,7 @@
     /// </summary>
     /// <param name="name">The name of the attribute.</param>
     /// <param name="value">The value of the attribute.</param>
-    internal void AddAttribute(String name, String value)
+    public void AddAttribute(String name, String value)
     {
       _attributes.Add(new KeyValuePair<String, String>(name, value));
     }
@@ -113,7 +113,7 @@
     /// Sets the value of the last added attribute.
     /// </summary>
     /// <param name="value">The value to set.</param>
-    internal void SetAttributeValue(String value)
+    public void SetAttributeValue(String value)
     {
       _attributes[_attributes.Count - 1] = new KeyValuePair<String, String>(_attributes[_attributes.Count - 1].Key, value);
     }

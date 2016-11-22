@@ -1,16 +1,19 @@
 ﻿namespace AngleParse
 {
   using AngleParse.Extensions;
-  using AngleParse.Html;
   using System;
   using System.Collections.Generic;
   using System.Collections;
+  using System.Xml;
 
   /// <summary>
   /// Performs the tokenization of the source code. Follows the tokenization algorithm at:
   /// http://www.w3.org/html/wg/drafts/html/master/syntax.html
   /// </summary>
-  public sealed class HtmlReader : BaseTokenizer, IEnumerable<HtmlNode>
+  public sealed class HtmlReader : BaseTokenizer
+    , IEnumerator<HtmlNode>
+    , IEnumerable<HtmlNode>
+    , IXmlLineInfo
   {
     #region Fields
 
@@ -19,6 +22,7 @@
     private TextPosition _position;
     private int _svgDepth = -1;
     private int _mathMlDepth = -1;
+    private HtmlNode _current;
 
     #endregion
 
@@ -52,75 +56,82 @@
     #region Properties
 
     /// <summary>
+    /// Current node on which the enumerator is positioned
+    /// </summary>
+    public HtmlNode Current { get { return _current; } }
+
+    /// <summary>
     /// Gets or sets if CDATA sections are accepted.
     /// </summary>
-    public Boolean IsAcceptingCharacterData
-    {
-      get;
-      set;
-    }
+    public Boolean IsAcceptingCharacterData { get; set; }
 
     /// <summary>
     /// Gets or sets the current parse mode.
     /// </summary>
-    public HtmlParseMode State
-    {
-      get;
-      set;
-    }
+    public HtmlParseMode State { get; set; }
 
     /// <summary>
     /// Gets or sets if strict mode is used.
     /// </summary>
-    public Boolean IsStrictMode
-    {
-      get;
-      set;
-    }
+    public Boolean IsStrictMode { get; set; }
+
+    object IEnumerator.Current { get { return _current; } }
+    int IXmlLineInfo.LineNumber { get { return _current.Position.Line; } }
+    int IXmlLineInfo.LinePosition { get { return _current.Position.Column; } }
 
     #endregion
 
     #region Methods
 
     /// <summary>
-    /// Gets the next available token.
+    /// Returns the next node
     /// </summary>
-    /// <returns>The next available token.</returns>
-    public HtmlNode Read()
+    public HtmlNode NextNode()
+    {
+      Read();
+      return _current;
+    }
+
+    /// <summary>
+    /// Positions the reader at the next node.
+    /// </summary>
+    /// <returns>Returns <c>true</c> if more nodes are available, <c>false</c> otherwise</returns>
+    public bool Read()
     {
       var current = GetNext();
       _position = GetCurrentPosition();
 
       if (current != Symbols.EndOfFile)
       {
-        var result = default(HtmlNode);
+        _current = default(HtmlNode);
         switch (State)
         {
           case HtmlParseMode.PCData:
-            result = Data(current);
+            _current = Data(current);
             break;
           case HtmlParseMode.RCData:
-            result = RCData(current);
+            _current = RCData(current);
             break;
           case HtmlParseMode.Plaintext:
-            result = Plaintext(current);
+            _current = Plaintext(current);
             break;
           case HtmlParseMode.Rawtext:
-            result = Rawtext(current);
+            _current = Rawtext(current);
             break;
           case HtmlParseMode.Script:
-            result = ScriptData(current);
+            _current = ScriptData(current);
             break;
         }
 
-        var tag = result as HtmlTagNode;
+        var tag = _current as HtmlTagNode;
         if (_svgDepth < 0
           && tag != null
-          && result.Type == HtmlTokenType.StartTag
-          && result.Value.Is(TagNames.Svg))
+          && _current.Type == HtmlTokenType.StartTag
+          && _current.Value.Is(TagNames.Svg))
         {
           _svgDepth = 0;
-          return HtmlForeign.SvgConfig(tag);
+          _current = HtmlForeign.SvgConfig(tag);
+          return true;
         }
         else if (_svgDepth >= 0 && tag != null)
         {
@@ -129,7 +140,8 @@
             case HtmlTokenType.StartTag:
               if (!tag.IsSelfClosing)
                 _svgDepth++;
-              return HtmlForeign.SvgConfig(tag);
+              _current = HtmlForeign.SvgConfig(tag);
+              return true;
             case HtmlTokenType.EndTag:
               _svgDepth--;
               break;
@@ -137,11 +149,12 @@
         }
         else if (_mathMlDepth < 0
           && tag != null
-          && result.Type == HtmlTokenType.StartTag
-          && result.Value.Is(TagNames.Math))
+          && _current.Type == HtmlTokenType.StartTag
+          && _current.Value.Is(TagNames.Math))
         {
           _mathMlDepth = 0;
-          return HtmlForeign.MathMlConfig(tag);
+          _current = HtmlForeign.MathMlConfig(tag);
+          return true;
         }
         else if (_mathMlDepth >= 0 && tag != null)
         {
@@ -150,17 +163,19 @@
             case HtmlTokenType.StartTag:
               if (!tag.IsSelfClosing)
                 _mathMlDepth++;
-              return HtmlForeign.MathMlConfig(tag);
+              _current = HtmlForeign.MathMlConfig(tag);
+              return true;
             case HtmlTokenType.EndTag:
               _mathMlDepth--;
               break;
           }
         }
 
-        return result;
+        return true;
       }
 
-      return NewEof(acceptable: true);
+      _current = NewEof(acceptable: true);
+      return false;
     }
 
     internal void RaiseErrorOccurred(HtmlParseError code, TextPosition position)
@@ -604,7 +619,7 @@
       var start = InsertionPoint - 1;
       var reference = new Char[32];
       var index = 0;
-      var chr = Current;
+      var chr = CurrentChar;
 
       do
       {
@@ -636,7 +651,7 @@
         }
       }
 
-      chr = Current;
+      chr = CurrentChar;
 
       if (chr != Symbols.Semicolon)
       {
@@ -2644,17 +2659,27 @@
 
     public IEnumerator<HtmlNode> GetEnumerator()
     {
-      var token = this.Read();
-      while (token.Type != HtmlTokenType.EndOfFile)
-      {
-        yield return token;
-        token = this.Read();
-      }
+      return this;
     }
 
     IEnumerator IEnumerable.GetEnumerator()
     {
       return this.GetEnumerator();
+    }
+
+    bool IEnumerator.MoveNext()
+    {
+      return Read();
+    }
+
+    void IEnumerator.Reset()
+    {
+      throw new NotSupportedException();
+    }
+
+    bool IXmlLineInfo.HasLineInfo()
+    {
+      return true;
     }
 
     #endregion

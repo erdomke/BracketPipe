@@ -1,4 +1,4 @@
-﻿namespace AngleParse.Html
+﻿namespace AngleParse
 {
   using System;
   using System.Collections.Generic;

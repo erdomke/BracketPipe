@@ -14,8 +14,9 @@
   {
     #region Fields
 
-    const Int32 BufferSize = 4096;
+    const Int32 DefaultBufferSize = 4096;
 
+    readonly int _bufferSize;
     readonly Stream _baseStream;
     readonly MemoryStream _raw;
     readonly Byte[] _buffer;
@@ -34,9 +35,6 @@
 
     TextSource(Encoding encoding)
     {
-      _buffer = new Byte[BufferSize];
-      _chars = new Char[BufferSize + 1];
-      _raw = new MemoryStream();
       _index = 0;
       _encoding = encoding ?? TextEncoding.Utf8;
       _decoder = _encoding.GetDecoder();
@@ -48,9 +46,10 @@
     /// </summary>
     /// <param name="source">The data source.</param>
     public TextSource(String source)
-        : this(null, TextEncoding.Utf8)
+        : this(TextEncoding.Utf8)
     {
       _finished = true;
+      _content = Pool.NewStringBuilder();
       _content.Append(source);
       _confidence = EncodingConfidence.Irrelevant;
     }
@@ -68,6 +67,14 @@
     public TextSource(Stream baseStream, Encoding encoding = null)
         : this(encoding)
     {
+      if (baseStream.CanSeek)
+        _bufferSize = (int)(baseStream.Length / 2);
+      else
+        _bufferSize = DefaultBufferSize;
+
+      _buffer = new Byte[_bufferSize];
+      _chars = new Char[_bufferSize + 1];
+      _raw = new MemoryStream();
       _baseStream = baseStream;
       _content = Pool.NewStringBuilder();
       _confidence = EncodingConfidence.Tentative;
@@ -182,7 +189,8 @@
 
       if (!isDisposed)
       {
-        _raw.Dispose();
+        if (_raw != null)
+          _raw.Dispose();
         _content.Clear().ToPool();
         _content = null;
       }
@@ -204,7 +212,7 @@
         return _content[_index++];
       }
 
-      ExpandBuffer(BufferSize);
+      ExpandBuffer(_bufferSize);
       var index = _index++;
       return index < _content.Length ? _content[index] : Symbols.EndOfFile;
     }
@@ -226,7 +234,7 @@
         return _content.ToString(start, characters);
       }
 
-      ExpandBuffer(Math.Max(BufferSize, characters));
+      ExpandBuffer(Math.Max(_bufferSize, characters));
       _index += characters;
       characters = Math.Min(characters, _content.Length - start);
       return _content.ToString(start, characters);
@@ -242,7 +250,7 @@
     {
       if (_index >= _content.Length)
       {
-        await ExpandBufferAsync(BufferSize, cancellationToken).ConfigureAwait(false);
+        await ExpandBufferAsync(_bufferSize, cancellationToken).ConfigureAwait(false);
         var index = _index++;
         return index < _content.Length ? _content[index] : Char.MaxValue;
       }
@@ -268,7 +276,7 @@
         return _content.ToString(start, characters);
       }
 
-      await ExpandBufferAsync(Math.Max(BufferSize, characters), cancellationToken).ConfigureAwait(false);
+      await ExpandBufferAsync(Math.Max(_bufferSize, characters), cancellationToken).ConfigureAwait(false);
       _index += characters;
       characters = Math.Min(characters, _content.Length - start);
       return _content.ToString(start, characters);
@@ -328,7 +336,7 @@
 
     async Task DetectByteOrderMarkAsync(CancellationToken cancellationToken)
     {
-      var count = await _baseStream.ReadAsync(_buffer, 0, BufferSize).ConfigureAwait(false);
+      var count = await _baseStream.ReadAsync(_buffer, 0, _bufferSize).ConfigureAwait(false);
       var offset = 0;
 
       if (count > 2 && _buffer[0] == 0xef && _buffer[1] == 0xbb && _buffer[2] == 0xbf)
@@ -388,7 +396,7 @@
 
     async Task ReadIntoBufferAsync(CancellationToken cancellationToken)
     {
-      var returned = await _baseStream.ReadAsync(_buffer, 0, BufferSize, cancellationToken).ConfigureAwait(false);
+      var returned = await _baseStream.ReadAsync(_buffer, 0, _bufferSize, cancellationToken).ConfigureAwait(false);
       AppendContentFromBuffer(returned);
     }
 
@@ -407,7 +415,7 @@
 
     void ReadIntoBuffer()
     {
-      var returned = _baseStream.Read(_buffer, 0, BufferSize);
+      var returned = _baseStream.Read(_buffer, 0, _bufferSize);
       AppendContentFromBuffer(returned);
     }
 
@@ -438,6 +446,10 @@
     #endregion
 
     public static implicit operator TextSource(string value)
+    {
+      return new TextSource(value);
+    }
+    public static implicit operator TextSource(Stream value)
     {
       return new TextSource(value);
     }

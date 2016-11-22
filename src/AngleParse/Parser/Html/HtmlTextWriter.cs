@@ -1,5 +1,4 @@
-﻿using AngleParse.Html;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -17,7 +16,7 @@ namespace AngleParse
 
     internal static HashSet<string> VoidElements = new HashSet<string>(new string[]
     {
-      "area", "base", "br", "col", "embed", "hr", "img", "input", "keygen", "link", "meta", "param", "source", "track", "wbr"
+      "area", "base", "basefont", "bgsound", "br", "col", "embed", "frame", "hr", "img", "input", "keygen", "link", "meta", "param", "source", "track", "wbr"
     }, StringComparer.OrdinalIgnoreCase);
 
     private StringBuilder _attrValue;
@@ -30,6 +29,42 @@ namespace AngleParse
     private bool _xHtml;
     private int _xmlDepth = -1;
 
+    public HtmlTextWriter this[string name, params string[] attrs]
+    {
+      get
+      {
+        if (name == null)
+        {
+          WriteEndElement();
+        }
+        else if (name[0] == '/')
+        {
+          WriteEndElement(name.Substring(1));
+        }
+        else
+        {
+          WriteStartElement(name);
+          for (var i = 0; i < attrs.Length - 1; i += 2)
+          {
+            WriteAttributeString(attrs[i], attrs[i + 1]);
+          }
+          if (VoidElements.Contains(name))
+            WriteEndElement();
+        }
+        return this;
+      }
+    }
+
+    public HtmlTextWriter Attr(string name, string value)
+    {
+      WriteAttributeString(name, value);
+      return this;
+    }
+    public HtmlTextWriter Text(string value)
+    {
+      WriteString(value);
+      return this;
+    }
 
     public HtmlTextWriter(TextWriter writer) : this(writer, new HtmlWriterSettings()) { }
     public HtmlTextWriter(TextWriter writer, HtmlWriterSettings settings)
@@ -205,7 +240,7 @@ namespace AngleParse
       var inXml = _xmlDepth >= 0;
       if (_state == InternalState.Element)
       {
-        CloseCurrElement(inXml);
+        CloseCurrElement(inXml || _xHtml);
         if (!forceFull && (VoidElements.Contains(name) || inXml))
           return tag;
       }
@@ -450,7 +485,8 @@ namespace AngleParse
           {
             case Symbols.Ampersand: WriteInternal("&amp;"); break;
             case Symbols.NoBreakSpace: WriteInternal("&nbsp;"); break;
-            case Symbols.LessThan: _writer.Write("&lt;"); break;
+            case Symbols.GreaterThan: WriteInternal("&gt;"); break;
+            case Symbols.LessThan: WriteInternal("&lt;"); break;
             case Symbols.DoubleQuote:
               if (_settings.QuoteChar == Symbols.DoubleQuote)
                 WriteInternal("&quot;");

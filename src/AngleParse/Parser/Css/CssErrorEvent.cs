@@ -1,30 +1,29 @@
 ﻿namespace AngleParse
 {
   using AngleParse.Extensions;
-  using AngleParse.Html;
   using System;
 
   /// <summary>
-  /// The event that is published in case of an HTML parse error.
+  /// The event that is published in case of an CSS parse error.
   /// </summary>
-  public class HtmlErrorEvent : EventArgs
+  public class CssErrorEvent : EventArgs
   {
     #region Fields
 
-    readonly HtmlParseError _code;
-    readonly TextPosition _position;
+    private CssParseError _code;
+    private TextPosition _position;
 
     #endregion
 
     #region ctor
 
     /// <summary>
-    /// Creates a new HtmlParseErrorEvent event.
+    /// Creates a new CssParseErrorEvent event.
     /// </summary>
     /// <param name="code">The provided error code.</param>
     /// <param name="position">The position in the source.</param>
     ///
-    public HtmlErrorEvent(HtmlParseError code, TextPosition position)
+    public CssErrorEvent(CssParseError code, TextPosition position)
     {
       _code = code;
       _position = position;

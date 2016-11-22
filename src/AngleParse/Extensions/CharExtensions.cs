@@ -171,7 +171,7 @@
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Boolean IsLetter(this Char c)
     {
-      return IsUppercaseAscii(c) || IsLowercaseAscii(c);
+      return IsLowercaseAscii(c) || IsUppercaseAscii(c);
     }
 
     /// <summary>
@@ -182,7 +182,7 @@
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Boolean IsName(this Char c)
     {
-      return c.IsNonAscii() || c.IsLetter() || c == Symbols.Underscore || c == Symbols.Minus || c.IsDigit();
+      return c.IsLetter() || c == Symbols.Underscore || c == Symbols.Minus || c.IsDigit() || c.IsNonAscii();
     }
 
     /// <summary>

@@ -2,7 +2,6 @@
 {
   //using AngleParse.Dom;
   using AngleParse.Extensions;
-  using AngleParse.Html;
   using System;
   using System.Collections.Generic;
 #if !NET40

@@ -591,6 +591,46 @@
       return value;
     }
 
+
+    /// <summary>
+    /// Serializes the string to a CSS string.
+    /// </summary>
+    /// <param name="value">The value to serialize.</param>
+    /// <returns>The CSS string representation.</returns>
+    public static String CssString(this String value)
+    {
+      var builder = Pool.NewStringBuilder();
+      builder.Append(Symbols.DoubleQuote);
+
+      if (!String.IsNullOrEmpty(value))
+      {
+        for (var i = 0; i < value.Length; i++)
+        {
+          var character = value[i];
+
+          if (character == Symbols.Null)
+          {
+            throw new ArgumentException("Invalid character");
+          }
+          else if (character == Symbols.DoubleQuote || character == Symbols.ReverseSolidus)
+          {
+            builder.Append(Symbols.ReverseSolidus).Append(character);
+          }
+          else if (character.IsInRange(0x1, 0x1f) || character == (Char)0x7b)
+          {
+            builder.Append(Symbols.ReverseSolidus).Append(character.ToHex()).Append(i + 1 != value.Length ? " " : "");
+          }
+          else
+          {
+            builder.Append(character);
+          }
+        }
+      }
+
+      builder.Append(Symbols.DoubleQuote);
+      return builder.ToPool();
+    }
+
     /// <summary>
     /// Creates a CSS function from the string with the given argument.
     /// </summary>

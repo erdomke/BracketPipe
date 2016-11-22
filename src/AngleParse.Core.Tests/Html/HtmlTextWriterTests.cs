@@ -6,12 +6,50 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using System.Xml.Linq;
 
 namespace AngleParse.Core.Tests
 {
   [TestFixture]
   class HtmlTextWriterTests
   {
+    [Test]
+    public void XmlToHtml()
+    {
+      using (var s = new StringWriter())
+      using (var w = new HtmlTextWriter(s))
+      {
+        var xml = new XElement("body",
+          new XElement("div", new XAttribute("style", "color:red"), "A > value"),
+          new XElement("input", new XAttribute("type", "text"), new XAttribute("value", "start")),
+          new XElement("p", "para & more"));
+
+        xml.WriteTo(w);
+        w.Flush();
+
+        Assert.AreEqual("<body><div style=\"color:red\">A &gt; value</div><input type=\"text\" value=\"start\"><p>para &amp; more</p></body>", s.ToString());
+      }
+    }
+
+    [Test]
+    public void BuildHtml()
+    {
+      using (var s = new StringWriter())
+      using (var w = new HtmlTextWriter(s))
+      {
+        w["html"]
+          ["body"]
+            ["div", "style", "color:red", "id", "1234"]
+              .Text("A > value")
+            ["/div"]
+            ["input", "type", "text", "value", "start"]
+            ["p"].Text("para & more")["/p"]
+          ["/body"]
+         ["/html"].Flush();
+        Assert.AreEqual("<html><body><div style=\"color:red\" id=\"1234\">A &gt; value</div><input type=\"text\" value=\"start\"><p>para &amp; more</p></body></html>", s.ToString());
+      }
+    }
+
     [Test]
     public void WriterNamespaceDefault()
     {

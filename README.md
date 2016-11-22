@@ -1,30 +1,97 @@
-AngleParse
-==========
+# AngleParse
 
 AngleParse is a .NET library for parsing angle bracket based hypertext languages like HTML, SVG, and MathML. The parser is built upon the official W3C specification.  It differentiates itself from other libraries such as [AngleSharp](https://github.com/AngleSharp/AngleSharp) (which it is based on) and [HTML Agility Pack](http://htmlagilitypack.codeplex.com/) in that it does not build an in-memory representation of the DOM.  Rather, it focuses on providing a convenient streaming interface for fast processing of HTML documents.  This makes the library ideal for 
 
 * minifying HTML
-* sanitizing potentially malicious XSS tags
+* sanitizing HTML to prevent XSS attacks
 * converting HTML to text
 * crawling hyperlinks from HTML documents
 * cleaning up MS Word HTML
 * ... and any other task that only requires a single traversal of the HTML document
 
-It can also be viewed as a modern update to similar older projects such as the [SgmlReader](https://github.com/MindTouch/SGMLReader) and [Majestic-12 HTML Parser](http://www.majestic12.co.uk/projects/html_parser.php)
+It can also be viewed as a modern update to previous projects such as the [SgmlReader](https://github.com/MindTouch/SGMLReader) and [Majestic-12 HTML Parser](http://www.majestic12.co.uk/projects/html_parser.php)
 
-Key features
-------------
+## Examples
 
-* **Portable** (designed as a portable class library)
-* **Standards conform** (works exactly as in all modern browsers)
-* **Great performance** (outperforms most other parsers in many cases)
+Read the nodes from an HTML string or stream named `html`.
 
-The parser uses the HTML 5.1 specification, which defines error handling and element correction.  Since AngleParse is essentially a stripped down version of [AngleSharp](https://github.com/AngleSharp/AngleSharp), its performance should meet or exceed AngleSharp's performance which is already quite close to the performance of browsers. Even very large pages can be processed within milliseconds.
+```csharp
+using (var reader = new HtmlReader(html))
+{
+  foreach (var node in reader)
+  {
+    // Do something
+  }
+}
+```
 
-Supported platforms
--------------------
+Render HTML nodes to a string
 
-AngleParse has been created as a PCL (profile 259) that supports a wide range of platforms. The list includes, but is not limited to:
+```csharp
+using (var reader = new HtmlReader(html))
+{
+  var str = reader.ToHtml();
+}
+```
+
+Sanitize user HTML
+
+```csharp
+var str = Html.Sanitize(html);
+```
+
+Write HTML
+
+```csharp
+using (var s = new StringWriter())
+using (var w = new HtmlTextWriter(s))
+{
+  w["html"]
+    ["body"]
+      ["div", "style", "color:red", "id", "1234"]
+        .Text("A > value")
+      ["/div"]
+      ["input", "type", "text", "value", "start"]
+      ["p"].Text("para & more")["/p"]
+    ["/body"]
+   ["/html"].Flush();
+  var str = s.ToString();
+}
+```
+
+XML to HTML
+
+```csharp
+using (var s = new StringWriter())
+using (var w = new HtmlTextWriter(s))
+{
+  var xml = new XElement("body",
+    new XElement("div", new XAttribute("style", "color:red"), "A > value"),
+    new XElement("input", new XAttribute("type", "text"), new XAttribute("value", "start")),
+    new XElement("p", "para & more"));
+  xml.WriteTo(w);
+  w.Flush();
+
+  var str = s.ToString();
+}
+```
+
+## High Performance
+
+Using only the stripped down core of [AngleSharp](https://github.com/AngleSharp/AngleSharp), AngleParse
+achives incredibly fast performance.  In fact, it was measured to be over **4.5 times faster** for
+HTML sanitization than [HtmlSanitizer](https://github.com/mganss/HtmlSanitizer) which leverages
+AngleSharp's full DOM parser.
+
+## Standards Conformance
+
+The parser uses the HTML 5.1 specification, which defines error handling and element correction.  As 
+a result, it works exactly as in all modern browsers.
+
+## Portable
+
+It is designed as a portable class library PCL (profile 259) that supports a wide range of platforms. 
+The list includes, but is not limited to:
 
 * .NET Core ("netstandard 1.0", see [.NET Platform Standard](https://github.com/dotnet/corefx/blob/master/Documentation/architecture/net-platform-standard.md))
 * .NET Framework 4.5
@@ -33,8 +100,7 @@ AngleParse has been created as a PCL (profile 259) that supports a wide range of
 * Xamarin.Android
 * Xamarin.iOS
 
-License
--------
+## License
 
 The MIT License (MIT)
 

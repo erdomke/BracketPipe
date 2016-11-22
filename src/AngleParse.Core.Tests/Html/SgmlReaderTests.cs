@@ -72,7 +72,7 @@ Symbol""><span style=""mso-list:Ignore"">·<span style=""font:7.0pt &quot;Times 
       {
         var rendered = reader.ToHtml();
         Assert.AreEqual(@"<html>
-<body><span text=""foo>bar""></span>
+<body><span text=""foo&gt;bar""></span>
 </body>
 </html>", rendered);
       }
@@ -442,7 +442,7 @@ var test = '<div>""test""</div>';
       {
         var rendered = reader.ToHtml();
         Assert.AreEqual(@"﻿<html>
-  <body style=""&amp;&quot;&lt;>'"">&amp;""&lt;&gt;'</body>
+  <body style=""&amp;&quot;&lt;&gt;'"">&amp;""&lt;&gt;'</body>
 </html>", rendered);
       }
     }

@@ -1,7 +1,6 @@
 ﻿namespace AngleParse
 {
   using AngleParse.Extensions;
-  using AngleParse.Html;
   using System;
 
   /// <summary>
@@ -24,11 +23,11 @@
     {
     }
 
-    public HtmlNode(HtmlTokenType type, TextPosition position, String name)
+    public HtmlNode(HtmlTokenType type, TextPosition position, String value)
     {
       _type = type;
       _position = position;
-      _value = name;
+      _value = value;
     }
 
     #endregion

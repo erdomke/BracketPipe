@@ -1,11 +1,11 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("AngleSharp.Core.Tests")]
+[assembly: AssemblyTitle("AngleParse.Core.Tests")]
 [assembly: AssemblyDescription("Tests for the core of the AngleSharp library.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("AngleSharp")]
-[assembly: AssemblyProduct("AngleSharp.Core")]
+[assembly: AssemblyProduct("AngleParse.Core")]
 [assembly: AssemblyCopyright("Copyright © AngleSharp, 2013-2015.")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
