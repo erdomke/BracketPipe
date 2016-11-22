@@ -47,8 +47,10 @@
   <ItemGroup>
     <Compile Include="Css\CombinatorSymbols.cs" />
     <Compile Include="Css\FunctionNames.cs" />
-    <Compile Include="DomDescriptionAttribute.cs" />
+    <Compile Include="Foundation\DomDescriptionAttribute.cs" />
     <Compile Include="Extensions\ValueExtensions.cs" />
+    <Compile Include="Foundation\StringBuilderReader.cs" />
+    <Compile Include="HtmlMinifySettings.cs" />
     <Compile Include="Html\NamespaceNames.cs" />
     <Compile Include="Extensions\CharExtensions.cs" />
     <Compile Include="Extensions\ObjectExtensions.cs" />
@@ -61,6 +63,7 @@
     <Compile Include="Html\HtmlEntityService.cs" />
     <Compile Include="Html\TagNames.cs" />
     <Compile Include="Extensions\HtmlParserExtensions.cs" />
+    <Compile Include="Js\JsMin.cs" />
     <Compile Include="Parser\Css\CssErrorEvent.cs" />
     <Compile Include="Parser\Css\CssExtensions.cs" />
     <Compile Include="Parser\Css\CssParseError.cs" />
@@ -82,25 +85,26 @@
     <Compile Include="Parser\Css\Tokens\CssUnitToken.cs" />
     <Compile Include="Parser\Css\Tokens\CssUrlToken.cs" />
     <Compile Include="Parser\Html\BaseTokenizer.cs" />
-    <Compile Include="Parser\Html\Html.cs" />
+    <Compile Include="Html.Minify.cs" />
     <Compile Include="Parser\Html\HtmlErrorEvent.cs" />
-    <Compile Include="Parser\Html\HtmlExtensions.cs" />
+    <Compile Include="Html.Render.cs" />
     <Compile Include="Parser\Html\HtmlForeign.cs" />
     <Compile Include="Parser\Html\HtmlParseError.cs" />
     <Compile Include="Parser\Html\HtmlParseException.cs" />
     <Compile Include="Parser\Html\HtmlParseMode.cs" />
     <Compile Include="Parser\Html\HtmlReader.cs" />
-    <Compile Include="Parser\Html\HtmlSanitizeExtensions.cs" />
-    <Compile Include="Parser\Html\HtmlSanitizeSettings.cs" />
+    <Compile Include="Html.Sanitize.cs" />
+    <Compile Include="HtmlSanitizeSettings.cs" />
     <Compile Include="Parser\Html\HtmlTextWriter.cs" />
     <Compile Include="Parser\Html\HtmlTokenType.cs" />
     <Compile Include="Parser\Html\HtmlWriterSettings.cs" />
+    <Compile Include="Parser\Html\Tokens\HtmlCommentNode.cs" />
     <Compile Include="Parser\Html\Tokens\HtmlDoctypeNode.cs" />
     <Compile Include="Parser\Html\Tokens\HtmlNode.cs" />
     <Compile Include="Parser\Html\Tokens\HtmlTagNode.cs" />
-    <Compile Include="TextEncoding.cs" />
-    <Compile Include="TextPosition.cs" />
-    <Compile Include="TextSource.cs" />
+    <Compile Include="Foundation\TextEncoding.cs" />
+    <Compile Include="Foundation\TextPosition.cs" />
+    <Compile Include="Foundation\TextSource.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -14,6 +14,20 @@ namespace AngleParse.Core.Tests
   class HtmlTextWriterTests
   {
     [Test]
+    public void Format_Basic()
+    {
+      Assert.AreEqual("<p style=\"a&lt;&gt;&amp;&quot;&apos;b\">a&lt;&gt;&amp;&quot;&apos;b</p><div>c'd</div>", Html.Format("<p style=\"{0}\">{0}</p>{1:!}", "a<>&\"'b", "<div>c'd</div>"));
+    }
+    [Test]
+    public void Format_Formattable()
+    {
+      var escape = "a<>&\"'b";
+      var raw = "<div>c'd</div>";
+
+      Assert.AreEqual("<p style=\"a&lt;&gt;&amp;&quot;&apos;b\">a&lt;&gt;&amp;&quot;&apos;b</p><div>c'd</div>", Html.Format((IFormattable)$"<p style=\"{escape}\">{escape}</p>{raw:!}"));
+    }
+
+    [Test]
     public void XmlToHtml()
     {
       using (var s = new StringWriter())

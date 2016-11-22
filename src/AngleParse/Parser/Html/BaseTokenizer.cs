@@ -141,11 +141,11 @@
 
     protected Char SkipSpaces()
     {
-      var c = GetNext();
+      var c = Advance();
 
       while (c.IsSpaceCharacter())
       {
-        c = GetNext();
+        c = Advance();
       }
 
       return c;
@@ -155,24 +155,11 @@
 
     #region Source Management
 
-    protected Char GetNext()
-    {
-      Advance();
-      return _currentChar;
-    }
-
-    protected Char GetPrevious()
-    {
-      Back();
-      return _currentChar;
-    }
-
-    protected void Advance()
+    protected Char Advance()
     {
       if (_currentChar != Symbols.EndOfFile)
-      {
         AdvanceUnsafe();
-      }
+      return _currentChar;
     }
 
     protected void Advance(Int32 n)
@@ -183,12 +170,11 @@
       }
     }
 
-    protected void Back()
+    protected Char Back()
     {
       if (InsertionPoint > 0)
-      {
         BackUnsafe();
-      }
+      return _currentChar;
     }
 
     protected void Back(Int32 n)

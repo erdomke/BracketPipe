@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AngleParse.Core.Tests.Html
+namespace AngleParse.Core.Tests
 {
   /// <summary>
   /// Tests lifted from the SgmlReader project
@@ -49,9 +49,9 @@ Symbol'><span style='mso-list:Ignore'>·<span style='font:7.0pt ""Times New Roma
 
 <p class=""MsoNormal"">Test <b style=""mso-bidi-font-weight:normal"">document<o:p></o:p></b></p>
 
-<p class=""MsoListParagraphCxSpFirst"" style=""text-indent:-.25in;mso-list:l0 level1 lfo1""><!--[if !supportLists]--><span style=""font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+<p class=""MsoListParagraphCxSpFirst"" style=""text-indent:-.25in;mso-list:l0 level1 lfo1""><![if !supportLists]><span style=""font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
 Symbol""><span style=""mso-list:Ignore"">·<span style=""font:7.0pt &quot;Times New Roman&quot;"">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></span><!--[endif]-->With bullets</p>
+</span></span></span><![endif]>With bullets</p>
 
 </div>
 
@@ -284,7 +284,7 @@ var test = '<div>""test""</div>';
       using (var reader = new HtmlReader(html))
       {
         var rendered = reader.ToHtml();
-        Assert.AreEqual(@"﻿<html><body>do <!--[if !supportLists]-->not<!--[endif]--> lose this text</body></html>", rendered);
+        Assert.AreEqual(@"﻿<html><body>do <![if !supportLists]>not<![endif]> lose this text</body></html>", rendered);
       }
     }
 

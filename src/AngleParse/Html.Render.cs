@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -8,8 +9,67 @@ using System.Xml;
 
 namespace AngleParse
 {
-  public static class HtmlExtensions
+  public static partial class Html
   {
+    public static StringBuilder AppendHtmlEncoded(this StringBuilder builder, string value)
+    {
+      builder.EnsureCapacity(builder.Length + value.Length + 8);
+      for (var i = 0; i < value.Length; i++)
+      {
+        switch (value[i])
+        {
+          case Symbols.Ampersand: builder.Append("&amp;"); break;
+          case Symbols.NoBreakSpace: builder.Append("&nbsp;"); break;
+          case Symbols.GreaterThan: builder.Append("&gt;"); break;
+          case Symbols.LessThan: builder.Append("&lt;"); break;
+          case Symbols.DoubleQuote: builder.Append("&quot;"); break;
+          case Symbols.SingleQuote: builder.Append("&apos;"); break;
+          default: builder.Append(value[i]); break;
+        }
+      }
+      return builder;
+    }
+
+    public static string Format(IFormattable formattable)
+    {
+      return formattable.ToString(null, _htmlProvider);
+    }
+    public static string Format(string format, params object[] args)
+    {
+      return string.Format(_htmlProvider, format, args);
+    }
+
+    private static FormatProvider _htmlProvider = new FormatProvider();
+
+    private class FormatProvider : IFormatProvider, ICustomFormatter
+    {
+      public string Format(string format, object arg, IFormatProvider formatProvider)
+      {
+        var value = default(string);
+        var raw = format == "!";
+        if (raw)
+          format = string.Empty;
+
+        if (arg is IFormattable)
+          value = ((IFormattable)arg).ToString(format, CultureInfo.CurrentCulture);
+        else if (arg != null)
+          value = arg.ToString();
+
+        if (raw)
+          return value;
+
+        return Pool.NewStringBuilder().AppendHtmlEncoded(value).ToString();
+      }
+
+      public object GetFormat(Type formatType)
+      {
+        if (formatType == typeof(ICustomFormatter))
+          return this;
+        else
+          return null;
+      }
+    }
+
     /// <summary>
     /// Render parsed HTML to a string
     /// </summary>
@@ -62,7 +122,10 @@ namespace AngleParse
             writer.WriteString(token.Value);
             break;
           case HtmlTokenType.Comment:
-            writer.WriteComment(token.Value);
+            if (htmlWriter == null)
+              writer.WriteComment(token.Value);
+            else
+              htmlWriter.WriteComment(token.Value, ((HtmlCommentNode)token).DownlevelRevealedConditional);
             break;
           case HtmlTokenType.Doctype:
             var docType = (HtmlDoctypeNode)token;

@@ -98,7 +98,7 @@
     /// <returns>Returns <c>true</c> if more nodes are available, <c>false</c> otherwise</returns>
     public bool Read()
     {
-      var current = GetNext();
+      var current = Advance();
       _position = GetCurrentPosition();
 
       if (current != Symbols.EndOfFile)
@@ -204,7 +204,7 @@
     /// <param name="c">The next input character.</param>
     private HtmlNode Data(Char c)
     {
-      return c == Symbols.LessThan ? TagOpen(GetNext()) : DataText(c);
+      return c == Symbols.LessThan ? TagOpen(Advance()) : DataText(c);
     }
 
     private HtmlNode DataText(Char c)
@@ -219,7 +219,7 @@
             return NewCharacter();
 
           case Symbols.Ampersand:
-            AppendCharacterReference(GetNext());
+            AppendCharacterReference(Advance());
             break;
 
           case Symbols.Null:
@@ -231,7 +231,7 @@
             break;
         }
 
-        c = GetNext();
+        c = Advance();
       }
     }
 
@@ -262,7 +262,7 @@
             break;
         }
 
-        c = GetNext();
+        c = Advance();
       }
     }
 
@@ -276,7 +276,7 @@
     /// <param name="c">The next input character.</param>
     private HtmlNode RCData(Char c)
     {
-      return c == Symbols.LessThan ? RCDataLt(GetNext()) : RCDataText(c);
+      return c == Symbols.LessThan ? RCDataLt(Advance()) : RCDataText(c);
     }
 
     private HtmlNode RCDataText(Char c)
@@ -286,7 +286,7 @@
         switch (c)
         {
           case Symbols.Ampersand:
-            AppendCharacterReference(GetNext());
+            AppendCharacterReference(Advance());
             break;
 
           case Symbols.LessThan:
@@ -303,7 +303,7 @@
             break;
         }
 
-        c = GetNext();
+        c = Advance();
       }
     }
 
@@ -316,17 +316,17 @@
       if (c == Symbols.Solidus)
       {
         // See 8.2.4.12 RCDATA end tag open state
-        c = GetNext();
+        c = Advance();
 
         if (c.IsUppercaseAscii())
         {
           StringBuffer.Append(Char.ToLowerInvariant(c));
-          return RCDataNameEndTag(GetNext());
+          return RCDataNameEndTag(Advance());
         }
         else if (c.IsLowercaseAscii())
         {
           StringBuffer.Append(c);
-          return RCDataNameEndTag(GetNext());
+          return RCDataNameEndTag(Advance());
         }
         else
         {
@@ -369,7 +369,7 @@
           return RCDataText(c);
         }
 
-        c = GetNext();
+        c = Advance();
       }
     }
 
@@ -383,7 +383,7 @@
     /// <param name="c">The next input character.</param>
     private HtmlNode Rawtext(Char c)
     {
-      return c == Symbols.LessThan ? RawtextLT(GetNext()) : RawtextText(c);
+      return c == Symbols.LessThan ? RawtextLT(Advance()) : RawtextText(c);
     }
 
     private HtmlNode RawtextText(Char c)
@@ -406,7 +406,7 @@
             break;
         }
 
-        c = GetNext();
+        c = Advance();
       }
     }
 
@@ -419,17 +419,17 @@
       if (c == Symbols.Solidus)
       {
         // See 8.2.4.15 RAWTEXT end tag open state
-        c = GetNext();
+        c = Advance();
 
         if (c.IsUppercaseAscii())
         {
           StringBuffer.Append(Char.ToLowerInvariant(c));
-          return RawtextNameEndTag(GetNext());
+          return RawtextNameEndTag(Advance());
         }
         else if (c.IsLowercaseAscii())
         {
           StringBuffer.Append(c);
-          return RawtextNameEndTag(GetNext());
+          return RawtextNameEndTag(Advance());
         }
         else
         {
@@ -472,7 +472,7 @@
           return RawtextText(c);
         }
 
-        c = GetNext();
+        c = Advance();
       }
     }
 
@@ -501,7 +501,7 @@
         else
         {
           StringBuffer.Append(c);
-          c = GetNext();
+          c = Advance();
         }
       }
 
@@ -526,7 +526,7 @@
 
         if (c == Symbols.Num)
         {
-          entity = GetNumericCharacterReference(GetNext());
+          entity = GetNumericCharacterReference(Advance());
         }
         else
         {
@@ -556,7 +556,7 @@
       {
         exp = 16;
 
-        while ((c = GetNext()).IsHex())
+        while ((c = Advance()).IsHex())
         {
           nums.Add(c.FromHex());
         }
@@ -566,7 +566,7 @@
         while (c.IsDigit())
         {
           nums.Add(c.FromHex());
-          c = GetNext();
+          c = Advance();
         }
       }
 
@@ -629,7 +629,7 @@
         }
 
         reference[index++] = chr;
-        chr = GetNext();
+        chr = Advance();
       }
       while (chr != Symbols.EndOfFile && index < 31);
 
@@ -685,7 +685,7 @@
     {
       if (c == Symbols.Solidus)
       {
-        return TagEnd(GetNext());
+        return TagEnd(Advance());
       }
       else if (c.IsLowercaseAscii())
       {
@@ -699,7 +699,7 @@
       }
       else if (c == Symbols.ExclamationMark)
       {
-        return MarkupDeclaration(GetNext());
+        return MarkupDeclaration(Advance());
       }
       else if (c != Symbols.QuestionMark)
       {
@@ -735,7 +735,7 @@
       {
         State = HtmlParseMode.PCData;
         RaiseErrorOccurred(HtmlParseError.TagClosedWrong);
-        return Data(GetNext());
+        return Data(Advance());
       }
       else if (c == Symbols.EndOfFile)
       {
@@ -759,7 +759,7 @@
     {
       while (true)
       {
-        var c = GetNext();
+        var c = Advance();
 
         if (c == Symbols.GreaterThan)
         {
@@ -801,7 +801,7 @@
     /// <param name="tag">The current tag token.</param>
     private HtmlNode TagSelfClosing(HtmlTagNode tag)
     {
-      switch (GetNext())
+      switch (Advance())
       {
         case Symbols.GreaterThan:
           tag.IsSelfClosing = true;
@@ -824,22 +824,22 @@
       if (ContinuesWithSensitive("--"))
       {
         Advance();
-        return CommentStart(GetNext());
+        return CommentStart(Advance());
       }
       else if (ContinuesWithInsensitive(TagNames.Doctype))
       {
         Advance(6);
-        return Doctype(GetNext());
+        return Doctype(Advance());
       }
       else if (IsAcceptingCharacterData && ContinuesWithSensitive(Keywords.CData))
       {
         Advance(6);
-        return CharacterData(GetNext());
+        return CharacterData(Advance());
       }
       else
       {
         RaiseErrorOccurred(HtmlParseError.UndefinedMarkupDeclaration);
-        return BogusComment(c);
+        return BogusComment(c, true);
       }
     }
 
@@ -851,9 +851,11 @@
     /// See 8.2.4.44 Bogus comment state
     /// </summary>
     /// <param name="c">The current character.</param>
-    private HtmlNode BogusComment(Char c)
+    private HtmlNode BogusComment(Char c, bool hadExclamation = false)
     {
       StringBuffer.Clear();
+
+      var downlevelRevealedConditional = hadExclamation && c == '[';
 
       while (true)
       {
@@ -869,12 +871,14 @@
             goto default;
           default:
             StringBuffer.Append(c);
-            c = GetNext();
+            c = Advance();
             continue;
         }
 
         State = HtmlParseMode.PCData;
-        return NewComment();
+        var result = NewComment();
+        result.DownlevelRevealedConditional = downlevelRevealedConditional;
+        return result;
       }
     }
 
@@ -889,10 +893,10 @@
       switch (c)
       {
         case Symbols.Minus:
-          return CommentDashStart(GetNext()) ?? Comment(GetNext());
+          return CommentDashStart(Advance()) ?? Comment(Advance());
         case Symbols.Null:
           AppendReplacement();
-          return Comment(GetNext());
+          return Comment(Advance());
         case Symbols.GreaterThan:
           State = HtmlParseMode.PCData;
           RaiseErrorOccurred(HtmlParseError.TagClosedWrong);
@@ -903,7 +907,7 @@
           break;
         default:
           StringBuffer.Append(c);
-          return Comment(GetNext());
+          return Comment(Advance());
       }
 
       return NewComment();
@@ -918,11 +922,11 @@
       switch (c)
       {
         case Symbols.Minus:
-          return CommentEnd(GetNext());
+          return CommentEnd(Advance());
         case Symbols.Null:
           RaiseErrorOccurred(HtmlParseError.Null);
           StringBuffer.Append(Symbols.Minus).Append(Symbols.Replacement);
-          return Comment(GetNext());
+          return Comment(Advance());
         case Symbols.GreaterThan:
           State = HtmlParseMode.PCData;
           RaiseErrorOccurred(HtmlParseError.TagClosedWrong);
@@ -933,7 +937,7 @@
           break;
         default:
           StringBuffer.Append(Symbols.Minus).Append(c);
-          return Comment(GetNext());
+          return Comment(Advance());
       }
 
       return NewComment();
@@ -950,7 +954,7 @@
         switch (c)
         {
           case Symbols.Minus:
-            var result = CommentDashEnd(GetNext());
+            var result = CommentDashEnd(Advance());
 
             if (result != null)
             {
@@ -970,7 +974,7 @@
             break;
         }
 
-        c = GetNext();
+        c = Advance();
       }
     }
 
@@ -983,7 +987,7 @@
       switch (c)
       {
         case Symbols.Minus:
-          return CommentEnd(GetNext());
+          return CommentEnd(Advance());
         case Symbols.EndOfFile:
           RaiseErrorOccurred(HtmlParseError.EOF);
           Back();
@@ -1017,7 +1021,7 @@
             return null;
           case Symbols.ExclamationMark:
             RaiseErrorOccurred(HtmlParseError.CommentEndedWithEM);
-            return CommentBangEnd(GetNext());
+            return CommentBangEnd(Advance());
           case Symbols.Minus:
             RaiseErrorOccurred(HtmlParseError.CommentEndedWithDash);
             StringBuffer.Append(Symbols.Minus);
@@ -1032,7 +1036,7 @@
             return null;
         }
 
-        c = GetNext();
+        c = Advance();
       }
     }
 
@@ -1046,7 +1050,7 @@
       {
         case Symbols.Minus:
           StringBuffer.Append(Symbols.Minus).Append(Symbols.Minus).Append(Symbols.ExclamationMark);
-          return CommentDashEnd(GetNext());
+          return CommentDashEnd(Advance());
         case Symbols.GreaterThan:
           State = HtmlParseMode.PCData;
           break;
@@ -1078,7 +1082,7 @@
     {
       if (c.IsSpaceCharacter())
       {
-        return DoctypeNameBefore(GetNext());
+        return DoctypeNameBefore(Advance());
       }
       else if (c == Symbols.EndOfFile)
       {
@@ -1100,7 +1104,7 @@
     private HtmlNode DoctypeNameBefore(Char c)
     {
       while (c.IsSpaceCharacter())
-        c = GetNext();
+        c = Advance();
 
       if (c.IsUppercaseAscii())
       {
@@ -1144,7 +1148,7 @@
     {
       while (true)
       {
-        var c = GetNext();
+        var c = Advance();
 
         if (c.IsSpaceCharacter())
         {
@@ -1226,7 +1230,7 @@
     /// <param name="doctype">The current doctype token.</param>
     private HtmlNode DoctypePublic(HtmlDoctypeNode doctype)
     {
-      var c = GetNext();
+      var c = Advance();
 
       if (c.IsSpaceCharacter())
       {
@@ -1314,7 +1318,7 @@
     {
       while (true)
       {
-        var c = GetNext();
+        var c = Advance();
 
         if (c == Symbols.DoubleQuote)
         {
@@ -1358,7 +1362,7 @@
     {
       while (true)
       {
-        var c = GetNext();
+        var c = Advance();
 
         if (c == Symbols.SingleQuote)
         {
@@ -1400,7 +1404,7 @@
     /// <param name="doctype">The current doctype token.</param>
     private HtmlNode DoctypePublicIdentifierAfter(HtmlDoctypeNode doctype)
     {
-      var c = GetNext();
+      var c = Advance();
 
       if (c.IsSpaceCharacter())
       {
@@ -1482,7 +1486,7 @@
     /// <param name="doctype">The current doctype token.</param>
     private HtmlNode DoctypeSystem(HtmlDoctypeNode doctype)
     {
-      var c = GetNext();
+      var c = Advance();
 
       if (c.IsSpaceCharacter())
       {
@@ -1573,7 +1577,7 @@
     {
       while (true)
       {
-        var c = GetNext();
+        var c = Advance();
 
         if (c == Symbols.DoubleQuote)
         {
@@ -1617,7 +1621,7 @@
     {
       while (true)
       {
-        var c = GetNext();
+        var c = Advance();
 
         switch (c)
         {
@@ -1682,7 +1686,7 @@
     {
       while (true)
       {
-        switch (GetNext())
+        switch (Advance())
         {
           case Symbols.GreaterThan:
             State = HtmlParseMode.PCData;
@@ -1768,7 +1772,7 @@
           // See 8.2.4.35 Attribute name state
           case AttributeState.Name:
             {
-              c = GetNext();
+              c = Advance();
 
               if (c == Symbols.Equality)
               {
@@ -1885,19 +1889,19 @@
                 RaiseErrorOccurred(HtmlParseError.AttributeValueInvalid);
                 StringBuffer.Append(c);
                 state = AttributeState.UnquotedValue;
-                c = GetNext();
+                c = Advance();
               }
               else if (c == Symbols.Null)
               {
                 AppendReplacement();
                 state = AttributeState.UnquotedValue;
-                c = GetNext();
+                c = Advance();
               }
               else if (c != Symbols.EndOfFile)
               {
                 StringBuffer.Append(c);
                 state = AttributeState.UnquotedValue;
-                c = GetNext();
+                c = Advance();
               }
               else
               {
@@ -1911,7 +1915,7 @@
           // and 8.2.4.39 Attribute value (single-quoted) state
           case AttributeState.QuotedValue:
             {
-              c = GetNext();
+              c = Advance();
 
               if (c == quote)
               {
@@ -1920,7 +1924,7 @@
               }
               else if (c == Symbols.Ampersand)
               {
-                AppendCharacterReference(GetNext(), quote);
+                AppendCharacterReference(Advance(), quote);
               }
               else if (c == Symbols.Null)
               {
@@ -1953,24 +1957,24 @@
               }
               else if (c == Symbols.Ampersand)
               {
-                AppendCharacterReference(GetNext(), Symbols.GreaterThan);
-                c = GetNext();
+                AppendCharacterReference(Advance(), Symbols.GreaterThan);
+                c = Advance();
               }
               else if (c == Symbols.Null)
               {
                 AppendReplacement();
-                c = GetNext();
+                c = Advance();
               }
               else if (c == Symbols.DoubleQuote || c == Symbols.SingleQuote || c == Symbols.LessThan || c == Symbols.Equality || c == Symbols.CurvedQuote)
               {
                 RaiseErrorOccurred(HtmlParseError.AttributeValueInvalid);
                 StringBuffer.Append(c);
-                c = GetNext();
+                c = Advance();
               }
               else if (c != Symbols.EndOfFile)
               {
                 StringBuffer.Append(c);
-                c = GetNext();
+                c = Advance();
               }
               else
               {
@@ -1983,7 +1987,7 @@
           // See 8.2.4.42 After attribute value (quoted) state
           case AttributeState.AfterValue:
             {
-              c = GetNext();
+              c = Advance();
 
               if (c == Symbols.GreaterThan)
               {
@@ -2073,14 +2077,14 @@
                   break;
               }
 
-              c = GetNext();
+              c = Advance();
               break;
             }
 
           // See 8.2.4.17 Script data less-than sign state
           case ScriptState.OpenTag:
             {
-              c = GetNext();
+              c = Advance();
 
               if (c == Symbols.Solidus)
               {
@@ -2102,7 +2106,7 @@
           case ScriptState.StartEscape:
             {
               StringBuffer.Append(Symbols.ExclamationMark);
-              c = GetNext();
+              c = Advance();
 
               if (c == Symbols.Minus)
               {
@@ -2119,7 +2123,7 @@
           // See 8.2.4.21 Script data escape start dash state
           case ScriptState.StartEscapeDash:
             {
-              c = GetNext();
+              c = Advance();
               StringBuffer.Append(Symbols.Minus);
 
               if (c == Symbols.Minus)
@@ -2138,7 +2142,7 @@
           // See 8.2.4.18 Script data end tag open state
           case ScriptState.EndTag:
             {
-              c = GetNext();
+              c = Advance();
               offset = StringBuffer.Append(Symbols.Solidus).Length;
               var tag = NewTagClose();
 
@@ -2146,7 +2150,7 @@
               {
                 // See 8.2.4.19 Script data end tag name state
                 StringBuffer.Append(c);
-                c = GetNext();
+                c = Advance();
                 var isspace = c.IsSpaceCharacter();
                 var isclosed = c == Symbols.GreaterThan;
                 var isslash = c == Symbols.Solidus;
@@ -2197,11 +2201,11 @@
               {
                 case Symbols.Minus:
                   StringBuffer.Append(Symbols.Minus);
-                  c = GetNext();
+                  c = Advance();
                   state = ScriptState.EscapedDash;
                   continue;
                 case Symbols.LessThan:
-                  c = GetNext();
+                  c = Advance();
                   state = ScriptState.EscapedOpenTag;
                   continue;
                 case Symbols.Null:
@@ -2215,7 +2219,7 @@
                   continue;
               }
 
-              c = GetNext();
+              c = Advance();
               break;
             }
 
@@ -2229,7 +2233,7 @@
                   state = ScriptState.EscapedDashDash;
                   continue;
                 case Symbols.LessThan:
-                  c = GetNext();
+                  c = Advance();
                   state = ScriptState.EscapedOpenTag;
                   continue;
                 case Symbols.Null:
@@ -2243,7 +2247,7 @@
                   break;
               }
 
-              c = GetNext();
+              c = Advance();
               state = ScriptState.Escaped;
               break;
             }
@@ -2251,7 +2255,7 @@
           // See 8.2.4.24 Script data escaped dash dash state
           case ScriptState.EscapedDashDash:
             {
-              c = GetNext();
+              c = Advance();
 
               switch (c)
               {
@@ -2259,24 +2263,24 @@
                   StringBuffer.Append(Symbols.Minus);
                   break;
                 case Symbols.LessThan:
-                  c = GetNext();
+                  c = Advance();
                   state = ScriptState.EscapedOpenTag;
                   continue;
                 case Symbols.GreaterThan:
                   StringBuffer.Append(Symbols.GreaterThan);
-                  c = GetNext();
+                  c = Advance();
                   state = ScriptState.Normal;
                   continue;
                 case Symbols.Null:
                   AppendReplacement();
-                  c = GetNext();
+                  c = Advance();
                   state = ScriptState.Escaped;
                   continue;
                 case Symbols.EndOfFile:
                   return NewCharacter();
                 default:
                   StringBuffer.Append(c);
-                  c = GetNext();
+                  c = Advance();
                   state = ScriptState.Escaped;
                   continue;
               }
@@ -2289,7 +2293,7 @@
             {
               if (c == Symbols.Solidus)
               {
-                c = GetNext();
+                c = Advance();
                 state = ScriptState.EscapedEndTag;
               }
               else if (c.IsLetter())
@@ -2328,7 +2332,7 @@
           // See 8.2.4.27 Script data escaped end tag name state
           case ScriptState.EscapedNameEndTag:
             {
-              c = GetNext();
+              c = Advance();
               var hasLength = StringBuffer.Length - offset == scriptLength;
 
               if (hasLength && (c == Symbols.Solidus || c == Symbols.GreaterThan || c.IsSpaceCharacter()) &&
@@ -2353,14 +2357,14 @@
           // See 8.2.4.28 Script data double escape start state
           case ScriptState.StartDoubleEscape:
             {
-              c = GetNext();
+              c = Advance();
               var hasLength = StringBuffer.Length - offset == scriptLength;
 
               if (hasLength && (c == Symbols.Solidus || c == Symbols.GreaterThan || c.IsSpaceCharacter()))
               {
                 var isscript = StringBuffer.ToString(offset, scriptLength).Isi(TagNames.Script);
                 StringBuffer.Append(c);
-                c = GetNext();
+                c = Advance();
                 state = isscript ? ScriptState.EscapedDouble : ScriptState.Escaped;
               }
               else if (c.IsLetter())
@@ -2382,13 +2386,13 @@
               {
                 case Symbols.Minus:
                   StringBuffer.Append(Symbols.Minus);
-                  c = GetNext();
+                  c = Advance();
                   state = ScriptState.EscapedDoubleDash;
                   continue;
 
                 case Symbols.LessThan:
                   StringBuffer.Append(Symbols.LessThan);
-                  c = GetNext();
+                  c = Advance();
                   state = ScriptState.EscapedDoubleOpenTag;
                   continue;
 
@@ -2403,7 +2407,7 @@
               }
 
               StringBuffer.Append(c);
-              c = GetNext();
+              c = Advance();
               break;
             }
 
@@ -2419,7 +2423,7 @@
 
                 case Symbols.LessThan:
                   StringBuffer.Append(Symbols.LessThan);
-                  c = GetNext();
+                  c = Advance();
                   state = ScriptState.EscapedDoubleOpenTag;
                   continue;
 
@@ -2441,7 +2445,7 @@
           // See 8.2.4.31 Script data double escaped dash dash state
           case ScriptState.EscapedDoubleDashDash:
             {
-              c = GetNext();
+              c = Advance();
 
               switch (c)
               {
@@ -2451,19 +2455,19 @@
 
                 case Symbols.LessThan:
                   StringBuffer.Append(Symbols.LessThan);
-                  c = GetNext();
+                  c = Advance();
                   state = ScriptState.EscapedDoubleOpenTag;
                   continue;
 
                 case Symbols.GreaterThan:
                   StringBuffer.Append(Symbols.GreaterThan);
-                  c = GetNext();
+                  c = Advance();
                   state = ScriptState.Normal;
                   continue;
 
                 case Symbols.Null:
                   AppendReplacement();
-                  c = GetNext();
+                  c = Advance();
                   state = ScriptState.EscapedDouble;
                   continue;
 
@@ -2474,7 +2478,7 @@
 
                 default:
                   StringBuffer.Append(c);
-                  c = GetNext();
+                  c = Advance();
                   state = ScriptState.EscapedDouble;
                   continue;
               }
@@ -2501,14 +2505,14 @@
           // See 8.2.4.33 Script data double escape end state
           case ScriptState.EndDoubleEscape:
             {
-              c = GetNext();
+              c = Advance();
               var hasLength = StringBuffer.Length - offset == scriptLength;
 
               if (hasLength && (c.IsSpaceCharacter() || c == Symbols.Solidus || c == Symbols.GreaterThan))
               {
                 var isscript = StringBuffer.ToString(offset, scriptLength).Isi(TagNames.Script);
                 StringBuffer.Append(c);
-                c = GetNext();
+                c = Advance();
                 state = isscript ? ScriptState.Escaped : ScriptState.EscapedDouble;
               }
               else if (c.IsLetter())
@@ -2536,10 +2540,10 @@
       return new HtmlNode(HtmlTokenType.Text, _position, content);
     }
 
-    private HtmlNode NewComment()
+    private HtmlCommentNode NewComment()
     {
       var content = FlushBuffer();
-      return new HtmlNode(HtmlTokenType.Comment, _position, content);
+      return new HtmlCommentNode(_position, content);
     }
 
     private HtmlNode NewEof(Boolean acceptable = false)

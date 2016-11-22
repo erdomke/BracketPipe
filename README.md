@@ -34,10 +34,11 @@ using (var reader = new HtmlReader(html))
 }
 ```
 
-Sanitize user HTML
+Sanitize or minify HTML
 
 ```csharp
 var str = Html.Sanitize(html);
+str = Html.Minify(html);
 ```
 
 Write HTML
@@ -79,14 +80,16 @@ using (var w = new HtmlTextWriter(s))
 ## High Performance
 
 Using only the stripped down core of [AngleSharp](https://github.com/AngleSharp/AngleSharp), AngleParse
-achives incredibly fast performance.  In fact, it was measured to be over **4.5 times faster** for
-HTML sanitization than [HtmlSanitizer](https://github.com/mganss/HtmlSanitizer) which leverages
+achives incredibly fast performance.  
+
+* Minification Tasks: **1.5 times faster** than [WebMarkupMin](https://github.com/Taritsyn/WebMarkupMin)
+* Sanitization Tasks: **4.5 times faster** than [HtmlSanitizer](https://github.com/mganss/HtmlSanitizer) which leverages
 AngleSharp's full DOM parser.
 
 ## Standards Conformance
 
-The parser uses the HTML 5.1 specification, which defines error handling and element correction.  As 
-a result, it works exactly as in all modern browsers.
+The parser uses the [HTML 5.1 specification](https://dev.w3.org/html5/spec-preview/tokenization.html), which defines error handling and element correction.  As 
+a result, it works the same as all modern browsers.
 
 ## Portable
 

@@ -7,8 +7,27 @@ using System.Threading.Tasks;
 
 namespace AngleParse
 {
-  public static class HtmlSanitizeExtensions
+  public static partial class Html
   {
+    public static string Sanitize(TextSource html, HtmlSanitizeSettings settings = null)
+    {
+      var sb = new StringBuilder(html.Length);
+      using (var reader = new HtmlReader(html))
+      using (var sw = new StringWriter(sb))
+      {
+        reader.Sanitize(settings).ToHtml(sw, new HtmlWriterSettings());
+        return sw.ToString();
+      }
+    }
+
+    public static void Sanitize(TextSource html, HtmlTextWriter writer, HtmlSanitizeSettings settings = null)
+    {
+      using (var reader = new HtmlReader(html))
+      {
+        reader.Sanitize(settings).ToHtml(writer);
+      }
+    }
+
     /// <summary>
     /// Remove possible malicious tags and content from HTML. Attempts to prevent XSS patterns
     /// described on https://www.owasp.org/index.php/XSS_Filter_Evasion_Cheat_Sheet

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AngleParse.Core.Tests.Html
+namespace AngleParse.Core.Tests
 {
   public class HtmlSanitize
   {

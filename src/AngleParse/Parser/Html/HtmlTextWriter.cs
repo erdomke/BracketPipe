@@ -149,9 +149,16 @@ namespace AngleParse
 
     public override void WriteComment(string text)
     {
+      WriteComment(text, false);
+    }
+    public void WriteComment(string text, bool downlevelRevealedConditional)
+    {
       CloseCurrElement(false);
       RenderIndent();
-      _writer.Write("<!--");
+      if (downlevelRevealedConditional)
+        _writer.Write("<!");
+      else
+        _writer.Write("<!--");
       for (var i = 0; i < text.Length; i++)
       {
         switch (text[i])
@@ -160,7 +167,10 @@ namespace AngleParse
           default: _writer.Write(text[i]); break;
         }
       }
-      _writer.Write("-->");
+      if (downlevelRevealedConditional)
+        _writer.Write(">");
+      else
+        _writer.Write("-->");
     }
 
     public override void WriteDocType(string name, string pubid, string sysid, string subset)
