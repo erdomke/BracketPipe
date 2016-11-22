@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace AngleParse
 {
@@ -12,6 +11,23 @@ namespace AngleParse
     private HashSet<string> _preserveInnerSpaceTags;
     private HashSet<string> _preserveSurroundingSpaceTags;
 
+#if NET35
+    /// <summary>
+    /// Tags for elements which start a new block
+    /// </summary>
+    public HashSet<string> BlockLevelElements { get { return _blockLevelElement; } }
+    /// <summary>
+    /// Tags for which inner space should be preserved
+    /// </summary>
+    public HashSet<string> PreserveInnerSpaceTags { get { return _preserveInnerSpaceTags; } }
+    /// <summary>
+    /// Tags for which surrounding space should be preserved
+    /// </summary>
+    public HashSet<string> PreserveSurroundingSpaceTags { get { return _preserveSurroundingSpaceTags; } }
+#else
+    /// <summary>
+    /// Tags for elements which start a new block
+    /// </summary>
     public ISet<string> BlockLevelElements { get { return _blockLevelElement; } }
     /// <summary>
     /// Tags for which inner space should be preserved
@@ -21,6 +37,7 @@ namespace AngleParse
     /// Tags for which surrounding space should be preserved
     /// </summary>
     public ISet<string> PreserveSurroundingSpaceTags { get { return _preserveSurroundingSpaceTags; } }
+#endif
 
     public HtmlMinifySettings()
     {

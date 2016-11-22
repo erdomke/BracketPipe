@@ -39,14 +39,5 @@
     }
 
     #endregion
-
-    #region String representation
-
-    public override String ToValue()
-    {
-      return Data.CssString();
-    }
-
-    #endregion
   }
 }

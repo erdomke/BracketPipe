@@ -64,14 +64,5 @@
     }
 
     #endregion
-
-    #region String representation
-
-    public override String ToValue()
-    {
-      return String.Concat(Data, "(", _arguments.ToText());
-    }
-
-    #endregion
   }
 }

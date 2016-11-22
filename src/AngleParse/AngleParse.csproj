@@ -1,68 +1,94 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
-    <MinimumVisualStudioVersion>11.0</MinimumVisualStudioVersion>
+    <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == 'Any CPU' ">AnyCPU</Platform>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{91F78C48-287E-41B5-9E49-44D6E1E31290}</ProjectGuid>
+    <ProjectGuid>{7FF8BF41-8A15-4CDA-AC3C-2BDBEE7B265C}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>AngleParse</RootNamespace>
     <AssemblyName>AngleParse</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <TargetFrameworkProfile>Profile259</TargetFrameworkProfile>
+    <DefaultLanguage>en-US</DefaultLanguage>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\$(TargetFrameworkVersion)\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;PORTABLE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'NET_STD|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\$(TargetFrameworkVersion)\</OutputPath>
+    <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\AngleParse.xml</DocumentationFile>
+    <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
   </PropertyGroup>
-  <PropertyGroup>
-    <SignAssembly>false</SignAssembly>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'NET35|AnyCPU'">
+    <OutputPath>bin\NET35\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
   </PropertyGroup>
-  <PropertyGroup>
-    <AssemblyOriginatorKeyFile>
-    </AssemblyOriginatorKeyFile>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'NET40|AnyCPU'">
+    <OutputPath>bin\NET40\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
   </PropertyGroup>
-  <PropertyGroup>
-    <DelaySign>false</DelaySign>
-  </PropertyGroup>
+  <ItemGroup>
+    <!-- A reference to the entire .NET Framework is automatically included -->
+    <None Include="project.json" Condition="$(Configuration) == 'NET_STD' Or $(Configuration) == 'Debug'" />
+    <Reference Include="Microsoft.CSharp" Condition="$(Configuration) == 'NET35' Or $(Configuration) == 'NET40'" />
+    <Reference Include="System" Condition="$(Configuration) == 'NET35' Or $(Configuration) == 'NET40'" />
+    <Reference Include="System.Core" Condition="$(Configuration) == 'NET35' Or $(Configuration) == 'NET40'" />
+    <Reference Include="System.Xml" Condition="$(Configuration) == 'NET35' Or $(Configuration) == 'NET40'" />
+  </ItemGroup>
   <ItemGroup>
     <Compile Include="Css\CombinatorSymbols.cs" />
     <Compile Include="Css\FunctionNames.cs" />
-    <Compile Include="Foundation\DomDescriptionAttribute.cs" />
-    <Compile Include="Extensions\ValueExtensions.cs" />
-    <Compile Include="Foundation\StringBuilderReader.cs" />
-    <Compile Include="HtmlMinifySettings.cs" />
-    <Compile Include="Html\NamespaceNames.cs" />
     <Compile Include="Extensions\CharExtensions.cs" />
+    <Compile Include="Extensions\HtmlParserExtensions.cs" />
     <Compile Include="Extensions\ObjectExtensions.cs" />
     <Compile Include="Extensions\PortableExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
+    <Compile Include="Foundation\DomDescriptionAttribute.cs" />
     <Compile Include="Foundation\Keywords.cs" />
     <Compile Include="Foundation\Pool.cs" />
     <Compile Include="Foundation\Symbols.cs" />
+    <Compile Include="Foundation\TextEncoding.cs" />
+    <Compile Include="Foundation\TextPosition.cs" />
+    <Compile Include="Foundation\TextSource.cs" />
+    <Compile Include="Html.Minify.cs" />
+    <Compile Include="Html.Render.cs" />
+    <Compile Include="Html.Sanitize.cs" />
+    <Compile Include="HtmlMinifySettings.cs" />
+    <Compile Include="HtmlSanitizeSettings.cs" />
+    <Compile Include="HtmlString.cs" />
     <Compile Include="Html\AttributeNames.cs" />
     <Compile Include="Html\HtmlEntityService.cs" />
+    <Compile Include="Html\HtmlFormatProvider.cs" />
+    <Compile Include="Html\NamespaceNames.cs" />
     <Compile Include="Html\TagNames.cs" />
-    <Compile Include="Extensions\HtmlParserExtensions.cs" />
+    <Compile Include="Js\Js.cs" />
     <Compile Include="Js\JsMin.cs" />
     <Compile Include="Parser\Css\CssErrorEvent.cs" />
     <Compile Include="Parser\Css\CssExtensions.cs" />
@@ -85,16 +111,12 @@
     <Compile Include="Parser\Css\Tokens\CssUnitToken.cs" />
     <Compile Include="Parser\Css\Tokens\CssUrlToken.cs" />
     <Compile Include="Parser\Html\BaseTokenizer.cs" />
-    <Compile Include="Html.Minify.cs" />
     <Compile Include="Parser\Html\HtmlErrorEvent.cs" />
-    <Compile Include="Html.Render.cs" />
     <Compile Include="Parser\Html\HtmlForeign.cs" />
     <Compile Include="Parser\Html\HtmlParseError.cs" />
     <Compile Include="Parser\Html\HtmlParseException.cs" />
     <Compile Include="Parser\Html\HtmlParseMode.cs" />
     <Compile Include="Parser\Html\HtmlReader.cs" />
-    <Compile Include="Html.Sanitize.cs" />
-    <Compile Include="HtmlSanitizeSettings.cs" />
     <Compile Include="Parser\Html\HtmlTextWriter.cs" />
     <Compile Include="Parser\Html\HtmlTokenType.cs" />
     <Compile Include="Parser\Html\HtmlWriterSettings.cs" />
@@ -102,15 +124,10 @@
     <Compile Include="Parser\Html\Tokens\HtmlDoctypeNode.cs" />
     <Compile Include="Parser\Html\Tokens\HtmlNode.cs" />
     <Compile Include="Parser\Html\Tokens\HtmlTagNode.cs" />
-    <Compile Include="Foundation\TextEncoding.cs" />
-    <Compile Include="Foundation\TextPosition.cs" />
-    <Compile Include="Foundation\TextSource.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="project.json" />
-  </ItemGroup>
-  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" Condition="$(Configuration) == 'NET_STD' Or $(Configuration) == 'Debug'" />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" Condition="$(Configuration) == 'NET35' Or $(Configuration) == 'NET40'" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

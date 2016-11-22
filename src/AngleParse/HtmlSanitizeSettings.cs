@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace AngleParse
 {
@@ -16,6 +15,36 @@ namespace AngleParse
     private HashSet<string> _allowedSchemes;
     private HashSet<string> _uriAttributes;
 
+#if NET35
+    /// <summary>
+    /// HTML attribute names which are permitted through the sanitize routine
+    /// </summary>
+    public HashSet<string> AllowedAttributes { get { return _allowedAttributes; } }
+    /// <summary>
+    /// CSS @-rules permitted
+    /// </summary>
+    public HashSet<string> AllowedCssAtRules { get { return _allowedCssAtRules; } }
+    /// <summary>
+    /// CSS functions permitted
+    /// </summary>
+    public HashSet<string> AllowedCssFunctions { get { return _allowedCssFunctions; } }
+    /// <summary>
+    /// CSS property names which are permitted through the sanitize routine
+    /// </summary>
+    public HashSet<string> AllowedCssProps { get { return _allowedCssProps; } }
+    /// <summary>
+    /// HTML tag names which are permitted through the sanitize routine
+    /// </summary>
+    public HashSet<string> AllowedTags { get { return _allowedTags; } }
+    /// <summary>
+    /// Allowed URI schemes (e.g. in the <c>href</c> attribute of <c>a</c> tags)
+    /// </summary>
+    public HashSet<string> AllowedSchemes { get { return _allowedSchemes; } }
+    /// <summary>
+    /// Attributes which contain a URI
+    /// </summary>
+    public HashSet<string> UriAttributes { get { return _uriAttributes; } }
+#else
     /// <summary>
     /// HTML attribute names which are permitted through the sanitize routine
     /// </summary>
@@ -44,6 +73,7 @@ namespace AngleParse
     /// Attributes which contain a URI
     /// </summary>
     public ISet<string> UriAttributes { get { return _uriAttributes; } }
+#endif
 
     public HtmlSanitizeSettings()
     {

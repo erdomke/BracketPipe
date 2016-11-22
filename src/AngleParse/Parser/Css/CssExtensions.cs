@@ -3,12 +3,23 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace AngleParse
 {
   public static class CssExtensions
   {
+    public static string ToValue(this CssToken token)
+    {
+      var sb = Pool.NewStringBuilder();
+      using (var sw = new StringWriter(sb))
+      using (var w = new CssWriter(sw))
+      {
+        w.Write(token);
+        sw.Flush();
+        return sb.ToPool();
+      }
+    }
+
     public static IEnumerable<CssToken> RemoveComments(this IEnumerable<CssToken> reader)
     {
       foreach (var token in reader)

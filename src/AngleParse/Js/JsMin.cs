@@ -44,7 +44,7 @@ SOFTWARE.
 
 namespace AngleParse
 {
-  public class JSMin
+  internal class JSMin
   {
     private const int Eof = -1;
     private TextReader _sr;

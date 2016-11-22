@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using AngleParse.Extensions;
 
 namespace AngleParse
 {
@@ -127,7 +127,7 @@ namespace AngleParse
         else if (string.Equals(tag.Attributes[i].Key, "style", StringComparison.OrdinalIgnoreCase))
         {
           var style = SanitizeCss(tag.Attributes[i].Value, settings, false);
-          if (!string.IsNullOrWhiteSpace(style))
+          if (!style.IsNullOrWhiteSpace())
             yield return new KeyValuePair<string, string>(tag.Attributes[i].Key, style);
         }
         else if (settings.UriAttributes.Contains(tag.Attributes[i].Key))

@@ -12,6 +12,8 @@
       var teststring = "h1 { background: blue; }";
       var tokenizer = new CssTokenizer(new TextSource(teststring));
       var token = tokenizer.NextToken();
+      var type = typeof(string).GetType().GetField("");
+
       Assert.AreEqual(CssTokenType.Ident, token.Type);
     }
 

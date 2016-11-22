@@ -50,11 +50,6 @@
 
     #region Methods
 
-    public virtual String ToValue()
-    {
-      return _data;
-    }
-
     public override string ToString()
     {
       return string.Format("{0} - {1}", _type, _data);

@@ -15,7 +15,7 @@ namespace AngleParse.Performance
   {
     static void Main(string[] args)
     {
-      /*var sanitizer = new HtmlSanitizer();
+      var sanitizer = new HtmlSanitizer();
       var html = @"<script>alert('xss')</script><div onload=""alert('xss')"""
           + @"style=""background-color: test"">Test<img src=""test.gif"""
           + @"style=""background-image: url(javascript:alert('xss')); margin: 10px""></div>";
@@ -37,7 +37,15 @@ namespace AngleParse.Performance
           var sanitized = Html.Sanitize(html);
         }
         Console.WriteLine("AngleParse {0}ms", st.ElapsedMilliseconds);
-      }*/
+
+        st = Stopwatch.StartNew();
+        for (var i = 0; i < 5000; i++)
+        {
+          memStream.Position = 0;
+          var sanitized = Html.Sanitize(memStream);
+        }
+        Console.WriteLine("AngleParse {0}ms", st.ElapsedMilliseconds);
+      }
 
 
       const string htmlInput = @"<!DOCTYPE html>
@@ -58,11 +66,12 @@ namespace AngleParse.Performance
         </script>
     </body>
 </html>";
+      memStream = new MemoryStream(Encoding.UTF8.GetBytes(htmlInput));
 
       var htmlMinifier = new HtmlMinifier();
       for (var j = 0; j < 5; j++)
       {
-        var st = Stopwatch.StartNew();
+        st = Stopwatch.StartNew();
         for (var i = 0; i < 5000; i++)
         {
           var result = htmlMinifier.Minify(htmlInput);
@@ -73,6 +82,14 @@ namespace AngleParse.Performance
         for (var i = 0; i < 5000; i++)
         {
           var result = Html.Minify(htmlInput);
+        }
+        Console.WriteLine("AngleParse {0}ms", st.ElapsedMilliseconds);
+
+        st = Stopwatch.StartNew();
+        for (var i = 0; i < 5000; i++)
+        {
+          memStream.Position = 0;
+          var result = Html.Minify(memStream);
         }
         Console.WriteLine("AngleParse {0}ms", st.ElapsedMilliseconds);
       }

@@ -15,24 +15,5 @@
     }
 
     #endregion
-
-    #region String representation
-
-    public override String ToValue()
-    {
-      switch (Type)
-      {
-        case CssTokenType.Hash:
-          return "#" + Data;
-        case CssTokenType.AtKeyword:
-          return "@" + Data;
-        case CssTokenType.Function:
-          return Data + "(";
-        default:
-          return Data;
-      }
-    }
-
-    #endregion
   }
 }

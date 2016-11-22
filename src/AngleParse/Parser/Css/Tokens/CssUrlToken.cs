@@ -39,15 +39,5 @@
     }
 
     #endregion
-
-    #region String representation
-
-    public override String ToValue()
-    {
-      var url = Data.CssString();
-      return _functionName.CssFunction(url);
-    }
-
-    #endregion
   }
 }

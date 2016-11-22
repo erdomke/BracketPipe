@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 
 namespace AngleParse
@@ -32,65 +30,34 @@ namespace AngleParse
 
     public static string Format(IFormattable formattable)
     {
-      return formattable.ToString(null, _htmlProvider);
+      return formattable.ToString(null, HtmlFormatProvider.Instance);
     }
     public static string Format(string format, params object[] args)
     {
-      return string.Format(_htmlProvider, format, args);
-    }
-
-    private static FormatProvider _htmlProvider = new FormatProvider();
-
-    private class FormatProvider : IFormatProvider, ICustomFormatter
-    {
-      public string Format(string format, object arg, IFormatProvider formatProvider)
-      {
-        var value = default(string);
-        var raw = format == "!";
-        if (raw)
-          format = string.Empty;
-
-        if (arg is IFormattable)
-          value = ((IFormattable)arg).ToString(format, CultureInfo.CurrentCulture);
-        else if (arg != null)
-          value = arg.ToString();
-
-        if (raw)
-          return value;
-
-        return Pool.NewStringBuilder().AppendHtmlEncoded(value).ToString();
-      }
-
-      public object GetFormat(Type formatType)
-      {
-        if (formatType == typeof(ICustomFormatter))
-          return this;
-        else
-          return null;
-      }
+      return string.Format(HtmlFormatProvider.Instance, format, args);
     }
 
     /// <summary>
     /// Render parsed HTML to a string
     /// </summary>
-    public static string ToHtml(this IEnumerable<HtmlNode> reader)
+    public static HtmlString ToHtml(this IEnumerable<HtmlNode> reader)
     {
       using (var sw = new StringWriter())
       {
         ToHtml(reader, sw, new HtmlWriterSettings());
-        return sw.ToString();
+        return new HtmlString(sw.ToString());
       }
     }
 
     /// <summary>
     /// Render parsed HTML to a string
     /// </summary>
-    public static string ToHtml(this IEnumerable<HtmlNode> reader, HtmlWriterSettings settings)
+    public static HtmlString ToHtml(this IEnumerable<HtmlNode> reader, HtmlWriterSettings settings)
     {
       using (var sw = new StringWriter())
       {
         ToHtml(reader, sw, settings);
-        return sw.ToString();
+        return new HtmlString(sw.ToString());
       }
     }
 

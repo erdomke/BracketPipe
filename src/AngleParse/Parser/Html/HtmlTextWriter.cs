@@ -4,7 +4,9 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+#if !NET35
 using System.Threading.Tasks;
+#endif
 using System.Xml;
 
 namespace AngleParse
@@ -83,11 +85,19 @@ namespace AngleParse
       CloseCurrElement(false);
       _writer.Flush();
     }
+
+#if PORTABLE
     public override Task FlushAsync()
     {
       CloseCurrElement(false);
       return _writer.FlushAsync();
     }
+#else
+    public override void Close()
+    {
+
+    }
+#endif
 
     public override string LookupPrefix(string ns)
     {
@@ -603,6 +613,7 @@ namespace AngleParse
       }
     }
 
+#if PORTABLE
     private async Task CloseCurrElementAsync()
     {
       if (_state == InternalState.Element)
@@ -635,6 +646,7 @@ namespace AngleParse
         _state = InternalState.Content;
       }
     }
+#endif
 
     private void WriteInternal(char value)
     {
@@ -648,6 +660,7 @@ namespace AngleParse
         this._attrValue.Append(value);
       _writer.Write(value);
     }
+#if PORTABLE
     private Task WriteInternalAsync(char value)
     {
       if (this._attrValue != null)
@@ -660,6 +673,7 @@ namespace AngleParse
         this._attrValue.Append(value);
       return _writer.WriteAsync(value);
     }
+#endif
 
     private void RenderIndent()
     {

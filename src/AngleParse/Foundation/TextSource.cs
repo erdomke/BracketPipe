@@ -5,12 +5,14 @@
   using System.IO;
   using System.Text;
   using System.Threading;
+#if !NET35
   using System.Threading.Tasks;
+#endif
 
   /// <summary>
   /// A stream abstraction to handle encoding and more.
   /// </summary>
-  public sealed class TextSource : IDisposable
+  public sealed class TextSource : TextReader
   {
     #region Fields
 
@@ -38,6 +40,19 @@
       _index = 0;
       _encoding = encoding ?? TextEncoding.Utf8;
       _decoder = _encoding.GetDecoder();
+    }
+
+    /// <summary>
+    /// Creates a new text source from a <see cref="StringBuilder"/>. No underlying stream will
+    /// be used.
+    /// </summary>
+    /// <param name="source">The data source.</param>
+    public TextSource(StringBuilder source)
+        : this(TextEncoding.Utf8)
+    {
+      _finished = true;
+      _content = source;
+      _confidence = EncodingConfidence.Irrelevant;
     }
 
     /// <summary>
@@ -183,7 +198,7 @@
     /// <summary>
     /// Disposes the text source by freeing the underlying stream, if any.
     /// </summary>
-    public void Dispose()
+    protected override void Dispose(bool disposing)
     {
       var isDisposed = _content == null;
 
@@ -200,6 +215,29 @@
 
     #region Text Methods
 
+    /// <summary>Reads the next character without changing the state of the reader or the character source. Returns the next available character without actually reading it from the reader.</summary>
+    /// <returns>An integer representing the next character to be read, or -1 if no more characters are available or the reader does not support seeking.</returns>
+    /// <exception cref="T:System.ObjectDisposedException">The <see cref="T:System.IO.TextReader" /> is closed. </exception>
+    /// <exception cref="T:System.IO.IOException">An I/O error occurs. </exception>
+    public override int Peek()
+    {
+      var result = Read();
+      _index--;
+      return result;
+    }
+
+    /// <summary>Reads the next character from the text reader and advances the character position by one character.</summary>
+    /// <returns>The next character from the text reader, or -1 if no more characters are available. The default implementation returns -1.</returns>
+    /// <exception cref="T:System.ObjectDisposedException">The <see cref="T:System.IO.TextReader" /> is closed. </exception>
+    /// <exception cref="T:System.IO.IOException">An I/O error occurs. </exception>
+    public override int Read()
+    {
+      var result = ReadCharacter();
+      if (result == Symbols.EndOfFile)
+        return -1;
+      return result;
+    }
+
     /// <summary>
     /// Reads the next character from the buffer or underlying stream, if
     /// any.
@@ -215,6 +253,54 @@
       ExpandBuffer(_bufferSize);
       var index = _index++;
       return index < _content.Length ? _content[index] : Symbols.EndOfFile;
+    }
+
+    /// <summary>Reads a specified maximum number of characters from the current reader and writes the data to a buffer, beginning at the specified index.</summary>
+    /// <returns>The number of characters that have been read. The number will be less than or equal to <paramref name="count" />, depending on whether the data is available within the reader. This method returns 0 (zero) if it is called when no more characters are left to read.</returns>
+    /// <param name="buffer">When this method returns, contains the specified character array with the values between <paramref name="index" /> and (<paramref name="index" /> + <paramref name="count" /> - 1) replaced by the characters read from the current source. </param>
+    /// <param name="index">The position in <paramref name="buffer" /> at which to begin writing. </param>
+    /// <param name="count">The maximum number of characters to read. If the end of the reader is reached before the specified number of characters is read into the buffer, the method returns. </param>
+    /// <exception cref="T:System.ArgumentNullException">
+    ///   <paramref name="buffer" /> is null. </exception>
+    /// <exception cref="T:System.ArgumentException">The buffer length minus <paramref name="index" /> is less than <paramref name="count" />. </exception>
+    /// <exception cref="T:System.ArgumentOutOfRangeException">
+    ///   <paramref name="index" /> or <paramref name="count" /> is negative. </exception>
+    /// <exception cref="T:System.ObjectDisposedException">The <see cref="T:System.IO.TextReader" /> is closed. </exception>
+    /// <exception cref="T:System.IO.IOException">An I/O error occurs. </exception>
+    public override int Read(char[] buffer, int index, int count)
+    {
+      var start = _index;
+      var end = start + count;
+
+      if (end <= _content.Length)
+      {
+        _index += count;
+        _content.CopyTo(_index, buffer, index, count);
+        return count;
+      }
+
+      ExpandBuffer(Math.Max(_bufferSize, count));
+      _index += count;
+      count = Math.Min(count, _content.Length - start);
+      _content.CopyTo(_index, buffer, index, count);
+      return count;
+    }
+
+    /// <summary>Reads a specified maximum number of characters from the current text reader and writes the data to a buffer, beginning at the specified index.</summary>
+    /// <returns>The number of characters that have been read. The number will be less than or equal to <paramref name="count" />, depending on whether all input characters have been read.</returns>
+    /// <param name="buffer">When this method returns, this parameter contains the specified character array with the values between <paramref name="index" /> and (<paramref name="index" /> + <paramref name="count" /> -1) replaced by the characters read from the current source. </param>
+    /// <param name="index">The position in <paramref name="buffer" /> at which to begin writing.</param>
+    /// <param name="count">The maximum number of characters to read. </param>
+    /// <exception cref="T:System.ArgumentNullException">
+    ///   <paramref name="buffer" /> is null. </exception>
+    /// <exception cref="T:System.ArgumentException">The buffer length minus <paramref name="index" /> is less than <paramref name="count" />. </exception>
+    /// <exception cref="T:System.ArgumentOutOfRangeException">
+    ///   <paramref name="index" /> or <paramref name="count" /> is negative. </exception>
+    /// <exception cref="T:System.ObjectDisposedException">The <see cref="T:System.IO.TextReader" /> is closed. </exception>
+    /// <exception cref="T:System.IO.IOException">An I/O error occurs. </exception>
+    public override int ReadBlock(char[] buffer, int index, int count)
+    {
+      return Read(buffer, index, count);
     }
 
     /// <summary>
@@ -240,6 +326,7 @@
       return _content.ToString(start, characters);
     }
 
+#if !NET35
     /// <summary>
     /// Reads the next character from the buffer or underlying stream
     /// asynchronously, if any.
@@ -310,6 +397,7 @@
         await ReadIntoBufferAsync(cancellationToken).ConfigureAwait(false);
       }
     }
+#endif
 
     /// <summary>
     /// Inserts the given content at the current insertation mark. Moves the
@@ -333,7 +421,7 @@
     #endregion
 
     #region Helpers
-
+#if !NET35
     async Task DetectByteOrderMarkAsync(CancellationToken cancellationToken)
     {
       var count = await _baseStream.ReadAsync(_buffer, 0, _bufferSize).ConfigureAwait(false);
@@ -399,12 +487,60 @@
       var returned = await _baseStream.ReadAsync(_buffer, 0, _bufferSize, cancellationToken).ConfigureAwait(false);
       AppendContentFromBuffer(returned);
     }
+#endif
+
+    void DetectByteOrderMark()
+    {
+      var count = _baseStream.Read(_buffer, 0, _bufferSize);
+      var offset = 0;
+
+      if (count > 2 && _buffer[0] == 0xef && _buffer[1] == 0xbb && _buffer[2] == 0xbf)
+      {
+        _encoding = TextEncoding.Utf8;
+        offset = 3;
+      }
+      else if (count > 3 && _buffer[0] == 0xff && _buffer[1] == 0xfe && _buffer[2] == 0x0 && _buffer[3] == 0x0)
+      {
+        _encoding = TextEncoding.Utf32Le;
+        offset = 4;
+      }
+      else if (count > 3 && _buffer[0] == 0x0 && _buffer[1] == 0x0 && _buffer[2] == 0xfe && _buffer[3] == 0xff)
+      {
+        _encoding = TextEncoding.Utf32Be;
+        offset = 4;
+      }
+      else if (count > 1 && _buffer[0] == 0xfe && _buffer[1] == 0xff)
+      {
+        _encoding = TextEncoding.Utf16Be;
+        offset = 2;
+      }
+      else if (count > 1 && _buffer[0] == 0xff && _buffer[1] == 0xfe)
+      {
+        _encoding = TextEncoding.Utf16Le;
+        offset = 2;
+      }
+      else if (count > 3 && _buffer[0] == 0x84 && _buffer[1] == 0x31 && _buffer[2] == 0x95 && _buffer[3] == 0x33)
+      {
+        _encoding = TextEncoding.Gb18030;
+        offset = 4;
+      }
+
+      if (offset > 0)
+      {
+        count -= offset;
+        Array.Copy(_buffer, offset, _buffer, 0, count);
+        _decoder = _encoding.GetDecoder();
+        _confidence = EncodingConfidence.Certain;
+      }
+
+      AppendContentFromBuffer(count);
+    }
 
     void ExpandBuffer(Int64 size)
     {
       if (!_finished && _content.Length == 0)
       {
-        DetectByteOrderMarkAsync(CancellationToken.None).Wait();
+        DetectByteOrderMark();
       }
 
       while (size + _index > _content.Length && !_finished)

@@ -1,30 +1,36 @@
-﻿#if !NET40 && !SL50
-namespace AngleParse.Extensions
+﻿namespace AngleParse.Extensions
 {
   using System;
   using System.Linq;
   using System.Reflection;
   using System.Runtime.CompilerServices;
   using System.Threading;
+#if PORTABLE
   using System.Threading.Tasks;
+#endif
 
   /// <summary>
   /// Extensions for ensuring code portability.
   /// </summary>
   static class PortableExtensions
   {
+#if PORTABLE
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     public static String ConvertFromUtf32(this Int32 utf32)
     {
       return Char.ConvertFromUtf32(utf32);
     }
 
+#if PORTABLE
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     public static Int32 ConvertToUtf32(this String s, Int32 index)
     {
       return Char.ConvertToUtf32(s, index);
     }
 
+#if PORTABLE
     public static Task Delay(this CancellationToken token, Int32 timeout)
     {
       return Task.Delay(Math.Max(timeout, 4), token);
@@ -69,6 +75,6 @@ namespace AngleParse.Extensions
     {
       return type.GetTypeInfo().Assembly;
     }
+#endif
   }
 }
-#endif

@@ -21,7 +21,9 @@
     /// <param name="chr">The character to look for.</param>
     /// <param name="index">The index of the character.</param>
     /// <returns>True if the value has the char, otherwise false.</returns>
+#if PORTABLE
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     public static Boolean Has(this String value, Char chr, Int32 index = 0)
     {
       return value != null && value.Length > index && value[index] == chr;
@@ -68,25 +70,6 @@
       }
 
       return value;
-    }
-
-    /// <summary>
-    /// Converts the given value to an enumeration value (or not).
-    /// </summary>
-    /// <param name="value">The value to convert.</param>
-    /// <param name="defaultValue">The default value to consider (optional).</param>
-    /// <returns>The converted enum value.</returns>
-    public static T ToEnum<T>(this String value, T defaultValue)
-        where T : struct, IComparable
-    {
-      var converted = default(T);
-
-      if (!String.IsNullOrEmpty(value) && Enum.TryParse(value, true, out converted))
-      {
-        return converted;
-      }
-
-      return defaultValue;
     }
 
     /// <summary>
@@ -272,7 +255,9 @@
     /// <param name="current">The current string.</param>
     /// <param name="other">The other string.</param>
     /// <returns>True if both are equal, false otherwise.</returns>
+#if PORTABLE
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     public static Boolean Is(this String current, String other)
     {
       return String.Equals(current, other, StringComparison.Ordinal);
@@ -284,7 +269,9 @@
     /// <param name="current">The current string.</param>
     /// <param name="other">The other string.</param>
     /// <returns>True if both are equal, false otherwise.</returns>
+#if PORTABLE
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     public static Boolean Isi(this String current, String other)
     {
       return String.Equals(current, other, StringComparison.OrdinalIgnoreCase);
@@ -297,7 +284,9 @@
     /// <param name="item1">The first item to compare to.</param>
     /// <param name="item2">The second item to compare to.</param>
     /// <returns>True if the element is equal to one of the elements, otherwise false.</returns>
+#if PORTABLE
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     public static Boolean IsOneOf(this String element, String item1, String item2)
     {
       return element.Is(item1) || element.Is(item2);
@@ -311,7 +300,9 @@
     /// <param name="item2">The second item to compare to.</param>
     /// <param name="item3">The third item to compare to.</param>
     /// <returns>True if the element is equal to one of the elements, otherwise false.</returns>
+#if PORTABLE
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     public static Boolean IsOneOf(this String element, String item1, String item2, String item3)
     {
       return element.Is(item1) || element.Is(item2) || element.Is(item3);
@@ -326,7 +317,9 @@
     /// <param name="item3">The third item to compare to.</param>
     /// <param name="item4">The fourth item to compare to.</param>
     /// <returns>True if the element is equal to one of the elements, otherwise false.</returns>
+#if PORTABLE
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     public static Boolean IsOneOf(this String element, String item1, String item2, String item3, String item4)
     {
       return element.Is(item1) || element.Is(item2) || element.Is(item3) || element.Is(item4);
@@ -342,7 +335,9 @@
     /// <param name="item4">The fourth item to compare to.</param>
     /// <param name="item5">The fifth item to compare to.</param>
     /// <returns>True if the element is equal to one of the elements, otherwise false.</returns>
+#if PORTABLE
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     public static Boolean IsOneOf(this String element, String item1, String item2, String item3, String item4, String item5)
     {
       return element.Is(item1) || element.Is(item2) || element.Is(item3) || element.Is(item4) || element.Is(item5);
@@ -383,7 +378,9 @@
     /// </summary>
     /// <param name="str">The string to examine.</param>
     /// <returns>A new string, which excludes the leading and tailing spaces.</returns>
+#if PORTABLE
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     public static String StripLeadingTrailingSpaces(this String str)
     {
       return StripLeadingTrailingSpaces(str.ToCharArray());
@@ -394,7 +391,9 @@
     /// </summary>
     /// <param name="array">The array of characters to examine.</param>
     /// <returns>A new string, which excludes the leading and tailing spaces.</returns>
+#if PORTABLE
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     public static String StripLeadingTrailingSpaces(this Char[] array)
     {
       var start = 0;
@@ -419,7 +418,9 @@
     /// <param name="str">The string to examine.</param>
     /// <param name="c">The delimiter character.</param>
     /// <returns>The list of tokens.</returns>
+#if PORTABLE
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     public static String[] SplitWithoutTrimming(this String str, Char c)
     {
       return SplitWithoutTrimming(str.ToCharArray(), c);
@@ -462,7 +463,9 @@
     /// </summary>
     /// <param name="str">The string to examine.</param>
     /// <returns>The list of tokens.</returns>
+#if PORTABLE
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     public static String[] SplitCommas(this String str)
     {
       return str.SplitWithTrimming(',');
@@ -475,7 +478,9 @@
     /// <param name="str">The string to examine.</param>
     /// <param name="value">The value to check against.</param>
     /// <returns>True if the string is exactly equal to or starts with the given value.</returns>
+#if PORTABLE
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     public static Boolean HasHyphen(this String str, String value)
     {
       return str.Is(value) || (str.Length > value.Length && str.StartsWith(value, StringComparison.Ordinal) && str[value.Length] == Symbols.Minus);
@@ -559,7 +564,9 @@
     /// </summary>
     /// <param name="s">The hexadecimal representation.</param>
     /// <returns>The integer number.</returns>
+#if PORTABLE
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     public static Int32 FromHex(this String s)
     {
       return Int32.Parse(s, NumberStyles.HexNumber);
@@ -570,7 +577,9 @@
     /// </summary>
     /// <param name="s">The decimal representation.</param>
     /// <returns>The integer number.</returns>
+#if PORTABLE
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     public static Int32 FromDec(this String s)
     {
       return Int32.Parse(s, NumberStyles.Integer);
@@ -583,7 +592,9 @@
     /// <param name="value">The value to sanatize.</param>
     /// <param name="encoding">The encoding to consider.</param>
     /// <returns>The sanatized value.</returns>
+#if PORTABLE
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     public static String HtmlEncode(this String value, Encoding encoding)
     {
       //In the PCL we don't have access to EncoderFallback and cannot
@@ -790,5 +801,31 @@
 
       return value;
     }
+
+    public static bool IsNullOrWhiteSpace(this string value)
+    {
+#if NET35
+      if (string.IsNullOrEmpty(value))
+        return true;
+      for (var i = 0; i < value.Length; i++)
+      {
+        if (!char.IsWhiteSpace(value[i]))
+          return false;
+      }
+      return true;
+#else
+      return string.IsNullOrWhiteSpace(value);
+#endif
+    }
+
+#if NET35
+
+    public static StringBuilder Clear(this StringBuilder builder)
+    {
+      builder.Length = 0;
+      return builder;
+    }
+#endif
+
   }
 }

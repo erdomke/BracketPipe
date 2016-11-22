@@ -101,9 +101,13 @@
     public static String GetMessage<T>(this T code)
         where T : struct
     {
-      var type = typeof(T).GetTypeInfo();
-      var field = type.GetDeclaredField(code.ToString());
+      var type = typeof(T).GetType();
+      var field = type.GetField(code.ToString());
+#if PORTABLE
       var description = field.GetCustomAttribute<DomDescriptionAttribute>()?.Description;
+#else
+      var description = ((DomDescriptionAttribute)System.Attribute.GetCustomAttribute(field, typeof(DomDescriptionAttribute)))?.Description;
+#endif
       return description ?? "An unknown error occurred.";
     }
   }

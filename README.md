@@ -82,9 +82,13 @@ using (var w = new HtmlTextWriter(s))
 Using only the stripped down core of [AngleSharp](https://github.com/AngleSharp/AngleSharp), AngleParse
 achives incredibly fast performance.  
 
-* Minification Tasks: **1.5 times faster** than [WebMarkupMin](https://github.com/Taritsyn/WebMarkupMin)
-* Sanitization Tasks: **4.5 times faster** than [HtmlSanitizer](https://github.com/mganss/HtmlSanitizer) which leverages
+* Minification Tasks: **73% of the time** relative to [WebMarkupMin](https://github.com/Taritsyn/WebMarkupMin)
+* Sanitization Tasks: **21% of the time** relative to [HtmlSanitizer](https://github.com/mganss/HtmlSanitizer) which leverages
 AngleSharp's full DOM parser.
+
+Comparison charts each showing the average time over 5000 operations:
+![Minification comparsion chart](http://chart.googleapis.com/chart?cht=bhg&chs=400x80&chd=t:647.25,888.25&chds=0,900&chxl=1:|WebMarkupMin(888ms)|AngleParse(647ms)&chxt=x,y&chxr=0,0,900&chco=4D89F9)
+![Sanitization comparsion chart](http://chart.googleapis.com/chart?cht=bhg&chs=400x80&chd=t:340.875,1594.25&chds=0,1600&chxl=1:|HtmlSanitizer(1594ms)|AngleParse(341ms)&chxt=x,y&chxr=0,0,1600&chco=4D89F9)
 
 ## Standards Conformance
 
@@ -93,15 +97,16 @@ a result, it works the same as all modern browsers.
 
 ## Portable
 
-It is designed as a portable class library PCL (profile 259) that supports a wide range of platforms. 
-The list includes, but is not limited to:
+It is designed as a .Net Standard library targeting [.Net Standard 1.0](https://docs.microsoft.com/en-us/dotnet/articles/standard/library).  
+That means it supports the following platforms:
 
-* .NET Core ("netstandard 1.0", see [.NET Platform Standard](https://github.com/dotnet/corefx/blob/master/Documentation/architecture/net-platform-standard.md))
-* .NET Framework 4.5
-* Windows 8.1
-* Windows Phone 8.1 / Windows Phone Silverlight
-* Xamarin.Android
-* Xamarin.iOS
+* .NET Core 1.0+
+* .NET Framework 4.5+
+* Xamarin vNext+
+* Universal Windows Platform 10.0+
+* Windows 8.0+
+* Windows Phone 8.1+
+* Windows Phone Silverlight 8.0+
 
 ## License
 

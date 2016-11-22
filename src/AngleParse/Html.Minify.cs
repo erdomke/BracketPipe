@@ -4,20 +4,21 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace AngleParse
 {
   public static partial class Html
   {
-    public static string Minify(TextSource html, HtmlMinifySettings settings = null)
+    public static HtmlString Minify(TextSource html, HtmlMinifySettings settings = null)
     {
-      var sb = new StringBuilder(html.Length);
-      using (var reader = new HtmlReader(html))
+      var sb = Pool.NewStringBuilder();
+      sb.EnsureCapacity(html.Length);
       using (var sw = new StringWriter(sb))
+      using (var reader = new HtmlReader(html))
       {
         reader.Minify(settings).ToHtml(sw, new HtmlWriterSettings());
-        return sw.ToString();
+        sw.Flush();
+        return new HtmlString(sb.ToPool());
       }
     }
 
@@ -133,7 +134,7 @@ namespace AngleParse
 
           if (node.Type == HtmlTokenType.EndTag && node.Value == "script" && builder != null)
           {
-            yield return new HtmlNode(HtmlTokenType.Text, node.Position, jsMin.Minify(new StringBuilderReader(builder)));
+            yield return new HtmlNode(HtmlTokenType.Text, node.Position, Js.Minify(new TextSource(builder)));
             builder.ToPool();
           }
 
@@ -169,13 +170,13 @@ namespace AngleParse
             tagState = ContainingTag.WhitespacePreserve;
           else if (node.Type == HtmlTokenType.StartTag && node.Value == "script")
             tagState = ContainingTag.Script;
-          else if (node.Type == HtmlTokenType.EndTag && 
+          else if (node.Type == HtmlTokenType.EndTag &&
             (settings.PreserveInnerSpaceTags.Contains(node.Value) || node.Value == "script"))
             tagState = ContainingTag.None;
         }
       }
     }
-    
+
     private static void TrimIndices(string value, out int start, out int end)
     {
       start = 0;

@@ -31,15 +31,5 @@
     }
 
     #endregion
-
-    #region String representation
-
-    public override String ToValue()
-    {
-      var trailing = _bad ? String.Empty : "*/";
-      return String.Concat("/*", Data, trailing);
-    }
-
-    #endregion
   }
 }
