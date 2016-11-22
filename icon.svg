@@ -73,7 +73,7 @@
          x="141.42136"
          y="757.39764" /></text>
     <path
-       style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:0.98000004;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#a347bb;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+       style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:0.98;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#a347bb;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
        d="m 195.67036,28.471638 -7.50006,19.535727 11.80361,5.08928 9.46422,-24.553601 -13.76777,-0.07314 z m 4.30355,24.625007 -37.0357,96.107155 13.82144,6.17857 L 306.92029,99.096648 199.97391,53.096645 Z m -37.0357,96.107155 -11.57147,-5.1786 -11.41066,29.75 13.49998,0 9.48215,-24.5714 z M 151.36674,144.0252 188.1703,48.007365 178.77748,43.971622 50.920287,99.096648 151.36674,144.0252 Z"
        id="path4471"
        inkscape:connector-curvature="0" />

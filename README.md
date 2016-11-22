@@ -1,3 +1,5 @@
+![AngleParse Icon](https://raw.githubusercontent.com/erdomke/AngleParse/master/icon.png)
+
 # AngleParse
 
 AngleParse is a .NET library for parsing angle bracket based hypertext languages like HTML, SVG, and MathML. The parser is built upon the official W3C specification.  It differentiates itself from other libraries such as [AngleSharp](https://github.com/AngleSharp/AngleSharp) (which it is based on) and [HTML Agility Pack](http://htmlagilitypack.codeplex.com/) in that it does not build an in-memory representation of the DOM.  Rather, it focuses on providing a convenient streaming interface for fast processing of HTML documents.  This makes the library ideal for 
@@ -82,13 +84,19 @@ using (var w = new HtmlTextWriter(s))
 Using only the stripped down core of [AngleSharp](https://github.com/AngleSharp/AngleSharp), AngleParse
 achives incredibly fast performance.  
 
-* Minification Tasks: **73% of the time** relative to [WebMarkupMin](https://github.com/Taritsyn/WebMarkupMin)
-* Sanitization Tasks: **21% of the time** relative to [HtmlSanitizer](https://github.com/mganss/HtmlSanitizer) which leverages
+* Minification Tasks: **73% of the time** required by to [WebMarkupMin](https://github.com/Taritsyn/WebMarkupMin)
+* Sanitization Tasks: **21% of the time** required by to [HtmlSanitizer](https://github.com/mganss/HtmlSanitizer) which leverages
 AngleSharp's full DOM parser.
 
-Comparison charts each showing the average time over 5000 operations:
-![Minification comparsion chart](http://chart.googleapis.com/chart?cht=bhg&chs=400x80&chd=t:647.25,888.25&chds=0,900&chxl=1:|WebMarkupMin(888ms)|AngleParse(647ms)&chxt=x,y&chxr=0,0,900&chco=4D89F9)
-![Sanitization comparsion chart](http://chart.googleapis.com/chart?cht=bhg&chs=400x80&chd=t:340.875,1594.25&chds=0,1600&chxl=1:|HtmlSanitizer(1594ms)|AngleParse(341ms)&chxt=x,y&chxr=0,0,1600&chco=4D89F9)
+Comparison charts each showing the average time over 5000 operations (smaller is better):
+
+**Minifying HTML**
+
+![Minification comparsion chart](http://chart.googleapis.com/chart?cht=bhg&chs=400x80&chd=t:647.25,888.25&chds=0,900&chxl=1:|WebMarkupMin(888ms)|AngleParse(647ms)&chxt=x,y&chxr=0,0,900&chco=a347bb)
+
+**Sanitizing HTML**
+
+![Sanitization comparsion chart](http://chart.googleapis.com/chart?cht=bhg&chs=400x80&chd=t:340.875,1594.25&chds=0,1600&chxl=1:|HtmlSanitizer(1594ms)|AngleParse(341ms)&chxt=x,y&chxr=0,0,1600&chco=a347bb)
 
 ## Standards Conformance
 

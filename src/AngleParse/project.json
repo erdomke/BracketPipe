@@ -8,6 +8,7 @@
     "projectUrl": "https://github.com/erdomke/angleparse",
     "tags": [ "html", "sanitize", "minify" ],
     "licenseUrl": "https://github.com/erdomke/AngleParse/blob/master/LICENSE",
+    "iconUrl": "https://raw.githubusercontent.com/erdomke/AngleParse/master/icon.png",
     "repository": {
       "type": "git",
       "url": "git://github.com/erdomke/AngleParse"
