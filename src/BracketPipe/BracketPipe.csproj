@@ -1,0 +1,113 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{7FF8BF41-8A15-4CDA-AC3C-2BDBEE7B265C}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>BracketPipe</RootNamespace>
+    <AssemblyName>BracketPipe</AssemblyName>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;PORTABLE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'NET_STD|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;PORTABLE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- A reference to the entire .NET Framework is automatically included -->
+    <None Include="project.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Css\CombinatorSymbols.cs" />
+    <Compile Include="Css\FunctionNames.cs" />
+    <Compile Include="Extensions\CharExtensions.cs" />
+    <Compile Include="Extensions\HtmlParserExtensions.cs" />
+    <Compile Include="Extensions\ObjectExtensions.cs" />
+    <Compile Include="Extensions\PortableExtensions.cs" />
+    <Compile Include="Extensions\StringExtensions.cs" />
+    <Compile Include="Foundation\DomDescriptionAttribute.cs" />
+    <Compile Include="Foundation\Keywords.cs" />
+    <Compile Include="Foundation\Pool.cs" />
+    <Compile Include="Foundation\Symbols.cs" />
+    <Compile Include="Foundation\TextEncoding.cs" />
+    <Compile Include="Foundation\TextPosition.cs" />
+    <Compile Include="Foundation\TextSource.cs" />
+    <Compile Include="Html.Minify.cs" />
+    <Compile Include="Html.Render.cs" />
+    <Compile Include="Html.Sanitize.cs" />
+    <Compile Include="HtmlMinifySettings.cs" />
+    <Compile Include="HtmlSanitizeSettings.cs" />
+    <Compile Include="HtmlString.cs" />
+    <Compile Include="Html\AttributeNames.cs" />
+    <Compile Include="Html\HtmlEntityService.cs" />
+    <Compile Include="Html\HtmlFormatProvider.cs" />
+    <Compile Include="Html\NamespaceNames.cs" />
+    <Compile Include="Html\TagNames.cs" />
+    <Compile Include="Js\Js.cs" />
+    <Compile Include="Js\JsMin.cs" />
+    <Compile Include="Parser\Css\CssErrorEvent.cs" />
+    <Compile Include="Parser\Css\CssExtensions.cs" />
+    <Compile Include="Parser\Css\CssParseError.cs" />
+    <Compile Include="Parser\Css\CssParserExtensions.cs" />
+    <Compile Include="Parser\Css\CssParserOptions.cs" />
+    <Compile Include="Parser\Css\CssTokenizer.cs" />
+    <Compile Include="Parser\Css\CssTokenType.cs" />
+    <Compile Include="Parser\Css\CssWriter.cs" />
+    <Compile Include="Parser\Css\Tokens\CssAtGroupToken.cs" />
+    <Compile Include="Parser\Css\Tokens\CssColorToken.cs" />
+    <Compile Include="Parser\Css\Tokens\CssCommentToken.cs" />
+    <Compile Include="Parser\Css\Tokens\CssFunctionToken.cs" />
+    <Compile Include="Parser\Css\Tokens\CssKeywordToken.cs" />
+    <Compile Include="Parser\Css\Tokens\CssNumberToken.cs" />
+    <Compile Include="Parser\Css\Tokens\CssPropertyToken.cs" />
+    <Compile Include="Parser\Css\Tokens\CssRangeToken.cs" />
+    <Compile Include="Parser\Css\Tokens\CssStringToken.cs" />
+    <Compile Include="Parser\Css\Tokens\CssToken.cs" />
+    <Compile Include="Parser\Css\Tokens\CssUnitToken.cs" />
+    <Compile Include="Parser\Css\Tokens\CssUrlToken.cs" />
+    <Compile Include="Parser\Html\BaseTokenizer.cs" />
+    <Compile Include="Parser\Html\HtmlErrorEvent.cs" />
+    <Compile Include="Parser\Html\HtmlForeign.cs" />
+    <Compile Include="Parser\Html\HtmlParseError.cs" />
+    <Compile Include="Parser\Html\HtmlParseException.cs" />
+    <Compile Include="Parser\Html\HtmlParseMode.cs" />
+    <Compile Include="Parser\Html\HtmlReader.cs" />
+    <Compile Include="Parser\Html\HtmlTextWriter.cs" />
+    <Compile Include="Parser\Html\HtmlTokenType.cs" />
+    <Compile Include="Parser\Html\HtmlWriterSettings.cs" />
+    <Compile Include="Parser\Html\Tokens\HtmlCommentNode.cs" />
+    <Compile Include="Parser\Html\Tokens\HtmlDoctypeNode.cs" />
+    <Compile Include="Parser\Html\Tokens\HtmlNode.cs" />
+    <Compile Include="Parser\Html\Tokens\HtmlTagNode.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -1,8 +1,8 @@
-![AngleParse Icon](https://raw.githubusercontent.com/erdomke/AngleParse/master/icon.png)
+![BracketPipe Icon](https://raw.githubusercontent.com/erdomke/BracketPipe/master/icon.png)
 
-# AngleParse
+# BracketPipe
 
-AngleParse is a .NET library for parsing angle bracket based hypertext languages like HTML, SVG, and MathML. The parser is built upon the official W3C specification.  It differentiates itself from other libraries such as [AngleSharp](https://github.com/AngleSharp/AngleSharp) (which it is based on) and [HTML Agility Pack](http://htmlagilitypack.codeplex.com/) in that it does not build an in-memory representation of the DOM.  Rather, it focuses on providing a convenient streaming interface for fast processing of HTML documents.  This makes the library ideal for 
+BracketPipe is a .NET library for building parsing and processing piplines for web languages like HTML, CSS, Javscript, SVG, and MathML. The parser is built upon the official W3C specification.  It differentiates itself from other libraries such as [AngleSharp](https://github.com/AngleSharp/AngleSharp) (which it is based on) and [HTML Agility Pack](http://htmlagilitypack.codeplex.com/) in that it does not build an in-memory representation of the DOM.  Rather, it focuses on providing a convenient streaming interface for fast processing of HTML documents.  This makes the library ideal for 
 
 * minifying HTML
 * sanitizing HTML to prevent XSS attacks
@@ -15,24 +15,39 @@ It can also be viewed as a modern update to previous projects such as the [SgmlR
 
 ## Examples
 
-Read the nodes from an HTML string or stream named `html`.
+Use a pipeline to parse, minify, and sanitize HTML;
 
 ```csharp
+var html = @"<div>  <script>alert('xss');</script>
+              <a href=""http://www.google.com/"">Google</a>
+              <a href=""http://www.yahoo.com/"">Yahoo</a>  </div>";
 using (var reader = new HtmlReader(html))
 {
-  foreach (var node in reader)
-  {
-    // Do something
-  }
+  var result = (string)reader.Sanitize().Minify().ToHtml();
+  Assert.AreEqual(@"<div><a href=""http://www.google.com/"">Google</a> <a href=""http://www.yahoo.com/"">Yahoo</a></div>"
+    , result);
 }
 ```
 
-Render HTML nodes to a string
+Parse the links from an HTML string
 
 ```csharp
+var html = @"<html>  <body>  <script>alert('xss');</script>
+              <a href=""http://www.google.com/"">Google</a>
+              <a href=""http://www.yahoo.com/"">Yahoo</a>  </body>  </html>";
 using (var reader = new HtmlReader(html))
 {
-  var str = reader.ToHtml();
+  var urls = reader
+    .OfType<HtmlTagNode>()
+    .Where(t => t.Type == HtmlTokenType.StartTag && t.Value == "a")
+    .Select(t => t.GetAttribute("href"))
+    .ToArray();
+  CollectionAssert.AreEqual(new string[]
+  {
+    "http://www.google.com/",
+    "http://www.yahoo.com/"
+  }
+  , urls);
 }
 ```
 
@@ -81,22 +96,22 @@ using (var w = new HtmlTextWriter(s))
 
 ## High Performance
 
-Using only the stripped down core of [AngleSharp](https://github.com/AngleSharp/AngleSharp), AngleParse
+Using only the stripped down core of [AngleSharp](https://github.com/AngleSharp/AngleSharp), BracketPipe
 achives incredibly fast performance.  
 
-* Minification Tasks: **73% of the time** required by to [WebMarkupMin](https://github.com/Taritsyn/WebMarkupMin)
-* Sanitization Tasks: **21% of the time** required by to [HtmlSanitizer](https://github.com/mganss/HtmlSanitizer) which leverages
+* Minification Tasks: **73% of the time** required by [WebMarkupMin](https://github.com/Taritsyn/WebMarkupMin)
+* Sanitization Tasks: **21% of the time** required by [HtmlSanitizer](https://github.com/mganss/HtmlSanitizer) which leverages
 AngleSharp's full DOM parser.
 
 Comparison charts each showing the average time over 5000 operations (smaller is better):
 
 **Minifying HTML**
 
-![Minification comparsion chart](http://chart.googleapis.com/chart?cht=bhg&chs=400x80&chd=t:647.25,888.25&chds=0,900&chxl=1:|WebMarkupMin(888ms)|AngleParse(647ms)&chxt=x,y&chxr=0,0,900&chco=a347bb)
+![Minification comparsion chart](http://chart.googleapis.com/chart?cht=bhg&chs=400x80&chd=t:647.25,888.25&chds=0,900&chxl=1:|WebMarkupMin(888ms)|BracketPipe(647ms)&chxt=x,y&chxr=0,0,900&chco=a347bb)
 
 **Sanitizing HTML**
 
-![Sanitization comparsion chart](http://chart.googleapis.com/chart?cht=bhg&chs=400x80&chd=t:340.875,1594.25&chds=0,1600&chxl=1:|HtmlSanitizer(1594ms)|AngleParse(341ms)&chxt=x,y&chxr=0,0,1600&chco=a347bb)
+![Sanitization comparsion chart](http://chart.googleapis.com/chart?cht=bhg&chs=400x80&chd=t:340.875,1594.25&chds=0,1600&chxl=1:|HtmlSanitizer(1594ms)|BracketPipe(341ms)&chxt=x,y&chxr=0,0,1600&chco=a347bb)
 
 ## Standards Conformance
 
@@ -116,11 +131,13 @@ That means it supports the following platforms:
 * Windows Phone 8.1+
 * Windows Phone Silverlight 8.0+
 
+The NuGet package build also supports .Net 3.5 and .Net 4.0.
+
 ## License
 
 The MIT License (MIT)
 
-Copyright (c) 2013 - 2016 AngleParse
+Copyright (c) 2013 - 2016 BracketPipe
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 

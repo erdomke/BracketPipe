@@ -1,0 +1,49 @@
+{
+  "version": "0.7.0-*",
+  "title": "BracketPipe",
+  "description": "BracketPipe is a .NET library for performing a single-pass streaming parse of angle bracket based hypertext languages like HTML, SVG, and MathML",
+  "language": "en-US",
+  "authors": [ "Eric Domke" ],
+  "packOptions": {
+    "projectUrl": "https://github.com/erdomke/BracketPipe",
+    "tags": [ "html", "sanitize", "minify" ],
+    "licenseUrl": "https://github.com/erdomke/BracketPipe/blob/master/LICENSE",
+    "iconUrl": "https://raw.githubusercontent.com/erdomke/BracketPipe/master/icon.png",
+    "repository": {
+      "type": "git",
+      "url": "git://github.com/erdomke/BracketPipe"
+    }
+  },
+  "supports": {},
+  "frameworks": {
+    "net40": {
+      "frameworkAssemblies": {
+        "Microsoft.CSharp": "",
+        "System.Core": "",
+        "System.Xml": ""
+      },
+      "dependencies": {
+        "Microsoft.Bcl.Async": "1.0.168"
+      }
+    },
+    "netstandard1.0": 
+    {
+      "buildOptions": {
+        "define": [
+          "NETSTANDARD1_0",
+          "PORTABLE"
+        ]
+      },
+      "dependencies": {
+        "NETStandard.Library": "1.6.0",
+        "Microsoft.NETCore.Portable.Compatibility": "1.0.1"
+      }
+    },
+    "net35": {
+      "frameworkAssemblies": {
+        "System.Core": "",
+        "System.Xml": "",
+      }
+    }
+  }
+}
