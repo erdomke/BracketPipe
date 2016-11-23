@@ -1,0 +1,17 @@
+{
+  "supports": {},
+  "frameworks": {
+    "net46": {
+      "frameworkAssemblies": {
+        "Microsoft.CSharp": "",
+        "System.Core": "",
+        "System.Xml": "",
+        "System.Xml.Linq": "",
+        "System.Net.Http": "",
+      },
+      "dependencies": {
+        "NUnit": "3.2.1"
+      }
+    }
+  }
+}

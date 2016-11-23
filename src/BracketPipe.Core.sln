@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BracketPipe.Tests", "BracketPipe.Core.Tests\BracketPipe.Tests.csproj", "{C3074D7E-CA6C-4F2C-813D-BD97462DC3EB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BracketPipe.Tests", "BracketPipe.Tests\BracketPipe.Tests.csproj", "{C3074D7E-CA6C-4F2C-813D-BD97462DC3EB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BracketPipe.Performance", "BracketPipe.Performance\BracketPipe.Performance.csproj", "{BC6D9618-55B0-4AF4-9B37-5B43547946D2}"
 EndProject
@@ -12,21 +12,21 @@ EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
-		NET_STD|Any CPU = NET_STD|Any CPU
+		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{C3074D7E-CA6C-4F2C-813D-BD97462DC3EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C3074D7E-CA6C-4F2C-813D-BD97462DC3EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C3074D7E-CA6C-4F2C-813D-BD97462DC3EB}.NET_STD|Any CPU.ActiveCfg = NET_STD|Any CPU
-		{C3074D7E-CA6C-4F2C-813D-BD97462DC3EB}.NET_STD|Any CPU.Build.0 = NET_STD|Any CPU
+		{C3074D7E-CA6C-4F2C-813D-BD97462DC3EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C3074D7E-CA6C-4F2C-813D-BD97462DC3EB}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BC6D9618-55B0-4AF4-9B37-5B43547946D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BC6D9618-55B0-4AF4-9B37-5B43547946D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BC6D9618-55B0-4AF4-9B37-5B43547946D2}.NET_STD|Any CPU.ActiveCfg = NET_STD|Any CPU
-		{BC6D9618-55B0-4AF4-9B37-5B43547946D2}.NET_STD|Any CPU.Build.0 = NET_STD|Any CPU
+		{BC6D9618-55B0-4AF4-9B37-5B43547946D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BC6D9618-55B0-4AF4-9B37-5B43547946D2}.Release|Any CPU.Build.0 = Release|Any CPU
 		{7FF8BF41-8A15-4CDA-AC3C-2BDBEE7B265C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7FF8BF41-8A15-4CDA-AC3C-2BDBEE7B265C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7FF8BF41-8A15-4CDA-AC3C-2BDBEE7B265C}.NET_STD|Any CPU.ActiveCfg = NET_STD|Any CPU
-		{7FF8BF41-8A15-4CDA-AC3C-2BDBEE7B265C}.NET_STD|Any CPU.Build.0 = NET_STD|Any CPU
+		{7FF8BF41-8A15-4CDA-AC3C-2BDBEE7B265C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7FF8BF41-8A15-4CDA-AC3C-2BDBEE7B265C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

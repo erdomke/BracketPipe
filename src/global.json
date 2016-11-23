@@ -1,0 +1,7 @@
+{
+  "projects":[
+    "BracketPipe",
+    "BracketPipe.Performance",
+    "BracketPipe.Tests"
+  ]
+}
