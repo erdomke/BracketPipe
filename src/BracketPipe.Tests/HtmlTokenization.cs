@@ -100,7 +100,7 @@
       var s = new TextSource("<a target='_blank' href='http://whatever' title='ho'>");
       var t = CreateTokenizer(s);
       var token = t.NextNode();
-      Assert.AreEqual(3, ((HtmlTagNode)token).Attributes.Count);
+      Assert.AreEqual(3, ((HtmlStartTag)token).Attributes.Count);
     }
 
     [Test]
@@ -109,7 +109,7 @@
       var s = new TextSource("<input required>");
       var t = CreateTokenizer(s);
       var token = t.NextNode();
-      Assert.AreEqual("required", ((HtmlTagNode)token).Attributes[0].Key);
+      Assert.AreEqual("required", ((HtmlStartTag)token).Attributes[0].Key);
     }
 
     [Test]
@@ -228,7 +228,7 @@
       var t = CreateTokenizer(s);
       var e = t.NextNode();
       Assert.AreEqual(HtmlTokenType.Doctype, e.Type);
-      var d = (HtmlDoctypeNode)e;
+      var d = (HtmlDoctype)e;
       Assert.IsNotNull(d.Value);
       Assert.AreEqual("root_element", d.Value);
       Assert.IsFalse(d.IsSystemIdentifierMissing);

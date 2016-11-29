@@ -94,17 +94,17 @@ namespace BracketPipe
             {
               if (state == MinifyState.SpaceNeeded && trimStart == 0)
               {
-                yield return new HtmlNode(HtmlTokenType.Text, node.Position, " ");
+                yield return new HtmlText(node.Position, " ");
                 state = MinifyState.LastCharWasSpace;
               }
 
               if (state == MinifyState.LastCharWasSpace || trimStart == 0)
               {
-                yield return new HtmlNode(HtmlTokenType.Text, node.Position, GetCompressedString(node.Value, trimStart, trimEnd));
+                yield return new HtmlText(node.Position, GetCompressedString(node.Value, trimStart, trimEnd));
               }
               else
               {
-                yield return new HtmlNode(HtmlTokenType.Text, node.Position, GetCompressedString(node.Value, trimStart - 1, trimEnd));
+                yield return new HtmlText(node.Position, GetCompressedString(node.Value, trimStart - 1, trimEnd));
               }
 
               if (trimEnd < node.Value.Length - 1)
@@ -124,7 +124,7 @@ namespace BracketPipe
             }
             else
             {
-              yield return new HtmlNode(HtmlTokenType.Text, node.Position, " ");
+              yield return new HtmlText(node.Position, " ");
               if (settings.PreserveSurroundingSpaceTags.Contains(node.Value))
                 state = MinifyState.Compressed;
               else
@@ -134,22 +134,22 @@ namespace BracketPipe
 
           if (node.Type == HtmlTokenType.EndTag && node.Value == "script" && builder != null)
           {
-            yield return new HtmlNode(HtmlTokenType.Text, node.Position, Js.Minify(new TextSource(builder)));
+            yield return new HtmlText(node.Position, Js.Minify(new TextSource(builder)));
             builder.ToPool();
           }
 
-          var tag = node as HtmlTagNode;
+          var tag = node as HtmlStartTag;
           if (tag != null)
           {
             if (tag.Attributes.Any(a => a.Key == "style" || a.Key == "class"))
             {
-              var newTag = new HtmlTagNode(tag.Type, tag.Position, tag.Value);
+              var newTag = new HtmlStartTag(tag.Position, tag.Value);
               foreach (var attr in tag.Attributes)
               {
                 if (attr.Key == "style")
-                  newTag.AddAttribute(attr.Key, TrimStyleString(attr.Value));
+                  newTag.Add(attr.Key, TrimStyleString(attr.Value));
                 else if (attr.Key == "class")
-                  newTag.AddAttribute(attr.Key, GetCompressedString(attr.Value));
+                  newTag.Add(attr.Key, GetCompressedString(attr.Value));
                 else
                   newTag.Attributes.Add(attr);
               }

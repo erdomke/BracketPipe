@@ -96,10 +96,14 @@
     <Compile Include="Parser\Html\HtmlTextWriter.cs" />
     <Compile Include="Parser\Html\HtmlTokenType.cs" />
     <Compile Include="Parser\Html\HtmlWriterSettings.cs" />
-    <Compile Include="Parser\Html\Tokens\HtmlCommentNode.cs" />
-    <Compile Include="Parser\Html\Tokens\HtmlDoctypeNode.cs" />
+    <Compile Include="Parser\Html\Tokens\HtmlComment.cs" />
+    <Compile Include="Parser\Html\Tokens\HtmlDoctype.cs" />
+    <Compile Include="Parser\Html\Tokens\HtmlEndOfFile.cs" />
+    <Compile Include="Parser\Html\Tokens\HtmlEndTag.cs" />
     <Compile Include="Parser\Html\Tokens\HtmlNode.cs" />
+    <Compile Include="Parser\Html\Tokens\HtmlStartTag.cs" />
     <Compile Include="Parser\Html\Tokens\HtmlTagNode.cs" />
+    <Compile Include="Parser\Html\Tokens\HtmlText.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />

@@ -6,7 +6,7 @@
   /// <summary>
   /// The DOCTYPE token.
   /// </summary>
-  public sealed class HtmlDoctypeNode : HtmlNode
+  public sealed class HtmlDoctype : HtmlNode
   {
     #region Fields
 
@@ -18,13 +18,19 @@
 
     #region ctor
 
+    public HtmlDoctype() : base(TextPosition.Empty, "html")
+    {
+      _publicIdentifier = null;
+      _systemIdentifier = null;
+      _quirks = false;
+    }
     /// <summary>
     /// Creates a new DOCTYPE token with the quirks mode set initially.
     /// </summary>
     /// <param name="quirksForced">The state of the force-quirks flag.</param>
     /// <param name="position">The token's position.</param>
-    public HtmlDoctypeNode(Boolean quirksForced, TextPosition position)
-        : base(HtmlTokenType.Doctype, position)
+    public HtmlDoctype(Boolean quirksForced, TextPosition position)
+        : base(position)
     {
       _publicIdentifier = null;
       _systemIdentifier = null;
@@ -77,6 +83,8 @@
       get { return _systemIdentifier ?? String.Empty; }
       set { _systemIdentifier = value; }
     }
+
+    public override HtmlTokenType Type { get { return HtmlTokenType.Doctype; } }
 
     /// <summary>
     /// Gets if the given doctype token represents a limited quirks mode state.

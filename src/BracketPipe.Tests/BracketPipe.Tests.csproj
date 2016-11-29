@@ -61,8 +61,8 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
-    <Compile Include="Helper.cs" />
     <Compile Include="CssTokenization.cs" />
+    <Compile Include="GenerateNodesTest.cs" />
     <Compile Include="HtmlTextWriterTests.cs" />
     <Compile Include="ImportedSanitizeTests.cs" />
     <Compile Include="JsMinifyTest.cs" />

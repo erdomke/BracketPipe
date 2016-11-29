@@ -6,11 +6,10 @@
   /// <summary>
   /// The abstract base class of any HTML token.
   /// </summary>
-  public class HtmlNode
+  public abstract class HtmlNode
   {
     #region Fields
 
-    readonly HtmlTokenType _type;
     readonly TextPosition _position;
     String _value;
 
@@ -18,14 +17,13 @@
 
     #region ctor
 
-    public HtmlNode(HtmlTokenType type, TextPosition position)
-        : this(type, position, null)
+    public HtmlNode(TextPosition position)
+        : this(position, null)
     {
     }
 
-    public HtmlNode(HtmlTokenType type, TextPosition position, String value)
+    public HtmlNode(TextPosition position, String value)
     {
-      _type = type;
       _position = position;
       _value = value;
     }
@@ -54,23 +52,11 @@
     /// <summary>
     /// Gets the type of the token.
     /// </summary>
-    public HtmlTokenType Type
-    {
-      get { return _type; }
-    }
+    public abstract HtmlTokenType Type { get; }
 
     #endregion
 
     #region Methods
-
-    /// <summary>
-    /// Converts the current token to a tag token.
-    /// </summary>
-    /// <returns>The tag token instance.</returns>
-    public HtmlTagNode AsTag()
-    {
-      return (HtmlTagNode)this;
-    }
 
     public override string ToString()
     {

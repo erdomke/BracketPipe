@@ -38,9 +38,9 @@ var html = @"<html>  <body>  <script>alert('xss');</script>
 using (var reader = new HtmlReader(html))
 {
   var urls = reader
-    .OfType<HtmlTagNode>()
-    .Where(t => t.Type == HtmlTokenType.StartTag && t.Value == "a")
-    .Select(t => t.GetAttribute("href"))
+    .OfType<HtmlStartTag>()
+    .Where(t => t.Value == "a")
+    .Select(t => t["href"])
     .ToArray();
   CollectionAssert.AreEqual(new string[]
   {

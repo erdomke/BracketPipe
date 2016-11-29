@@ -78,7 +78,7 @@ namespace BracketPipe
     /// </summary>
     public static void ToHtml(this IEnumerable<HtmlNode> reader, XmlWriter writer)
     {
-      HtmlTagNode tag;
+      HtmlStartTag tag;
       var htmlWriter = writer as HtmlTextWriter;
 
       foreach (var token in reader)
@@ -92,14 +92,14 @@ namespace BracketPipe
             if (htmlWriter == null)
               writer.WriteComment(token.Value);
             else
-              htmlWriter.WriteComment(token.Value, ((HtmlCommentNode)token).DownlevelRevealedConditional);
+              htmlWriter.WriteComment(token.Value, ((HtmlComment)token).DownlevelRevealedConditional);
             break;
           case HtmlTokenType.Doctype:
-            var docType = (HtmlDoctypeNode)token;
+            var docType = (HtmlDoctype)token;
             writer.WriteDocType(token.Value, docType.PublicIdentifier, docType.SystemIdentifier, null);
             break;
           case HtmlTokenType.StartTag:
-            tag = token.AsTag();
+            tag = (HtmlStartTag)token;
             writer.WriteStartElement(tag.Value);
             foreach (var attr in tag.Attributes)
             {

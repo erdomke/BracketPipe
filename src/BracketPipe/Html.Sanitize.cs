@@ -54,7 +54,7 @@ namespace BracketPipe
             if (removeDepth < 0)
             {
               if (inStyle)
-                yield return new HtmlNode(HtmlTokenType.Text, token.Position, SanitizeCss(token.Value, settings, true));
+                yield return new HtmlText(token.Position, SanitizeCss(token.Value, settings, true));
               else
                 yield return token;
             }
@@ -66,7 +66,7 @@ namespace BracketPipe
             // Doctypes should not appear in snippets
             break;
           case HtmlTokenType.StartTag:
-            var tag = token.AsTag();
+            var tag = (HtmlStartTag)token;
             if (removeDepth < 0)
             {
               if (settings.AllowedTags.Contains(token.Value))
@@ -83,7 +83,7 @@ namespace BracketPipe
                 }
                 else
                 {
-                  var newTag = new HtmlTagNode(tag.Type, tag.Position, tag.Value);
+                  var newTag = new HtmlStartTag(tag.Position, tag.Value);
                   newTag.IsSelfClosing = tag.IsSelfClosing;
                   foreach (var attr in allowed)
                   {
@@ -116,7 +116,7 @@ namespace BracketPipe
       }
     }
 
-    private static IEnumerable<KeyValuePair<string, string>> AllowedAttributes(HtmlTagNode tag, HtmlSanitizeSettings settings)
+    private static IEnumerable<KeyValuePair<string, string>> AllowedAttributes(HtmlStartTag tag, HtmlSanitizeSettings settings)
     {
       for (var i = 0; i < tag.Attributes.Count; i++)
       {

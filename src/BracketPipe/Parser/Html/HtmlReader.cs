@@ -130,7 +130,7 @@
           && _current.Value.Is(TagNames.Svg))
         {
           _svgDepth = 0;
-          _current = HtmlForeign.SvgConfig(tag);
+          _current = HtmlForeign.SvgConfig((HtmlStartTag)tag);
           return true;
         }
         else if (_svgDepth >= 0 && tag != null)
@@ -140,7 +140,7 @@
             case HtmlTokenType.StartTag:
               if (!tag.IsSelfClosing)
                 _svgDepth++;
-              _current = HtmlForeign.SvgConfig(tag);
+              _current = HtmlForeign.SvgConfig((HtmlStartTag)tag);
               return true;
             case HtmlTokenType.EndTag:
               _svgDepth--;
@@ -153,7 +153,7 @@
           && _current.Value.Is(TagNames.Math))
         {
           _mathMlDepth = 0;
-          _current = HtmlForeign.MathMlConfig(tag);
+          _current = HtmlForeign.MathMlConfig((HtmlStartTag)tag);
           return true;
         }
         else if (_mathMlDepth >= 0 && tag != null)
@@ -163,7 +163,7 @@
             case HtmlTokenType.StartTag:
               if (!tag.IsSelfClosing)
                 _mathMlDepth++;
-              _current = HtmlForeign.MathMlConfig(tag);
+              _current = HtmlForeign.MathMlConfig((HtmlStartTag)tag);
               return true;
             case HtmlTokenType.EndTag:
               _mathMlDepth--;
@@ -1144,7 +1144,7 @@
     /// See 8.2.4.54 DOCTYPE name state
     /// </summary>
     /// <param name="doctype">The current doctype token.</param>
-    private HtmlNode DoctypeName(HtmlDoctypeNode doctype)
+    private HtmlNode DoctypeName(HtmlDoctype doctype)
     {
       while (true)
       {
@@ -1190,7 +1190,7 @@
     /// See 8.2.4.55 After DOCTYPE name state
     /// </summary>
     /// <param name="doctype">The current doctype token.</param>
-    private HtmlNode DoctypeNameAfter(HtmlDoctypeNode doctype)
+    private HtmlNode DoctypeNameAfter(HtmlDoctype doctype)
     {
       var c = SkipSpaces();
 
@@ -1228,7 +1228,7 @@
     /// See 8.2.4.56 After DOCTYPE public keyword state
     /// </summary>
     /// <param name="doctype">The current doctype token.</param>
-    private HtmlNode DoctypePublic(HtmlDoctypeNode doctype)
+    private HtmlNode DoctypePublic(HtmlDoctype doctype)
     {
       var c = Advance();
 
@@ -1274,7 +1274,7 @@
     /// See 8.2.4.57 Before DOCTYPE public identifier state
     /// </summary>
     /// <param name="doctype">The current doctype token.</param>
-    private HtmlNode DoctypePublicIdentifierBefore(HtmlDoctypeNode doctype)
+    private HtmlNode DoctypePublicIdentifierBefore(HtmlDoctype doctype)
     {
       var c = SkipSpaces();
 
@@ -1314,7 +1314,7 @@
     /// See 8.2.4.58 DOCTYPE public identifier (double-quoted) state
     /// </summary>
     /// <param name="doctype">The current doctype token.</param>
-    private HtmlNode DoctypePublicIdentifierDoubleQuoted(HtmlDoctypeNode doctype)
+    private HtmlNode DoctypePublicIdentifierDoubleQuoted(HtmlDoctype doctype)
     {
       while (true)
       {
@@ -1358,7 +1358,7 @@
     /// See 8.2.4.59 DOCTYPE public identifier (single-quoted) state
     /// </summary>
     /// <param name="doctype">The current doctype token.</param>
-    private HtmlNode DoctypePublicIdentifierSingleQuoted(HtmlDoctypeNode doctype)
+    private HtmlNode DoctypePublicIdentifierSingleQuoted(HtmlDoctype doctype)
     {
       while (true)
       {
@@ -1402,7 +1402,7 @@
     /// See 8.2.4.60 After DOCTYPE public identifier state
     /// </summary>
     /// <param name="doctype">The current doctype token.</param>
-    private HtmlNode DoctypePublicIdentifierAfter(HtmlDoctypeNode doctype)
+    private HtmlNode DoctypePublicIdentifierAfter(HtmlDoctype doctype)
     {
       var c = Advance();
 
@@ -1446,7 +1446,7 @@
     /// See 8.2.4.61 Between DOCTYPE public and system identifiers state
     /// </summary>
     /// <param name="doctype">The current doctype token.</param>
-    private HtmlNode DoctypeBetween(HtmlDoctypeNode doctype)
+    private HtmlNode DoctypeBetween(HtmlDoctype doctype)
     {
       var c = SkipSpaces();
 
@@ -1484,7 +1484,7 @@
     /// See 8.2.4.62 After DOCTYPE system keyword state
     /// </summary>
     /// <param name="doctype">The current doctype token.</param>
-    private HtmlNode DoctypeSystem(HtmlDoctypeNode doctype)
+    private HtmlNode DoctypeSystem(HtmlDoctype doctype)
     {
       var c = Advance();
 
@@ -1531,7 +1531,7 @@
     /// See 8.2.4.63 Before DOCTYPE system identifier state
     /// </summary>
     /// <param name="doctype">The current doctype token.</param>
-    private HtmlNode DoctypeSystemIdentifierBefore(HtmlDoctypeNode doctype)
+    private HtmlNode DoctypeSystemIdentifierBefore(HtmlDoctype doctype)
     {
       var c = SkipSpaces();
 
@@ -1573,7 +1573,7 @@
     /// See 8.2.4.64 DOCTYPE system identifier (double-quoted) state
     /// </summary>
     /// <param name="doctype">The current doctype token.</param>
-    private HtmlNode DoctypeSystemIdentifierDoubleQuoted(HtmlDoctypeNode doctype)
+    private HtmlNode DoctypeSystemIdentifierDoubleQuoted(HtmlDoctype doctype)
     {
       while (true)
       {
@@ -1617,7 +1617,7 @@
     /// See 8.2.4.65 DOCTYPE system identifier (single-quoted) state
     /// </summary>
     /// <param name="doctype">The current doctype token.</param>
-    private HtmlNode DoctypeSystemIdentifierSingleQuoted(HtmlDoctypeNode doctype)
+    private HtmlNode DoctypeSystemIdentifierSingleQuoted(HtmlDoctype doctype)
     {
       while (true)
       {
@@ -1656,7 +1656,7 @@
     /// See 8.2.4.66 After DOCTYPE system identifier state
     /// </summary>
     /// <param name="doctype">The current doctype token.</param>
-    private HtmlNode DoctypeSystemIdentifierAfter(HtmlDoctypeNode doctype)
+    private HtmlNode DoctypeSystemIdentifierAfter(HtmlDoctype doctype)
     {
       var c = SkipSpaces();
 
@@ -1682,7 +1682,7 @@
     /// See 8.2.4.67 Bogus DOCTYPE state
     /// </summary>
     /// <param name="doctype">The current doctype token.</param>
-    private HtmlNode BogusDoctype(HtmlDoctypeNode doctype)
+    private HtmlNode BogusDoctype(HtmlDoctype doctype)
     {
       while (true)
       {
@@ -2537,13 +2537,13 @@
     private HtmlNode NewCharacter()
     {
       var content = FlushBuffer();
-      return new HtmlNode(HtmlTokenType.Text, _position, content);
+      return new HtmlText(_position, content);
     }
 
-    private HtmlCommentNode NewComment()
+    private HtmlComment NewComment()
     {
       var content = FlushBuffer();
-      return new HtmlCommentNode(_position, content);
+      return new HtmlComment(_position, content);
     }
 
     private HtmlNode NewEof(Boolean acceptable = false)
@@ -2553,22 +2553,22 @@
         RaiseErrorOccurred(HtmlParseError.EOF);
       }
 
-      return new HtmlNode(HtmlTokenType.EndOfFile, _position);
+      return new HtmlEndOfFile(_position);
     }
 
-    private HtmlDoctypeNode NewDoctype(Boolean quirksForced)
+    private HtmlDoctype NewDoctype(Boolean quirksForced)
     {
-      return new HtmlDoctypeNode(quirksForced, _position);
+      return new HtmlDoctype(quirksForced, _position);
     }
 
     private HtmlTagNode NewTagOpen()
     {
-      return new HtmlTagNode(HtmlTokenType.StartTag, _position);
+      return new HtmlStartTag(_position);
     }
 
     private HtmlTagNode NewTagClose()
     {
-      return new HtmlTagNode(HtmlTokenType.EndTag, _position);
+      return new HtmlEndTag(_position);
     }
 
     #endregion
@@ -2620,42 +2620,29 @@
 
     private HtmlNode EmitTag(HtmlTagNode tag)
     {
-      var attributes = tag.Attributes;
       State = HtmlParseMode.PCData;
 
-      switch (tag.Type)
+      var start = tag as HtmlStartTag;
+      if (start != null)
       {
-        case HtmlTokenType.StartTag:
-          for (var i = attributes.Count - 1; i > 0; i--)
+        var attributes = start.Attributes;
+        for (var i = attributes.Count - 1; i > 0; i--)
+        {
+          for (var j = i - 1; j >= 0; j--)
           {
-            for (var j = i - 1; j >= 0; j--)
+            if (attributes[j].Key == attributes[i].Key)
             {
-              if (attributes[j].Key == attributes[i].Key)
-              {
-                attributes.RemoveAt(i);
-                RaiseErrorOccurred(HtmlParseError.AttributeDuplicateOmitted, tag.Position);
-                break;
-              }
+              attributes.RemoveAt(i);
+              RaiseErrorOccurred(HtmlParseError.AttributeDuplicateOmitted, tag.Position);
+              break;
             }
           }
+        }
 
-          if (tag.Value.Is(TagNames.Script))
-            State = HtmlParseMode.Script;
+        if (tag.Value.Is(TagNames.Script))
+          State = HtmlParseMode.Script;
 
-          _lastStartTag = tag.Value;
-          break;
-        case HtmlTokenType.EndTag:
-          if (tag.IsSelfClosing)
-          {
-            RaiseErrorOccurred(HtmlParseError.EndTagCannotBeSelfClosed, tag.Position);
-          }
-
-          if (attributes.Count != 0)
-          {
-            RaiseErrorOccurred(HtmlParseError.EndTagCannotHaveAttributes, tag.Position);
-          }
-
-          break;
+        _lastStartTag = tag.Value;
       }
 
       return tag;

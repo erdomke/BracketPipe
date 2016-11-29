@@ -6,11 +6,11 @@ using System.Text;
 
 namespace BracketPipe
 {
-  public class HtmlString
+  public sealed class HtmlString
     : IEquatable<string>
     , IEquatable<HtmlString>
   {
-    private string _html;
+    private readonly string _html;
 
     public int Length { get { return _html.Length; } }
 

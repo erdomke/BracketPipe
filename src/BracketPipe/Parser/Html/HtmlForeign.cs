@@ -127,7 +127,7 @@
     /// <param name="element">The element to setup.</param>
     /// <param name="tag">The tag token to use.</param>
     /// <returns>The finished element.</returns>
-    public static HtmlTagNode MathMlConfig(HtmlTagNode tag)
+    public static HtmlTagNode MathMlConfig(HtmlStartTag tag)
     {
       var count = tag.Attributes.Count;
 
@@ -147,7 +147,7 @@
     /// <param name="element">The element to setup.</param>
     /// <param name="tag">The tag token to use.</param>
     /// <returns>The finished element.</returns>
-    public static HtmlTagNode SvgConfig(this HtmlTagNode tag)
+    public static HtmlTagNode SvgConfig(this HtmlStartTag tag)
     {
       var count = tag.Attributes.Count;
       var adjustedName = default(String);
