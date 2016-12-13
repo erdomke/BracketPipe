@@ -34,7 +34,7 @@ namespace BracketPipe
     {
       Compressed,
       LastCharWasSpace,
-      SpaceNeeded
+      SpaceNeeded,
     }
     private enum ContainingTag : byte
     {
@@ -48,6 +48,7 @@ namespace BracketPipe
       settings = settings ?? HtmlMinifySettings.ReadOnlyDefault;
       var state = MinifyState.LastCharWasSpace;
       var tagState = ContainingTag.None;
+      var lastTag = default(HtmlNode);
       int trimStart;
       int trimEnd;
       StringBuilder builder = null;
@@ -118,7 +119,7 @@ namespace BracketPipe
         {
           if (state == MinifyState.SpaceNeeded)
           {
-            if (node.Type == HtmlTokenType.EndTag && settings.BlockLevelElements.Contains(node.Value))
+            if (node.Type == HtmlTokenType.EndTag && !settings.InlineElements.Contains(node.Value))
             {
               state = MinifyState.LastCharWasSpace;
             }
@@ -163,6 +164,13 @@ namespace BracketPipe
           else
           {
             yield return node;
+            // Treat an empty inline tag as a character (often used for icon fonts)
+            if (state == MinifyState.LastCharWasSpace
+              && lastTag != null
+              && lastTag.Type == HtmlTokenType.StartTag
+              && lastTag.Value == node.Value
+              && settings.InlineElements.Contains(node.Value))
+              state = MinifyState.Compressed;
           }
 
 
@@ -174,6 +182,7 @@ namespace BracketPipe
             (settings.PreserveInnerSpaceTags.Contains(node.Value) || node.Value == "script"))
             tagState = ContainingTag.None;
         }
+        lastTag = node;
       }
     }
 

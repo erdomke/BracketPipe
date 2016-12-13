@@ -7,7 +7,7 @@ namespace BracketPipe
 {
   public class HtmlMinifySettings
   {
-    private HashSet<string> _blockLevelElement;
+    private HashSet<string> _inlineElement;
     private HashSet<string> _preserveInnerSpaceTags;
     private HashSet<string> _preserveSurroundingSpaceTags;
 
@@ -28,7 +28,7 @@ namespace BracketPipe
     /// <summary>
     /// Tags for elements which start a new block
     /// </summary>
-    public ISet<string> BlockLevelElements { get { return _blockLevelElement; } }
+    public ISet<string> InlineElements { get { return _inlineElement; } }
     /// <summary>
     /// Tags for which inner space should be preserved
     /// </summary>
@@ -41,50 +41,64 @@ namespace BracketPipe
 
     public HtmlMinifySettings()
     {
-      _blockLevelElement = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+      _inlineElement = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
       _preserveInnerSpaceTags = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
       _preserveSurroundingSpaceTags = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
     }
 
     private HtmlMinifySettings(bool setDefaults)
     {
-      _blockLevelElement = new HashSet<string>(new string[]
+      _inlineElement = new HashSet<string>(new string[]
       {
-        "address",
-        "article",
-        "aside",
-        "blockquote",
-        "canvas",
-        "dd",
-        "div",
-        "dl",
-        "fieldset",
-        "figcaption",
-        "figure",
-        "footer",
-        "form",
-        "h1",
-        "h2",
-        "h3",
-        "h4",
-        "h5",
-        "h6",
-        "header",
-        "hgroup",
-        "hr",
-        "li",
-        "main",
-        "nav",
-        "noscript",
-        "ol",
+        "a",
+        "abbr",
+        "acronym",
+        "b",
+        "bdi",
+        "bdo",
+        "big",
+        "br",
+        "button",
+        "cite",
+        "code",
+        "del",
+        "dfn",
+        "em",
+        "font",
+        "i",
+        "img",
+        "input",
+        "ins",
+        "kbd",
+        "label",
+        "map",
+        "mark",
+        "math",
+        "meter",
+        "object",
         "output",
-        "p",
-        "pre",
-        "section",
-        "table",
-        "tfoot",
-        "ul",
-        "video",
+        "progress",
+        "q",
+        "ruby",
+        "rp",
+        "rt",
+        "s",
+        "samp",
+        "script",
+        "select",
+        "small",
+        "span",
+        "strike",
+        "strong",
+        "sub",
+        "sup",
+        "svg",
+        "textarea",
+        "time",
+        "tt",
+        "u",
+        "var",
+        "wbr"
       }, StringComparer.OrdinalIgnoreCase);
       _preserveInnerSpaceTags = new HashSet<string>(new string[]
       {

@@ -140,5 +140,20 @@ namespace BracketPipe.Core.Tests
       output = "<p style=\"font-weight: bold\"></p>";
       Assert.AreEqual(output, Html.Minify(input));
     }
+
+    [Test]
+    public void Minify_KeepSpaceAfterIcon()
+    {
+      var input = "<div><i class=\"i-icon\"></i>     Some text     </div>";
+      var output = "<div><i class=\"i-icon\"></i> Some text</div>";
+      Assert.AreEqual(output, Html.Minify(input));
+    }
+
+    [Test]
+    public void Minify_DontAlterWbr()
+    {
+      var input = "<p>http://this<wbr>.is<wbr>.a<wbr>.really<wbr>.long<wbr>.example<wbr>.com/With<wbr>/deeper<wbr>/level<wbr>/pages<wbr>/deeper<wbr>/level<wbr>/pages<wbr>/deeper<wbr>/level<wbr>/pages<wbr>/deeper<wbr>/level<wbr>/pages<wbr>/deeper<wbr>/level<wbr>/pages</p>";
+      Assert.AreEqual(input, Html.Minify(input));
+    }
   }
 }
