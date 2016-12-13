@@ -15,7 +15,7 @@ namespace BracketPipe
     /// <summary>
     /// Tags for elements which start a new block
     /// </summary>
-    public HashSet<string> BlockLevelElements { get { return _blockLevelElement; } }
+    public HashSet<string> InlineElements { get { return _inlineElement; } }
     /// <summary>
     /// Tags for which inner space should be preserved
     /// </summary>
