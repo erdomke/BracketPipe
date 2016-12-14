@@ -35,6 +35,7 @@ namespace BracketPipe
       Compressed,
       LastCharWasSpace,
       SpaceNeeded,
+      InlineStartAfterSpace,
     }
     private enum ContainingTag : byte
     {
@@ -48,7 +49,6 @@ namespace BracketPipe
       settings = settings ?? HtmlMinifySettings.ReadOnlyDefault;
       var state = MinifyState.LastCharWasSpace;
       var tagState = ContainingTag.None;
-      var lastTag = default(HtmlNode);
       int trimStart;
       int trimEnd;
       StringBuilder builder = null;
@@ -99,7 +99,9 @@ namespace BracketPipe
                 state = MinifyState.LastCharWasSpace;
               }
 
-              if (state == MinifyState.LastCharWasSpace || trimStart == 0)
+              if (state == MinifyState.LastCharWasSpace 
+                || state == MinifyState.InlineStartAfterSpace 
+                || trimStart == 0)
               {
                 yield return new HtmlText(node.Position, GetCompressedString(node.Value, trimStart, trimEnd));
               }
@@ -160,16 +162,21 @@ namespace BracketPipe
             {
               yield return node;
             }
+
+            if (state == MinifyState.LastCharWasSpace
+              && settings.InlineElements.Contains(node.Value))
+            {
+              if (HtmlTextWriter.VoidElements.Contains(node.Value))
+                state = MinifyState.Compressed;
+              else
+                state = MinifyState.InlineStartAfterSpace;
+            }
           }
           else
           {
             yield return node;
-            // Treat an empty inline tag as a character (often used for icon fonts)
-            if (state == MinifyState.LastCharWasSpace
-              && lastTag != null
-              && lastTag.Type == HtmlTokenType.StartTag
-              && lastTag.Value == node.Value
-              && settings.InlineElements.Contains(node.Value))
+
+            if (state == MinifyState.InlineStartAfterSpace)
               state = MinifyState.Compressed;
           }
 
@@ -182,7 +189,6 @@ namespace BracketPipe
             (settings.PreserveInnerSpaceTags.Contains(node.Value) || node.Value == "script"))
             tagState = ContainingTag.None;
         }
-        lastTag = node;
       }
     }
 

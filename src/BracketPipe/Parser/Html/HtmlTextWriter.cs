@@ -744,7 +744,7 @@ namespace BracketPipe
 
       private static bool InRange(int value, int start, int end)
       {
-        return value - start <= end - start;
+        return value >= start && value <= end;
       }
     }
 

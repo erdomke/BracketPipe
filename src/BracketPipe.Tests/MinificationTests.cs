@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace BracketPipe.Core.Tests
 {
+  /// <summary>
+  /// Taken from https://github.com/kangax/html-minifier/blob/gh-pages/tests/minifier.js
+  /// </summary>
   [TestFixture]
   class MinificationTests
   {
@@ -146,6 +149,14 @@ namespace BracketPipe.Core.Tests
     {
       var input = "<div><i class=\"i-icon\"></i>     Some text     </div>";
       var output = "<div><i class=\"i-icon\"></i> Some text</div>";
+      Assert.AreEqual(output, Html.Minify(input));
+
+      input = "<div><img src=\"test\">     Some text     </div>";
+      output = "<div><img src=\"test\"> Some text</div>";
+      Assert.AreEqual(output, Html.Minify(input));
+
+      input = "<div><span><img src=\"test\"></span>     Some text     </div>";
+      output = "<div><span><img src=\"test\"></span> Some text</div>";
       Assert.AreEqual(output, Html.Minify(input));
     }
 
