@@ -67,12 +67,14 @@
     <Compile Include="ImportedSanitizeTests.cs" />
     <Compile Include="JsMinifyTest.cs" />
     <Compile Include="Majestic12.cs" />
+    <Compile Include="MarkdownTests.cs" />
     <Compile Include="MinificationTests.cs" />
     <Compile Include="OfficialExamples.cs" />
     <Compile Include="SanitizeTests.cs" />
     <Compile Include="SgmlReaderTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="HtmlTokenization.cs" />
+    <Compile Include="XmlReaderTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config">

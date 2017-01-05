@@ -99,8 +99,8 @@ namespace BracketPipe
                 state = MinifyState.LastCharWasSpace;
               }
 
-              if (state == MinifyState.LastCharWasSpace 
-                || state == MinifyState.InlineStartAfterSpace 
+              if (state == MinifyState.LastCharWasSpace
+                || state == MinifyState.InlineStartAfterSpace
                 || trimStart == 0)
               {
                 yield return new HtmlText(node.Position, GetCompressedString(node.Value, trimStart, trimEnd));

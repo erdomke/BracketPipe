@@ -25,6 +25,11 @@ namespace BracketPipe
     {
     }
 
+    internal override void AddToDebugDisplay(StringBuilder builder)
+    {
+      builder.Append("{EOF}");
+    }
+
     #endregion
   }
 }

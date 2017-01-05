@@ -7,7 +7,7 @@ root = true
 [*.{vb,cs,xml,js,css,html,htm,xsl,xslt}]
 end_of_line = crlf
 insert_final_newline = true
-trim_trailing_whitespace = true
+trim_trailing_whitespace = false
 charset = utf-8
 indent_style = space
 indent_size = 2

@@ -13,6 +13,15 @@
   /// </summary>
   static class StringExtensions
   {
+    public static string GroupConcat(this IEnumerable<string> values, string separator)
+    {
+#if NET35
+      return string.Join(separator, values.ToArray());
+#else
+      return string.Join(separator, values);
+#endif
+    }
+
     /// <summary>
     /// Checks if the given string has a certain character at a specific
     /// index. The index is optional (default is 0).

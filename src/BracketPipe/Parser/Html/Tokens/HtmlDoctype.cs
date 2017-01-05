@@ -2,6 +2,7 @@
 {
   using BracketPipe.Extensions;
   using System;
+  using System.Text;
 
   /// <summary>
   /// The DOCTYPE token.
@@ -269,6 +270,18 @@
 
         return false;
       }
+    }
+
+    internal override void AddToDebugDisplay(StringBuilder builder)
+    {
+      builder.Append("<!DOCTYPE");
+      if (!string.IsNullOrEmpty(PublicIdentifier))
+        builder.Append(' ').Append(PublicIdentifier);
+      if (!string.IsNullOrEmpty(SystemIdentifier))
+        builder.Append(' ').Append(SystemIdentifier);
+      if (!string.IsNullOrEmpty(Value))
+        builder.Append(' ').Append(Value);
+      builder.Append('>');
     }
 
     #endregion

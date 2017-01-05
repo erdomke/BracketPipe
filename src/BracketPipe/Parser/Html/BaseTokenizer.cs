@@ -8,7 +8,7 @@
   /// <summary>
   /// Common methods and variables of all tokenizers.
   /// </summary>
-  public abstract class BaseTokenizer : IDisposable
+  public sealed class BaseTokenizer : IDisposable
   {
     #region Fields
 
@@ -37,7 +37,7 @@
 
     #region Properties
 
-    protected StringBuilder StringBuffer
+    public StringBuilder StringBuffer
     {
       get;
       private set;
@@ -51,7 +51,7 @@
     public Int32 InsertionPoint
     {
       get { return _source.Index; }
-      protected set
+      set
       {
         var delta = _source.Index - value;
 
@@ -84,7 +84,7 @@
       get { return _source.Index; }
     }
 
-    protected Char CurrentChar
+    public Char CurrentChar
     {
       get { return _currentChar; }
     }
@@ -118,19 +118,19 @@
       return new TextPosition(_row, _column, Position);
     }
 
-    protected Boolean ContinuesWithInsensitive(String s)
+    public Boolean ContinuesWithInsensitive(String s)
     {
       var content = PeekString(s.Length);
       return content.Length == s.Length && content.Isi(s);
     }
 
-    protected Boolean ContinuesWithSensitive(String s)
+    public Boolean ContinuesWithSensitive(String s)
     {
       var content = PeekString(s.Length);
       return content.Length == s.Length && content.Isi(s);
     }
 
-    protected String PeekString(Int32 length)
+    public String PeekString(Int32 length)
     {
       var mark = _source.Index;
       _source.Index--;
@@ -139,7 +139,7 @@
       return content;
     }
 
-    protected Char SkipSpaces()
+    public Char SkipSpaces()
     {
       var c = Advance();
 
@@ -155,14 +155,14 @@
 
     #region Source Management
 
-    protected Char Advance()
+    public Char Advance()
     {
       if (_currentChar != Symbols.EndOfFile)
         AdvanceUnsafe();
       return _currentChar;
     }
 
-    protected void Advance(Int32 n)
+    public void Advance(Int32 n)
     {
       while (n-- > 0 && _currentChar != Symbols.EndOfFile)
       {
@@ -170,14 +170,14 @@
       }
     }
 
-    protected Char Back()
+    public Char Back()
     {
       if (InsertionPoint > 0)
         BackUnsafe();
       return _currentChar;
     }
 
-    protected void Back(Int32 n)
+    public void Back(Int32 n)
     {
       while (n-- > 0 && InsertionPoint > 0)
       {

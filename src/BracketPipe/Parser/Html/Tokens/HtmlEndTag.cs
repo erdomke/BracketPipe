@@ -20,5 +20,10 @@ namespace BracketPipe
     public HtmlEndTag(TextPosition position, String name) : base (position, name) { }
 
     #endregion
+
+    internal override void AddToDebugDisplay(StringBuilder builder)
+    {
+      builder.Append('<').Append('/').Append(this.Value).Append('>');
+    }
   }
 }

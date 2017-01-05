@@ -2,24 +2,21 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace BracketPipe
 {
-  public class HtmlWriterSettings
+  public class MarkdownWriterSettings
   {
-    public bool Indent { get; set; }
-    public string IndentChars { get; set; }
+    public int LineLength { get; set; }
     public string NewLineChars { get; set; }
-    public bool NewLineOnAttributes { get; set; }
     public char QuoteChar { get; set; }
     //public bool ReplaceConsecutiveSpaceNonBreaking { get; set; }
 
-    public HtmlWriterSettings()
+    public MarkdownWriterSettings()
     {
-      this.Indent = false;
-      this.IndentChars = "  ";
+      this.LineLength = 80;
       this.NewLineChars = Environment.NewLine;
-      this.NewLineOnAttributes = false;
       this.QuoteChar = '"';
       //this.ReplaceConsecutiveSpaceNonBreaking = false;
     }

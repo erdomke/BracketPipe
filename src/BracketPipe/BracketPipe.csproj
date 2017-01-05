@@ -104,6 +104,9 @@
     <Compile Include="Parser\Html\Tokens\HtmlStartTag.cs" />
     <Compile Include="Parser\Html\Tokens\HtmlTagNode.cs" />
     <Compile Include="Parser\Html\Tokens\HtmlText.cs" />
+    <Compile Include="Parser\Text\MarkdownWriter.cs" />
+    <Compile Include="Parser\Text\MarkdownWriterSettings.cs" />
+    <Compile Include="Parser\XmlCharType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />

@@ -2,10 +2,13 @@
 {
   using BracketPipe.Extensions;
   using System;
+  using System.Diagnostics;
+  using System.Text;
 
   /// <summary>
   /// The abstract base class of any HTML token.
   /// </summary>
+  [DebuggerDisplay("{DebuggerDisplay,nq}")]
   public abstract class HtmlNode
   {
     #region Fields
@@ -54,15 +57,27 @@
     /// </summary>
     public abstract HtmlTokenType Type { get; }
 
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+    protected string DebuggerDisplay
+    {
+      get
+      {
+        var builder = new StringBuilder();
+        AddToDebugDisplay(builder);
+        return builder.ToString();
+      }
+    }
+
     #endregion
 
     #region Methods
 
     public override string ToString()
     {
-      return string.Format("{0} - {1}", Type, Value);
+      return this.Value;
     }
 
+    internal abstract void AddToDebugDisplay(StringBuilder builder);
     #endregion
   }
 }

@@ -5,18 +5,21 @@
   using System.Collections.Generic;
   using System.Collections;
   using System.Xml;
+  using System.Linq;
 
   /// <summary>
   /// Performs the tokenization of the source code. Follows the tokenization algorithm at:
   /// http://www.w3.org/html/wg/drafts/html/master/syntax.html
   /// </summary>
-  public sealed class HtmlReader : BaseTokenizer
+  public sealed class HtmlReader : XmlReader
     , IEnumerator<HtmlNode>
     , IEnumerable<HtmlNode>
     , IXmlLineInfo
+    , IDisposable
   {
     #region Fields
 
+    private BaseTokenizer _base;
     private readonly HtmlEntityService _resolver;
     private String _lastStartTag;
     private TextPosition _position;
@@ -42,8 +45,9 @@
     /// </summary>
     /// <param name="source">The source code manager.</param>
     /// <param name="resolver">The entity resolver to use.</param>
-    public HtmlReader(TextSource source) : base(source)
+    public HtmlReader(TextSource source)
     {
+      _base = new BaseTokenizer(source);
       State = HtmlParseMode.PCData;
       IsAcceptingCharacterData = false;
       IsStrictMode = false;
@@ -96,10 +100,11 @@
     /// Positions the reader at the next node.
     /// </summary>
     /// <returns>Returns <c>true</c> if more nodes are available, <c>false</c> otherwise</returns>
-    public bool Read()
+    public override bool Read()
     {
-      var current = Advance();
-      _position = GetCurrentPosition();
+      _attrIndex = -1;
+      var current = _base.Advance();
+      _position = _base.GetCurrentPosition();
 
       if (current != Symbols.EndOfFile)
       {
@@ -122,6 +127,12 @@
             _current = ScriptData(current);
             break;
         }
+
+        if (_current.Type == HtmlTokenType.StartTag
+          && !IsEmptyElement)
+          _depth++;
+        else if (_current.Type == HtmlTokenType.EndTag)
+          _depth--;
 
         var tag = _current as HtmlTagNode;
         if (_svgDepth < 0
@@ -204,7 +215,7 @@
     /// <param name="c">The next input character.</param>
     private HtmlNode Data(Char c)
     {
-      return c == Symbols.LessThan ? TagOpen(Advance()) : DataText(c);
+      return c == Symbols.LessThan ? TagOpen(_base.Advance()) : DataText(c);
     }
 
     private HtmlNode DataText(Char c)
@@ -215,11 +226,11 @@
         {
           case Symbols.LessThan:
           case Symbols.EndOfFile:
-            Back();
+            _base.Back();
             return NewCharacter();
 
           case Symbols.Ampersand:
-            AppendCharacterReference(Advance());
+            AppendCharacterReference(_base.Advance());
             break;
 
           case Symbols.Null:
@@ -227,11 +238,11 @@
             break;
 
           default:
-            StringBuffer.Append(c);
+            _base.StringBuffer.Append(c);
             break;
         }
 
-        c = Advance();
+        c = _base.Advance();
       }
     }
 
@@ -254,15 +265,15 @@
             break;
 
           case Symbols.EndOfFile:
-            Back();
+            _base.Back();
             return NewCharacter();
 
           default:
-            StringBuffer.Append(c);
+            _base.StringBuffer.Append(c);
             break;
         }
 
-        c = Advance();
+        c = _base.Advance();
       }
     }
 
@@ -276,7 +287,7 @@
     /// <param name="c">The next input character.</param>
     private HtmlNode RCData(Char c)
     {
-      return c == Symbols.LessThan ? RCDataLt(Advance()) : RCDataText(c);
+      return c == Symbols.LessThan ? RCDataLt(_base.Advance()) : RCDataText(c);
     }
 
     private HtmlNode RCDataText(Char c)
@@ -286,12 +297,12 @@
         switch (c)
         {
           case Symbols.Ampersand:
-            AppendCharacterReference(Advance());
+            AppendCharacterReference(_base.Advance());
             break;
 
           case Symbols.LessThan:
           case Symbols.EndOfFile:
-            Back();
+            _base.Back();
             return NewCharacter();
 
           case Symbols.Null:
@@ -299,11 +310,11 @@
             break;
 
           default:
-            StringBuffer.Append(c);
+            _base.StringBuffer.Append(c);
             break;
         }
 
-        c = Advance();
+        c = _base.Advance();
       }
     }
 
@@ -316,27 +327,27 @@
       if (c == Symbols.Solidus)
       {
         // See 8.2.4.12 RCDATA end tag open state
-        c = Advance();
+        c = _base.Advance();
 
         if (c.IsUppercaseAscii())
         {
-          StringBuffer.Append(Char.ToLowerInvariant(c));
-          return RCDataNameEndTag(Advance());
+          _base.StringBuffer.Append(Char.ToLowerInvariant(c));
+          return RCDataNameEndTag(_base.Advance());
         }
         else if (c.IsLowercaseAscii())
         {
-          StringBuffer.Append(c);
-          return RCDataNameEndTag(Advance());
+          _base.StringBuffer.Append(c);
+          return RCDataNameEndTag(_base.Advance());
         }
         else
         {
-          StringBuffer.Append(Symbols.LessThan).Append(Symbols.Solidus);
+          _base.StringBuffer.Append(Symbols.LessThan).Append(Symbols.Solidus);
           return RCDataText(c);
         }
       }
       else
       {
-        StringBuffer.Append(Symbols.LessThan);
+        _base.StringBuffer.Append(Symbols.LessThan);
         return RCDataText(c);
       }
     }
@@ -357,19 +368,19 @@
         }
         else if (c.IsUppercaseAscii())
         {
-          StringBuffer.Append(Char.ToLowerInvariant(c));
+          _base.StringBuffer.Append(Char.ToLowerInvariant(c));
         }
         else if (c.IsLowercaseAscii())
         {
-          StringBuffer.Append(c);
+          _base.StringBuffer.Append(c);
         }
         else
         {
-          StringBuffer.Insert(0, Symbols.LessThan).Insert(1, Symbols.Solidus);
+          _base.StringBuffer.Insert(0, Symbols.LessThan).Insert(1, Symbols.Solidus);
           return RCDataText(c);
         }
 
-        c = Advance();
+        c = _base.Advance();
       }
     }
 
@@ -383,7 +394,7 @@
     /// <param name="c">The next input character.</param>
     private HtmlNode Rawtext(Char c)
     {
-      return c == Symbols.LessThan ? RawtextLT(Advance()) : RawtextText(c);
+      return c == Symbols.LessThan ? RawtextLT(_base.Advance()) : RawtextText(c);
     }
 
     private HtmlNode RawtextText(Char c)
@@ -394,7 +405,7 @@
         {
           case Symbols.LessThan:
           case Symbols.EndOfFile:
-            Back();
+            _base.Back();
             return NewCharacter();
 
           case Symbols.Null:
@@ -402,11 +413,11 @@
             break;
 
           default:
-            StringBuffer.Append(c);
+            _base.StringBuffer.Append(c);
             break;
         }
 
-        c = Advance();
+        c = _base.Advance();
       }
     }
 
@@ -419,27 +430,27 @@
       if (c == Symbols.Solidus)
       {
         // See 8.2.4.15 RAWTEXT end tag open state
-        c = Advance();
+        c = _base.Advance();
 
         if (c.IsUppercaseAscii())
         {
-          StringBuffer.Append(Char.ToLowerInvariant(c));
-          return RawtextNameEndTag(Advance());
+          _base.StringBuffer.Append(Char.ToLowerInvariant(c));
+          return RawtextNameEndTag(_base.Advance());
         }
         else if (c.IsLowercaseAscii())
         {
-          StringBuffer.Append(c);
-          return RawtextNameEndTag(Advance());
+          _base.StringBuffer.Append(c);
+          return RawtextNameEndTag(_base.Advance());
         }
         else
         {
-          StringBuffer.Append(Symbols.LessThan).Append(Symbols.Solidus);
+          _base.StringBuffer.Append(Symbols.LessThan).Append(Symbols.Solidus);
           return RawtextText(c);
         }
       }
       else
       {
-        StringBuffer.Append(Symbols.LessThan);
+        _base.StringBuffer.Append(Symbols.LessThan);
         return RawtextText(c);
       }
     }
@@ -460,19 +471,19 @@
         }
         else if (c.IsUppercaseAscii())
         {
-          StringBuffer.Append(Char.ToLowerInvariant(c));
+          _base.StringBuffer.Append(Char.ToLowerInvariant(c));
         }
         else if (c.IsLowercaseAscii())
         {
-          StringBuffer.Append(c);
+          _base.StringBuffer.Append(c);
         }
         else
         {
-          StringBuffer.Insert(0, Symbols.LessThan).Insert(1, Symbols.Solidus);
+          _base.StringBuffer.Insert(0, Symbols.LessThan).Insert(1, Symbols.Solidus);
           return RawtextText(c);
         }
 
-        c = Advance();
+        c = _base.Advance();
       }
     }
 
@@ -490,18 +501,18 @@
       {
         if (c == Symbols.EndOfFile)
         {
-          Back();
+          _base.Back();
           break;
         }
-        else if (c == Symbols.SquareBracketClose && ContinuesWithSensitive("]]>"))
+        else if (c == Symbols.SquareBracketClose && _base.ContinuesWithSensitive("]]>"))
         {
-          Advance(2);
+          _base.Advance(2);
           break;
         }
         else
         {
-          StringBuffer.Append(c);
-          c = Advance();
+          _base.StringBuffer.Append(c);
+          c = _base.Advance();
         }
       }
 
@@ -517,8 +528,8 @@
     {
       if (c.IsSpaceCharacter() || c == Symbols.LessThan || c == Symbols.EndOfFile || c == Symbols.Ampersand || c == allowedCharacter)
       {
-        Back();
-        StringBuffer.Append(Symbols.Ampersand);
+        _base.Back();
+        _base.StringBuffer.Append(Symbols.Ampersand);
       }
       else
       {
@@ -526,7 +537,7 @@
 
         if (c == Symbols.Num)
         {
-          entity = GetNumericCharacterReference(Advance());
+          entity = GetNumericCharacterReference(_base.Advance());
         }
         else
         {
@@ -535,11 +546,11 @@
 
         if (entity == null)
         {
-          StringBuffer.Append(Symbols.Ampersand);
+          _base.StringBuffer.Append(Symbols.Ampersand);
         }
         else
         {
-          StringBuffer.Append(entity);
+          _base.StringBuffer.Append(entity);
         }
       }
     }
@@ -556,7 +567,7 @@
       {
         exp = 16;
 
-        while ((c = Advance()).IsHex())
+        while ((c = _base.Advance()).IsHex())
         {
           nums.Add(c.FromHex());
         }
@@ -566,7 +577,7 @@
         while (c.IsDigit())
         {
           nums.Add(c.FromHex());
-          c = Advance();
+          c = _base.Advance();
         }
       }
 
@@ -578,11 +589,11 @@
 
       if (nums.Count == 0)
       {
-        Back(2);
+        _base.Back(2);
 
         if (isHex)
         {
-          Back();
+          _base.Back();
         }
 
         RaiseErrorOccurred(HtmlParseError.CharacterReferenceWrongNumber);
@@ -592,7 +603,7 @@
       if (c != Symbols.Semicolon)
       {
         RaiseErrorOccurred(HtmlParseError.CharacterReferenceSemicolonMissing);
-        Back();
+        _base.Back();
       }
 
       if (HtmlEntityService.IsInCharacterTable(num))
@@ -616,10 +627,10 @@
     private String GetLookupCharacterReference(Char c, Char allowedCharacter)
     {
       var entity = default(String);
-      var start = InsertionPoint - 1;
+      var start = _base.InsertionPoint - 1;
       var reference = new Char[32];
       var index = 0;
-      var chr = CurrentChar;
+      var chr = _base.CurrentChar;
 
       do
       {
@@ -629,7 +640,7 @@
         }
 
         reference[index++] = chr;
-        chr = Advance();
+        chr = _base.Advance();
       }
       while (chr != Symbols.EndOfFile && index < 31);
 
@@ -647,11 +658,11 @@
 
         if (entity == null)
         {
-          Back();
+          _base.Back();
         }
       }
 
-      chr = CurrentChar;
+      chr = _base.CurrentChar;
 
       if (chr != Symbols.Semicolon)
       {
@@ -662,11 +673,11 @@
             RaiseErrorOccurred(HtmlParseError.CharacterReferenceAttributeEqualsFound);
           }
 
-          InsertionPoint = start;
+          _base.InsertionPoint = start;
           return null;
         }
 
-        Back();
+        _base.Back();
         RaiseErrorOccurred(HtmlParseError.CharacterReferenceNotTerminated);
       }
 
@@ -685,27 +696,27 @@
     {
       if (c == Symbols.Solidus)
       {
-        return TagEnd(Advance());
+        return TagEnd(_base.Advance());
       }
       else if (c.IsLowercaseAscii())
       {
-        StringBuffer.Append(c);
+        _base.StringBuffer.Append(c);
         return TagName(NewTagOpen());
       }
       else if (c.IsUppercaseAscii())
       {
-        StringBuffer.Append(Char.ToLowerInvariant(c));
+        _base.StringBuffer.Append(Char.ToLowerInvariant(c));
         return TagName(NewTagOpen());
       }
       else if (c == Symbols.ExclamationMark)
       {
-        return MarkupDeclaration(Advance());
+        return MarkupDeclaration(_base.Advance());
       }
       else if (c != Symbols.QuestionMark)
       {
         State = HtmlParseMode.PCData;
         RaiseErrorOccurred(HtmlParseError.AmbiguousOpenTag);
-        StringBuffer.Append(Symbols.LessThan);
+        _base.StringBuffer.Append(Symbols.LessThan);
         return DataText(c);
       }
       else
@@ -723,25 +734,25 @@
     {
       if (c.IsLowercaseAscii())
       {
-        StringBuffer.Append(c);
+        _base.StringBuffer.Append(c);
         return TagName(NewTagClose());
       }
       else if (c.IsUppercaseAscii())
       {
-        StringBuffer.Append(Char.ToLowerInvariant(c));
+        _base.StringBuffer.Append(Char.ToLowerInvariant(c));
         return TagName(NewTagClose());
       }
       else if (c == Symbols.GreaterThan)
       {
         State = HtmlParseMode.PCData;
         RaiseErrorOccurred(HtmlParseError.TagClosedWrong);
-        return Data(Advance());
+        return Data(_base.Advance());
       }
       else if (c == Symbols.EndOfFile)
       {
-        Back();
+        _base.Back();
         RaiseErrorOccurred(HtmlParseError.EOF);
-        StringBuffer.Append(Symbols.LessThan).Append(Symbols.Solidus);
+        _base.StringBuffer.Append(Symbols.LessThan).Append(Symbols.Solidus);
         return NewCharacter();
       }
       else
@@ -759,26 +770,26 @@
     {
       while (true)
       {
-        var c = Advance();
+        var c = _base.Advance();
 
         if (c == Symbols.GreaterThan)
         {
-          tag.Value = FlushBuffer();
+          tag.Value = _base.FlushBuffer();
           return EmitTag(tag);
         }
         else if (c.IsSpaceCharacter())
         {
-          tag.Value = FlushBuffer();
+          tag.Value = _base.FlushBuffer();
           return ParseAttributes(tag);
         }
         else if (c == Symbols.Solidus)
         {
-          tag.Value = FlushBuffer();
+          tag.Value = _base.FlushBuffer();
           return TagSelfClosing(tag);
         }
         else if (c.IsUppercaseAscii())
         {
-          StringBuffer.Append(Char.ToLowerInvariant(c));
+          _base.StringBuffer.Append(Char.ToLowerInvariant(c));
         }
         else if (c == Symbols.Null)
         {
@@ -786,7 +797,7 @@
         }
         else if (c != Symbols.EndOfFile)
         {
-          StringBuffer.Append(c);
+          _base.StringBuffer.Append(c);
         }
         else
         {
@@ -801,7 +812,7 @@
     /// <param name="tag">The current tag token.</param>
     private HtmlNode TagSelfClosing(HtmlTagNode tag)
     {
-      switch (Advance())
+      switch (_base.Advance())
       {
         case Symbols.GreaterThan:
           tag.IsSelfClosing = true;
@@ -810,7 +821,7 @@
           return NewEof();
         default:
           RaiseErrorOccurred(HtmlParseError.ClosingSlashMisplaced);
-          Back();
+          _base.Back();
           return ParseAttributes(tag);
       }
     }
@@ -821,20 +832,20 @@
     /// <param name="c">The next input character.</param>
     private HtmlNode MarkupDeclaration(Char c)
     {
-      if (ContinuesWithSensitive("--"))
+      if (_base.ContinuesWithSensitive("--"))
       {
-        Advance();
-        return CommentStart(Advance());
+        _base.Advance();
+        return CommentStart(_base.Advance());
       }
-      else if (ContinuesWithInsensitive(TagNames.Doctype))
+      else if (_base.ContinuesWithInsensitive(TagNames.Doctype))
       {
-        Advance(6);
-        return Doctype(Advance());
+        _base.Advance(6);
+        return Doctype(_base.Advance());
       }
-      else if (IsAcceptingCharacterData && ContinuesWithSensitive(Keywords.CData))
+      else if (IsAcceptingCharacterData && _base.ContinuesWithSensitive(Keywords.CData))
       {
-        Advance(6);
-        return CharacterData(Advance());
+        _base.Advance(6);
+        return CharacterData(_base.Advance());
       }
       else
       {
@@ -853,7 +864,7 @@
     /// <param name="c">The current character.</param>
     private HtmlNode BogusComment(Char c, bool hadExclamation = false)
     {
-      StringBuffer.Clear();
+      _base.StringBuffer.Clear();
 
       var downlevelRevealedConditional = hadExclamation && c == '[';
 
@@ -864,14 +875,14 @@
           case Symbols.GreaterThan:
             break;
           case Symbols.EndOfFile:
-            Back();
+            _base.Back();
             break;
           case Symbols.Null:
             c = Symbols.Replacement;
             goto default;
           default:
-            StringBuffer.Append(c);
-            c = Advance();
+            _base.StringBuffer.Append(c);
+            c = _base.Advance();
             continue;
         }
 
@@ -888,26 +899,26 @@
     /// <param name="c">The next input character.</param>
     private HtmlNode CommentStart(Char c)
     {
-      StringBuffer.Clear();
+      _base.StringBuffer.Clear();
 
       switch (c)
       {
         case Symbols.Minus:
-          return CommentDashStart(Advance()) ?? Comment(Advance());
+          return CommentDashStart(_base.Advance()) ?? Comment(_base.Advance());
         case Symbols.Null:
           AppendReplacement();
-          return Comment(Advance());
+          return Comment(_base.Advance());
         case Symbols.GreaterThan:
           State = HtmlParseMode.PCData;
           RaiseErrorOccurred(HtmlParseError.TagClosedWrong);
           break;
         case Symbols.EndOfFile:
           RaiseErrorOccurred(HtmlParseError.EOF);
-          Back();
+          _base.Back();
           break;
         default:
-          StringBuffer.Append(c);
-          return Comment(Advance());
+          _base.StringBuffer.Append(c);
+          return Comment(_base.Advance());
       }
 
       return NewComment();
@@ -922,22 +933,22 @@
       switch (c)
       {
         case Symbols.Minus:
-          return CommentEnd(Advance());
+          return CommentEnd(_base.Advance());
         case Symbols.Null:
           RaiseErrorOccurred(HtmlParseError.Null);
-          StringBuffer.Append(Symbols.Minus).Append(Symbols.Replacement);
-          return Comment(Advance());
+          _base.StringBuffer.Append(Symbols.Minus).Append(Symbols.Replacement);
+          return Comment(_base.Advance());
         case Symbols.GreaterThan:
           State = HtmlParseMode.PCData;
           RaiseErrorOccurred(HtmlParseError.TagClosedWrong);
           break;
         case Symbols.EndOfFile:
           RaiseErrorOccurred(HtmlParseError.EOF);
-          Back();
+          _base.Back();
           break;
         default:
-          StringBuffer.Append(Symbols.Minus).Append(c);
-          return Comment(Advance());
+          _base.StringBuffer.Append(Symbols.Minus).Append(c);
+          return Comment(_base.Advance());
       }
 
       return NewComment();
@@ -954,7 +965,7 @@
         switch (c)
         {
           case Symbols.Minus:
-            var result = CommentDashEnd(Advance());
+            var result = CommentDashEnd(_base.Advance());
 
             if (result != null)
             {
@@ -964,17 +975,17 @@
             break;
           case Symbols.EndOfFile:
             RaiseErrorOccurred(HtmlParseError.EOF);
-            Back();
+            _base.Back();
             return NewComment();
           case Symbols.Null:
             AppendReplacement();
             break;
           default:
-            StringBuffer.Append(c);
+            _base.StringBuffer.Append(c);
             break;
         }
 
-        c = Advance();
+        c = _base.Advance();
       }
     }
 
@@ -987,10 +998,10 @@
       switch (c)
       {
         case Symbols.Minus:
-          return CommentEnd(Advance());
+          return CommentEnd(_base.Advance());
         case Symbols.EndOfFile:
           RaiseErrorOccurred(HtmlParseError.EOF);
-          Back();
+          _base.Back();
           return NewComment();
         case Symbols.Null:
           RaiseErrorOccurred(HtmlParseError.Null);
@@ -998,7 +1009,7 @@
           break;
       }
 
-      StringBuffer.Append(Symbols.Minus).Append(c);
+      _base.StringBuffer.Append(Symbols.Minus).Append(c);
       return null;
     }
 
@@ -1017,26 +1028,26 @@
             return NewComment();
           case Symbols.Null:
             RaiseErrorOccurred(HtmlParseError.Null);
-            StringBuffer.Append(Symbols.Minus).Append(Symbols.Replacement);
+            _base.StringBuffer.Append(Symbols.Minus).Append(Symbols.Replacement);
             return null;
           case Symbols.ExclamationMark:
             RaiseErrorOccurred(HtmlParseError.CommentEndedWithEM);
-            return CommentBangEnd(Advance());
+            return CommentBangEnd(_base.Advance());
           case Symbols.Minus:
             RaiseErrorOccurred(HtmlParseError.CommentEndedWithDash);
-            StringBuffer.Append(Symbols.Minus);
+            _base.StringBuffer.Append(Symbols.Minus);
             break;
           case Symbols.EndOfFile:
             RaiseErrorOccurred(HtmlParseError.EOF);
-            Back();
+            _base.Back();
             return NewComment();
           default:
             RaiseErrorOccurred(HtmlParseError.CommentEndedUnexpected);
-            StringBuffer.Append(Symbols.Minus).Append(Symbols.Minus).Append(c);
+            _base.StringBuffer.Append(Symbols.Minus).Append(Symbols.Minus).Append(c);
             return null;
         }
 
-        c = Advance();
+        c = _base.Advance();
       }
     }
 
@@ -1049,21 +1060,21 @@
       switch (c)
       {
         case Symbols.Minus:
-          StringBuffer.Append(Symbols.Minus).Append(Symbols.Minus).Append(Symbols.ExclamationMark);
-          return CommentDashEnd(Advance());
+          _base.StringBuffer.Append(Symbols.Minus).Append(Symbols.Minus).Append(Symbols.ExclamationMark);
+          return CommentDashEnd(_base.Advance());
         case Symbols.GreaterThan:
           State = HtmlParseMode.PCData;
           break;
         case Symbols.Null:
           RaiseErrorOccurred(HtmlParseError.Null);
-          StringBuffer.Append(Symbols.Minus).Append(Symbols.Minus).Append(Symbols.ExclamationMark).Append(Symbols.Replacement);
+          _base.StringBuffer.Append(Symbols.Minus).Append(Symbols.Minus).Append(Symbols.ExclamationMark).Append(Symbols.Replacement);
           return null;
         case Symbols.EndOfFile:
           RaiseErrorOccurred(HtmlParseError.EOF);
-          Back();
+          _base.Back();
           break;
         default:
-          StringBuffer.Append(Symbols.Minus).Append(Symbols.Minus).Append(Symbols.ExclamationMark).Append(c);
+          _base.StringBuffer.Append(Symbols.Minus).Append(Symbols.Minus).Append(Symbols.ExclamationMark).Append(c);
           return null;
       }
 
@@ -1082,12 +1093,12 @@
     {
       if (c.IsSpaceCharacter())
       {
-        return DoctypeNameBefore(Advance());
+        return DoctypeNameBefore(_base.Advance());
       }
       else if (c == Symbols.EndOfFile)
       {
         RaiseErrorOccurred(HtmlParseError.EOF);
-        Back();
+        _base.Back();
         return NewDoctype(true);
       }
       else
@@ -1104,12 +1115,12 @@
     private HtmlNode DoctypeNameBefore(Char c)
     {
       while (c.IsSpaceCharacter())
-        c = Advance();
+        c = _base.Advance();
 
       if (c.IsUppercaseAscii())
       {
         var doctype = NewDoctype(false);
-        StringBuffer.Append(Char.ToLowerInvariant(c));
+        _base.StringBuffer.Append(Char.ToLowerInvariant(c));
         return DoctypeName(doctype);
       }
       else if (c == Symbols.Null)
@@ -1129,13 +1140,13 @@
       {
         var doctype = NewDoctype(true);
         RaiseErrorOccurred(HtmlParseError.EOF);
-        Back();
+        _base.Back();
         return doctype;
       }
       else
       {
         var doctype = NewDoctype(false);
-        StringBuffer.Append(c);
+        _base.StringBuffer.Append(c);
         return DoctypeName(doctype);
       }
     }
@@ -1148,22 +1159,22 @@
     {
       while (true)
       {
-        var c = Advance();
+        var c = _base.Advance();
 
         if (c.IsSpaceCharacter())
         {
-          doctype.Value = FlushBuffer();
+          doctype.Value = _base.FlushBuffer();
           return DoctypeNameAfter(doctype);
         }
         else if (c == Symbols.GreaterThan)
         {
           State = HtmlParseMode.PCData;
-          doctype.Value = FlushBuffer();
+          doctype.Value = _base.FlushBuffer();
           break;
         }
         else if (c.IsUppercaseAscii())
         {
-          StringBuffer.Append(Char.ToLowerInvariant(c));
+          _base.StringBuffer.Append(Char.ToLowerInvariant(c));
         }
         else if (c == Symbols.Null)
         {
@@ -1172,14 +1183,14 @@
         else if (c == Symbols.EndOfFile)
         {
           RaiseErrorOccurred(HtmlParseError.EOF);
-          Back();
+          _base.Back();
           doctype.IsQuirksForced = true;
-          doctype.Value = FlushBuffer();
+          doctype.Value = _base.FlushBuffer();
           break;
         }
         else
         {
-          StringBuffer.Append(c);
+          _base.StringBuffer.Append(c);
         }
       }
 
@@ -1192,7 +1203,7 @@
     /// <param name="doctype">The current doctype token.</param>
     private HtmlNode DoctypeNameAfter(HtmlDoctype doctype)
     {
-      var c = SkipSpaces();
+      var c = _base.SkipSpaces();
 
       if (c == Symbols.GreaterThan)
       {
@@ -1201,17 +1212,17 @@
       else if (c == Symbols.EndOfFile)
       {
         RaiseErrorOccurred(HtmlParseError.EOF);
-        Back();
+        _base.Back();
         doctype.IsQuirksForced = true;
       }
-      else if (ContinuesWithInsensitive(Keywords.Public))
+      else if (_base.ContinuesWithInsensitive(Keywords.Public))
       {
-        Advance(5);
+        _base.Advance(5);
         return DoctypePublic(doctype);
       }
-      else if (ContinuesWithInsensitive(Keywords.System))
+      else if (_base.ContinuesWithInsensitive(Keywords.System))
       {
-        Advance(5);
+        _base.Advance(5);
         return DoctypeSystem(doctype);
       }
       else
@@ -1230,7 +1241,7 @@
     /// <param name="doctype">The current doctype token.</param>
     private HtmlNode DoctypePublic(HtmlDoctype doctype)
     {
-      var c = Advance();
+      var c = _base.Advance();
 
       if (c.IsSpaceCharacter())
       {
@@ -1258,7 +1269,7 @@
       {
         RaiseErrorOccurred(HtmlParseError.EOF);
         doctype.IsQuirksForced = true;
-        Back();
+        _base.Back();
       }
       else
       {
@@ -1276,7 +1287,7 @@
     /// <param name="doctype">The current doctype token.</param>
     private HtmlNode DoctypePublicIdentifierBefore(HtmlDoctype doctype)
     {
-      var c = SkipSpaces();
+      var c = _base.SkipSpaces();
 
       if (c == Symbols.DoubleQuote)
       {
@@ -1298,7 +1309,7 @@
       {
         RaiseErrorOccurred(HtmlParseError.EOF);
         doctype.IsQuirksForced = true;
-        Back();
+        _base.Back();
       }
       else
       {
@@ -1318,11 +1329,11 @@
     {
       while (true)
       {
-        var c = Advance();
+        var c = _base.Advance();
 
         if (c == Symbols.DoubleQuote)
         {
-          doctype.PublicIdentifier = FlushBuffer();
+          doctype.PublicIdentifier = _base.FlushBuffer();
           return DoctypePublicIdentifierAfter(doctype);
         }
         else if (c == Symbols.Null)
@@ -1334,20 +1345,20 @@
           State = HtmlParseMode.PCData;
           RaiseErrorOccurred(HtmlParseError.TagClosedWrong);
           doctype.IsQuirksForced = true;
-          doctype.PublicIdentifier = FlushBuffer();
+          doctype.PublicIdentifier = _base.FlushBuffer();
           break;
         }
         else if (c == Symbols.EndOfFile)
         {
           RaiseErrorOccurred(HtmlParseError.EOF);
-          Back();
+          _base.Back();
           doctype.IsQuirksForced = true;
-          doctype.PublicIdentifier = FlushBuffer();
+          doctype.PublicIdentifier = _base.FlushBuffer();
           break;
         }
         else
         {
-          StringBuffer.Append(c);
+          _base.StringBuffer.Append(c);
         }
       }
 
@@ -1362,11 +1373,11 @@
     {
       while (true)
       {
-        var c = Advance();
+        var c = _base.Advance();
 
         if (c == Symbols.SingleQuote)
         {
-          doctype.PublicIdentifier = FlushBuffer();
+          doctype.PublicIdentifier = _base.FlushBuffer();
           return DoctypePublicIdentifierAfter(doctype);
         }
         else if (c == Symbols.Null)
@@ -1378,20 +1389,20 @@
           State = HtmlParseMode.PCData;
           RaiseErrorOccurred(HtmlParseError.TagClosedWrong);
           doctype.IsQuirksForced = true;
-          doctype.PublicIdentifier = FlushBuffer();
+          doctype.PublicIdentifier = _base.FlushBuffer();
           break;
         }
         else if (c == Symbols.EndOfFile)
         {
           RaiseErrorOccurred(HtmlParseError.EOF);
           doctype.IsQuirksForced = true;
-          doctype.PublicIdentifier = FlushBuffer();
-          Back();
+          doctype.PublicIdentifier = _base.FlushBuffer();
+          _base.Back();
           break;
         }
         else
         {
-          StringBuffer.Append(c);
+          _base.StringBuffer.Append(c);
         }
       }
 
@@ -1404,7 +1415,7 @@
     /// <param name="doctype">The current doctype token.</param>
     private HtmlNode DoctypePublicIdentifierAfter(HtmlDoctype doctype)
     {
-      var c = Advance();
+      var c = _base.Advance();
 
       if (c.IsSpaceCharacter())
       {
@@ -1430,7 +1441,7 @@
       {
         RaiseErrorOccurred(HtmlParseError.EOF);
         doctype.IsQuirksForced = true;
-        Back();
+        _base.Back();
       }
       else
       {
@@ -1448,7 +1459,7 @@
     /// <param name="doctype">The current doctype token.</param>
     private HtmlNode DoctypeBetween(HtmlDoctype doctype)
     {
-      var c = SkipSpaces();
+      var c = _base.SkipSpaces();
 
       if (c == Symbols.GreaterThan)
       {
@@ -1468,7 +1479,7 @@
       {
         RaiseErrorOccurred(HtmlParseError.EOF);
         doctype.IsQuirksForced = true;
-        Back();
+        _base.Back();
       }
       else
       {
@@ -1486,7 +1497,7 @@
     /// <param name="doctype">The current doctype token.</param>
     private HtmlNode DoctypeSystem(HtmlDoctype doctype)
     {
-      var c = Advance();
+      var c = _base.Advance();
 
       if (c.IsSpaceCharacter())
       {
@@ -1508,14 +1519,14 @@
       else if (c == Symbols.GreaterThan)
       {
         RaiseErrorOccurred(HtmlParseError.TagClosedWrong);
-        doctype.SystemIdentifier = FlushBuffer();
+        doctype.SystemIdentifier = _base.FlushBuffer();
         doctype.IsQuirksForced = true;
       }
       else if (c == Symbols.EndOfFile)
       {
         RaiseErrorOccurred(HtmlParseError.EOF);
         doctype.IsQuirksForced = true;
-        Back();
+        _base.Back();
       }
       else
       {
@@ -1533,7 +1544,7 @@
     /// <param name="doctype">The current doctype token.</param>
     private HtmlNode DoctypeSystemIdentifierBefore(HtmlDoctype doctype)
     {
-      var c = SkipSpaces();
+      var c = _base.SkipSpaces();
 
       if (c == Symbols.DoubleQuote)
       {
@@ -1550,14 +1561,14 @@
         State = HtmlParseMode.PCData;
         RaiseErrorOccurred(HtmlParseError.TagClosedWrong);
         doctype.IsQuirksForced = true;
-        doctype.SystemIdentifier = FlushBuffer();
+        doctype.SystemIdentifier = _base.FlushBuffer();
       }
       else if (c == Symbols.EndOfFile)
       {
         RaiseErrorOccurred(HtmlParseError.EOF);
         doctype.IsQuirksForced = true;
-        doctype.SystemIdentifier = FlushBuffer();
-        Back();
+        doctype.SystemIdentifier = _base.FlushBuffer();
+        _base.Back();
       }
       else
       {
@@ -1577,11 +1588,11 @@
     {
       while (true)
       {
-        var c = Advance();
+        var c = _base.Advance();
 
         if (c == Symbols.DoubleQuote)
         {
-          doctype.SystemIdentifier = FlushBuffer();
+          doctype.SystemIdentifier = _base.FlushBuffer();
           return DoctypeSystemIdentifierAfter(doctype);
         }
         else if (c == Symbols.Null)
@@ -1593,20 +1604,20 @@
           State = HtmlParseMode.PCData;
           RaiseErrorOccurred(HtmlParseError.TagClosedWrong);
           doctype.IsQuirksForced = true;
-          doctype.SystemIdentifier = FlushBuffer();
+          doctype.SystemIdentifier = _base.FlushBuffer();
           break;
         }
         else if (c == Symbols.EndOfFile)
         {
           RaiseErrorOccurred(HtmlParseError.EOF);
           doctype.IsQuirksForced = true;
-          doctype.SystemIdentifier = FlushBuffer();
-          Back();
+          doctype.SystemIdentifier = _base.FlushBuffer();
+          _base.Back();
           break;
         }
         else
         {
-          StringBuffer.Append(c);
+          _base.StringBuffer.Append(c);
         }
       }
 
@@ -1621,12 +1632,12 @@
     {
       while (true)
       {
-        var c = Advance();
+        var c = _base.Advance();
 
         switch (c)
         {
           case Symbols.SingleQuote:
-            doctype.SystemIdentifier = FlushBuffer();
+            doctype.SystemIdentifier = _base.FlushBuffer();
             return DoctypeSystemIdentifierAfter(doctype);
           case Symbols.Null:
             AppendReplacement();
@@ -1635,16 +1646,16 @@
             State = HtmlParseMode.PCData;
             RaiseErrorOccurred(HtmlParseError.TagClosedWrong);
             doctype.IsQuirksForced = true;
-            doctype.SystemIdentifier = FlushBuffer();
+            doctype.SystemIdentifier = _base.FlushBuffer();
             break;
           case Symbols.EndOfFile:
             RaiseErrorOccurred(HtmlParseError.EOF);
             doctype.IsQuirksForced = true;
-            doctype.SystemIdentifier = FlushBuffer();
-            Back();
+            doctype.SystemIdentifier = _base.FlushBuffer();
+            _base.Back();
             break;
           default:
-            StringBuffer.Append(c);
+            _base.StringBuffer.Append(c);
             continue;
         }
 
@@ -1658,7 +1669,7 @@
     /// <param name="doctype">The current doctype token.</param>
     private HtmlNode DoctypeSystemIdentifierAfter(HtmlDoctype doctype)
     {
-      var c = SkipSpaces();
+      var c = _base.SkipSpaces();
 
       switch (c)
       {
@@ -1668,7 +1679,7 @@
         case Symbols.EndOfFile:
           RaiseErrorOccurred(HtmlParseError.EOF);
           doctype.IsQuirksForced = true;
-          Back();
+          _base.Back();
           break;
         default:
           RaiseErrorOccurred(HtmlParseError.DoctypeInvalidCharacter);
@@ -1686,13 +1697,13 @@
     {
       while (true)
       {
-        switch (Advance())
+        switch (_base.Advance())
         {
           case Symbols.GreaterThan:
             State = HtmlParseMode.PCData;
             break;
           case Symbols.EndOfFile:
-            Back();
+            _base.Back();
             break;
           default:
             continue;
@@ -1730,7 +1741,7 @@
           // See 8.2.4.34 Before attribute name state
           case AttributeState.BeforeName:
             {
-              c = SkipSpaces();
+              c = _base.SkipSpaces();
 
               if (c == Symbols.Solidus)
               {
@@ -1742,7 +1753,7 @@
               }
               else if (c.IsUppercaseAscii())
               {
-                StringBuffer.Append(Char.ToLowerInvariant(c));
+                _base.StringBuffer.Append(Char.ToLowerInvariant(c));
                 state = AttributeState.Name;
               }
               else if (c == Symbols.Null)
@@ -1753,12 +1764,12 @@
               else if (c == Symbols.SingleQuote || c == Symbols.DoubleQuote || c == Symbols.Equality || c == Symbols.LessThan)
               {
                 RaiseErrorOccurred(HtmlParseError.AttributeNameInvalid);
-                StringBuffer.Append(c);
+                _base.StringBuffer.Append(c);
                 state = AttributeState.Name;
               }
               else if (c != Symbols.EndOfFile)
               {
-                StringBuffer.Append(c);
+                _base.StringBuffer.Append(c);
                 state = AttributeState.Name;
               }
               else
@@ -1772,36 +1783,36 @@
           // See 8.2.4.35 Attribute name state
           case AttributeState.Name:
             {
-              c = Advance();
+              c = _base.Advance();
 
               if (c == Symbols.Equality)
               {
-                tag.AddAttribute(FlushBuffer());
+                tag.AddAttribute(_base.FlushBuffer());
                 state = AttributeState.BeforeValue;
               }
               else if (c == Symbols.GreaterThan)
               {
-                tag.AddAttribute(FlushBuffer());
+                tag.AddAttribute(_base.FlushBuffer());
                 return EmitTag(tag);
               }
               else if (c.IsSpaceCharacter())
               {
-                tag.AddAttribute(FlushBuffer());
+                tag.AddAttribute(_base.FlushBuffer());
                 state = AttributeState.AfterName;
               }
               else if (c == Symbols.Solidus)
               {
-                tag.AddAttribute(FlushBuffer());
+                tag.AddAttribute(_base.FlushBuffer());
                 return TagSelfClosing(tag);
               }
               else if (c.IsUppercaseAscii())
               {
-                StringBuffer.Append(Char.ToLowerInvariant(c));
+                _base.StringBuffer.Append(Char.ToLowerInvariant(c));
               }
               else if (c == Symbols.DoubleQuote || c == Symbols.SingleQuote || c == Symbols.LessThan)
               {
                 RaiseErrorOccurred(HtmlParseError.AttributeNameInvalid);
-                StringBuffer.Append(c);
+                _base.StringBuffer.Append(c);
               }
               else if (c == Symbols.Null)
               {
@@ -1809,7 +1820,7 @@
               }
               else if (c != Symbols.EndOfFile)
               {
-                StringBuffer.Append(c);
+                _base.StringBuffer.Append(c);
               }
               else
               {
@@ -1822,7 +1833,7 @@
           // See 8.2.4.36 After attribute name state
           case AttributeState.AfterName:
             {
-              c = SkipSpaces();
+              c = _base.SkipSpaces();
 
               if (c == Symbols.GreaterThan)
               {
@@ -1838,13 +1849,13 @@
               }
               else if (c.IsUppercaseAscii())
               {
-                StringBuffer.Append(Char.ToLowerInvariant(c));
+                _base.StringBuffer.Append(Char.ToLowerInvariant(c));
                 state = AttributeState.Name;
               }
               else if (c == Symbols.DoubleQuote || c == Symbols.SingleQuote || c == Symbols.LessThan)
               {
                 RaiseErrorOccurred(HtmlParseError.AttributeNameInvalid);
-                StringBuffer.Append(c);
+                _base.StringBuffer.Append(c);
                 state = AttributeState.Name;
               }
               else if (c == Symbols.Null)
@@ -1854,7 +1865,7 @@
               }
               else if (c != Symbols.EndOfFile)
               {
-                StringBuffer.Append(c);
+                _base.StringBuffer.Append(c);
                 state = AttributeState.Name;
               }
               else
@@ -1868,7 +1879,7 @@
           // See 8.2.4.37 Before attribute value state
           case AttributeState.BeforeValue:
             {
-              c = SkipSpaces();
+              c = _base.SkipSpaces();
 
               if (c == Symbols.DoubleQuote || c == Symbols.SingleQuote)
               {
@@ -1887,21 +1898,21 @@
               else if (c == Symbols.LessThan || c == Symbols.Equality || c == Symbols.CurvedQuote)
               {
                 RaiseErrorOccurred(HtmlParseError.AttributeValueInvalid);
-                StringBuffer.Append(c);
+                _base.StringBuffer.Append(c);
                 state = AttributeState.UnquotedValue;
-                c = Advance();
+                c = _base.Advance();
               }
               else if (c == Symbols.Null)
               {
                 AppendReplacement();
                 state = AttributeState.UnquotedValue;
-                c = Advance();
+                c = _base.Advance();
               }
               else if (c != Symbols.EndOfFile)
               {
-                StringBuffer.Append(c);
+                _base.StringBuffer.Append(c);
                 state = AttributeState.UnquotedValue;
-                c = Advance();
+                c = _base.Advance();
               }
               else
               {
@@ -1915,16 +1926,16 @@
           // and 8.2.4.39 Attribute value (single-quoted) state
           case AttributeState.QuotedValue:
             {
-              c = Advance();
+              c = _base.Advance();
 
               if (c == quote)
               {
-                tag.SetAttributeValue(FlushBuffer());
+                tag.SetAttributeValue(_base.FlushBuffer());
                 state = AttributeState.AfterValue;
               }
               else if (c == Symbols.Ampersand)
               {
-                AppendCharacterReference(Advance(), quote);
+                AppendCharacterReference(_base.Advance(), quote);
               }
               else if (c == Symbols.Null)
               {
@@ -1932,7 +1943,7 @@
               }
               else if (c != Symbols.EndOfFile)
               {
-                StringBuffer.Append(c);
+                _base.StringBuffer.Append(c);
               }
               else
               {
@@ -1947,34 +1958,34 @@
             {
               if (c == Symbols.GreaterThan)
               {
-                tag.SetAttributeValue(FlushBuffer());
+                tag.SetAttributeValue(_base.FlushBuffer());
                 return EmitTag(tag);
               }
               else if (c.IsSpaceCharacter())
               {
-                tag.SetAttributeValue(FlushBuffer());
+                tag.SetAttributeValue(_base.FlushBuffer());
                 state = AttributeState.BeforeName;
               }
               else if (c == Symbols.Ampersand)
               {
-                AppendCharacterReference(Advance(), Symbols.GreaterThan);
-                c = Advance();
+                AppendCharacterReference(_base.Advance(), Symbols.GreaterThan);
+                c = _base.Advance();
               }
               else if (c == Symbols.Null)
               {
                 AppendReplacement();
-                c = Advance();
+                c = _base.Advance();
               }
               else if (c == Symbols.DoubleQuote || c == Symbols.SingleQuote || c == Symbols.LessThan || c == Symbols.Equality || c == Symbols.CurvedQuote)
               {
                 RaiseErrorOccurred(HtmlParseError.AttributeValueInvalid);
-                StringBuffer.Append(c);
-                c = Advance();
+                _base.StringBuffer.Append(c);
+                c = _base.Advance();
               }
               else if (c != Symbols.EndOfFile)
               {
-                StringBuffer.Append(c);
-                c = Advance();
+                _base.StringBuffer.Append(c);
+                c = _base.Advance();
               }
               else
               {
@@ -1987,7 +1998,7 @@
           // See 8.2.4.42 After attribute value (quoted) state
           case AttributeState.AfterValue:
             {
-              c = Advance();
+              c = _base.Advance();
 
               if (c == Symbols.GreaterThan)
               {
@@ -2008,7 +2019,7 @@
               else
               {
                 RaiseErrorOccurred(HtmlParseError.AttributeNameExpected);
-                Back();
+                _base.Back();
                 state = AttributeState.BeforeName;
               }
 
@@ -2064,27 +2075,27 @@
                   break;
 
                 case Symbols.LessThan:
-                  StringBuffer.Append(Symbols.LessThan);
+                  _base.StringBuffer.Append(Symbols.LessThan);
                   state = ScriptState.OpenTag;
                   continue;
 
                 case Symbols.EndOfFile:
-                  Back();
+                  _base.Back();
                   return NewCharacter();
 
                 default:
-                  StringBuffer.Append(c);
+                  _base.StringBuffer.Append(c);
                   break;
               }
 
-              c = Advance();
+              c = _base.Advance();
               break;
             }
 
           // See 8.2.4.17 Script data less-than sign state
           case ScriptState.OpenTag:
             {
-              c = Advance();
+              c = _base.Advance();
 
               if (c == Symbols.Solidus)
               {
@@ -2105,8 +2116,8 @@
           // See 8.2.4.20 Script data escape start state
           case ScriptState.StartEscape:
             {
-              StringBuffer.Append(Symbols.ExclamationMark);
-              c = Advance();
+              _base.StringBuffer.Append(Symbols.ExclamationMark);
+              c = _base.Advance();
 
               if (c == Symbols.Minus)
               {
@@ -2123,12 +2134,12 @@
           // See 8.2.4.21 Script data escape start dash state
           case ScriptState.StartEscapeDash:
             {
-              c = Advance();
-              StringBuffer.Append(Symbols.Minus);
+              c = _base.Advance();
+              _base.StringBuffer.Append(Symbols.Minus);
 
               if (c == Symbols.Minus)
               {
-                StringBuffer.Append(Symbols.Minus);
+                _base.StringBuffer.Append(Symbols.Minus);
                 state = ScriptState.EscapedDashDash;
               }
               else
@@ -2142,34 +2153,34 @@
           // See 8.2.4.18 Script data end tag open state
           case ScriptState.EndTag:
             {
-              c = Advance();
-              offset = StringBuffer.Append(Symbols.Solidus).Length;
+              c = _base.Advance();
+              offset = _base.StringBuffer.Append(Symbols.Solidus).Length;
               var tag = NewTagClose();
 
               while (c.IsLetter())
               {
                 // See 8.2.4.19 Script data end tag name state
-                StringBuffer.Append(c);
-                c = Advance();
+                _base.StringBuffer.Append(c);
+                c = _base.Advance();
                 var isspace = c.IsSpaceCharacter();
                 var isclosed = c == Symbols.GreaterThan;
                 var isslash = c == Symbols.Solidus;
-                var hasLength = StringBuffer.Length - offset == length;
+                var hasLength = _base.StringBuffer.Length - offset == length;
 
                 if (hasLength && (isspace || isclosed || isslash))
                 {
-                  var name = StringBuffer.ToString(offset, length);
+                  var name = _base.StringBuffer.ToString(offset, length);
 
                   if (name.Isi(_lastStartTag))
                   {
                     if (offset > 2)
                     {
-                      Back(3 + length);
-                      StringBuffer.Remove(offset - 2, length + 2);
+                      _base.Back(3 + length);
+                      _base.StringBuffer.Remove(offset - 2, length + 2);
                       return NewCharacter();
                     }
 
-                    StringBuffer.Clear();
+                    _base.StringBuffer.Clear();
 
                     if (isspace)
                     {
@@ -2200,26 +2211,26 @@
               switch (c)
               {
                 case Symbols.Minus:
-                  StringBuffer.Append(Symbols.Minus);
-                  c = Advance();
+                  _base.StringBuffer.Append(Symbols.Minus);
+                  c = _base.Advance();
                   state = ScriptState.EscapedDash;
                   continue;
                 case Symbols.LessThan:
-                  c = Advance();
+                  c = _base.Advance();
                   state = ScriptState.EscapedOpenTag;
                   continue;
                 case Symbols.Null:
                   AppendReplacement();
                   break;
                 case Symbols.EndOfFile:
-                  Back();
+                  _base.Back();
                   return NewCharacter();
                 default:
                   state = ScriptState.Normal;
                   continue;
               }
 
-              c = Advance();
+              c = _base.Advance();
               break;
             }
 
@@ -2229,25 +2240,25 @@
               switch (c)
               {
                 case Symbols.Minus:
-                  StringBuffer.Append(Symbols.Minus);
+                  _base.StringBuffer.Append(Symbols.Minus);
                   state = ScriptState.EscapedDashDash;
                   continue;
                 case Symbols.LessThan:
-                  c = Advance();
+                  c = _base.Advance();
                   state = ScriptState.EscapedOpenTag;
                   continue;
                 case Symbols.Null:
                   AppendReplacement();
                   break;
                 case Symbols.EndOfFile:
-                  Back();
+                  _base.Back();
                   return NewCharacter();
                 default:
-                  StringBuffer.Append(c);
+                  _base.StringBuffer.Append(c);
                   break;
               }
 
-              c = Advance();
+              c = _base.Advance();
               state = ScriptState.Escaped;
               break;
             }
@@ -2255,32 +2266,32 @@
           // See 8.2.4.24 Script data escaped dash dash state
           case ScriptState.EscapedDashDash:
             {
-              c = Advance();
+              c = _base.Advance();
 
               switch (c)
               {
                 case Symbols.Minus:
-                  StringBuffer.Append(Symbols.Minus);
+                  _base.StringBuffer.Append(Symbols.Minus);
                   break;
                 case Symbols.LessThan:
-                  c = Advance();
+                  c = _base.Advance();
                   state = ScriptState.EscapedOpenTag;
                   continue;
                 case Symbols.GreaterThan:
-                  StringBuffer.Append(Symbols.GreaterThan);
-                  c = Advance();
+                  _base.StringBuffer.Append(Symbols.GreaterThan);
+                  c = _base.Advance();
                   state = ScriptState.Normal;
                   continue;
                 case Symbols.Null:
                   AppendReplacement();
-                  c = Advance();
+                  c = _base.Advance();
                   state = ScriptState.Escaped;
                   continue;
                 case Symbols.EndOfFile:
                   return NewCharacter();
                 default:
-                  StringBuffer.Append(c);
-                  c = Advance();
+                  _base.StringBuffer.Append(c);
+                  c = _base.Advance();
                   state = ScriptState.Escaped;
                   continue;
               }
@@ -2293,18 +2304,18 @@
             {
               if (c == Symbols.Solidus)
               {
-                c = Advance();
+                c = _base.Advance();
                 state = ScriptState.EscapedEndTag;
               }
               else if (c.IsLetter())
               {
-                offset = StringBuffer.Append(Symbols.LessThan).Length;
-                StringBuffer.Append(c);
+                offset = _base.StringBuffer.Append(Symbols.LessThan).Length;
+                _base.StringBuffer.Append(c);
                 state = ScriptState.StartDoubleEscape;
               }
               else
               {
-                StringBuffer.Append(Symbols.LessThan);
+                _base.StringBuffer.Append(Symbols.LessThan);
                 state = ScriptState.Escaped;
               }
 
@@ -2314,11 +2325,11 @@
           // See 8.2.4.26 Script data escaped end tag open state
           case ScriptState.EscapedEndTag:
             {
-              offset = StringBuffer.Append(Symbols.LessThan).Append(Symbols.Solidus).Length;
+              offset = _base.StringBuffer.Append(Symbols.LessThan).Append(Symbols.Solidus).Length;
 
               if (c.IsLetter())
               {
-                StringBuffer.Append(c);
+                _base.StringBuffer.Append(c);
                 state = ScriptState.EscapedNameEndTag;
               }
               else
@@ -2332,14 +2343,14 @@
           // See 8.2.4.27 Script data escaped end tag name state
           case ScriptState.EscapedNameEndTag:
             {
-              c = Advance();
-              var hasLength = StringBuffer.Length - offset == scriptLength;
+              c = _base.Advance();
+              var hasLength = _base.StringBuffer.Length - offset == scriptLength;
 
               if (hasLength && (c == Symbols.Solidus || c == Symbols.GreaterThan || c.IsSpaceCharacter()) &&
-                  StringBuffer.ToString(offset, scriptLength).Isi(TagNames.Script))
+                  _base.StringBuffer.ToString(offset, scriptLength).Isi(TagNames.Script))
               {
-                Back(scriptLength + 3);
-                StringBuffer.Remove(offset - 2, scriptLength + 2);
+                _base.Back(scriptLength + 3);
+                _base.StringBuffer.Remove(offset - 2, scriptLength + 2);
                 return NewCharacter();
               }
               else if (!c.IsLetter())
@@ -2348,7 +2359,7 @@
               }
               else
               {
-                StringBuffer.Append(c);
+                _base.StringBuffer.Append(c);
               }
 
               break;
@@ -2357,19 +2368,19 @@
           // See 8.2.4.28 Script data double escape start state
           case ScriptState.StartDoubleEscape:
             {
-              c = Advance();
-              var hasLength = StringBuffer.Length - offset == scriptLength;
+              c = _base.Advance();
+              var hasLength = _base.StringBuffer.Length - offset == scriptLength;
 
               if (hasLength && (c == Symbols.Solidus || c == Symbols.GreaterThan || c.IsSpaceCharacter()))
               {
-                var isscript = StringBuffer.ToString(offset, scriptLength).Isi(TagNames.Script);
-                StringBuffer.Append(c);
-                c = Advance();
+                var isscript = _base.StringBuffer.ToString(offset, scriptLength).Isi(TagNames.Script);
+                _base.StringBuffer.Append(c);
+                c = _base.Advance();
                 state = isscript ? ScriptState.EscapedDouble : ScriptState.Escaped;
               }
               else if (c.IsLetter())
               {
-                StringBuffer.Append(c);
+                _base.StringBuffer.Append(c);
               }
               else
               {
@@ -2385,14 +2396,14 @@
               switch (c)
               {
                 case Symbols.Minus:
-                  StringBuffer.Append(Symbols.Minus);
-                  c = Advance();
+                  _base.StringBuffer.Append(Symbols.Minus);
+                  c = _base.Advance();
                   state = ScriptState.EscapedDoubleDash;
                   continue;
 
                 case Symbols.LessThan:
-                  StringBuffer.Append(Symbols.LessThan);
-                  c = Advance();
+                  _base.StringBuffer.Append(Symbols.LessThan);
+                  c = _base.Advance();
                   state = ScriptState.EscapedDoubleOpenTag;
                   continue;
 
@@ -2402,12 +2413,12 @@
 
                 case Symbols.EndOfFile:
                   RaiseErrorOccurred(HtmlParseError.EOF);
-                  Back();
+                  _base.Back();
                   return NewCharacter();
               }
 
-              StringBuffer.Append(c);
-              c = Advance();
+              _base.StringBuffer.Append(c);
+              c = _base.Advance();
               break;
             }
 
@@ -2417,13 +2428,13 @@
               switch (c)
               {
                 case Symbols.Minus:
-                  StringBuffer.Append(Symbols.Minus);
+                  _base.StringBuffer.Append(Symbols.Minus);
                   state = ScriptState.EscapedDoubleDashDash;
                   continue;
 
                 case Symbols.LessThan:
-                  StringBuffer.Append(Symbols.LessThan);
-                  c = Advance();
+                  _base.StringBuffer.Append(Symbols.LessThan);
+                  c = _base.Advance();
                   state = ScriptState.EscapedDoubleOpenTag;
                   continue;
 
@@ -2434,7 +2445,7 @@
 
                 case Symbols.EndOfFile:
                   RaiseErrorOccurred(HtmlParseError.EOF);
-                  Back();
+                  _base.Back();
                   return NewCharacter();
               }
 
@@ -2445,40 +2456,40 @@
           // See 8.2.4.31 Script data double escaped dash dash state
           case ScriptState.EscapedDoubleDashDash:
             {
-              c = Advance();
+              c = _base.Advance();
 
               switch (c)
               {
                 case Symbols.Minus:
-                  StringBuffer.Append(Symbols.Minus);
+                  _base.StringBuffer.Append(Symbols.Minus);
                   break;
 
                 case Symbols.LessThan:
-                  StringBuffer.Append(Symbols.LessThan);
-                  c = Advance();
+                  _base.StringBuffer.Append(Symbols.LessThan);
+                  c = _base.Advance();
                   state = ScriptState.EscapedDoubleOpenTag;
                   continue;
 
                 case Symbols.GreaterThan:
-                  StringBuffer.Append(Symbols.GreaterThan);
-                  c = Advance();
+                  _base.StringBuffer.Append(Symbols.GreaterThan);
+                  c = _base.Advance();
                   state = ScriptState.Normal;
                   continue;
 
                 case Symbols.Null:
                   AppendReplacement();
-                  c = Advance();
+                  c = _base.Advance();
                   state = ScriptState.EscapedDouble;
                   continue;
 
                 case Symbols.EndOfFile:
                   RaiseErrorOccurred(HtmlParseError.EOF);
-                  Back();
+                  _base.Back();
                   return NewCharacter();
 
                 default:
-                  StringBuffer.Append(c);
-                  c = Advance();
+                  _base.StringBuffer.Append(c);
+                  c = _base.Advance();
                   state = ScriptState.EscapedDouble;
                   continue;
               }
@@ -2491,7 +2502,7 @@
             {
               if (c == Symbols.Solidus)
               {
-                offset = StringBuffer.Append(Symbols.Solidus).Length;
+                offset = _base.StringBuffer.Append(Symbols.Solidus).Length;
                 state = ScriptState.EndDoubleEscape;
               }
               else
@@ -2505,19 +2516,19 @@
           // See 8.2.4.33 Script data double escape end state
           case ScriptState.EndDoubleEscape:
             {
-              c = Advance();
-              var hasLength = StringBuffer.Length - offset == scriptLength;
+              c = _base.Advance();
+              var hasLength = _base.StringBuffer.Length - offset == scriptLength;
 
               if (hasLength && (c.IsSpaceCharacter() || c == Symbols.Solidus || c == Symbols.GreaterThan))
               {
-                var isscript = StringBuffer.ToString(offset, scriptLength).Isi(TagNames.Script);
-                StringBuffer.Append(c);
-                c = Advance();
+                var isscript = _base.StringBuffer.ToString(offset, scriptLength).Isi(TagNames.Script);
+                _base.StringBuffer.Append(c);
+                c = _base.Advance();
                 state = isscript ? ScriptState.Escaped : ScriptState.EscapedDouble;
               }
               else if (c.IsLetter())
               {
-                StringBuffer.Append(c);
+                _base.StringBuffer.Append(c);
               }
               else
               {
@@ -2536,13 +2547,13 @@
 
     private HtmlNode NewCharacter()
     {
-      var content = FlushBuffer();
+      var content = _base.FlushBuffer();
       return new HtmlText(_position, content);
     }
 
     private HtmlComment NewComment()
     {
-      var content = FlushBuffer();
+      var content = _base.FlushBuffer();
       return new HtmlComment(_position, content);
     }
 
@@ -2577,13 +2588,13 @@
 
     private void RaiseErrorOccurred(HtmlParseError code)
     {
-      RaiseErrorOccurred(code, GetCurrentPosition());
+      RaiseErrorOccurred(code, _base.GetCurrentPosition());
     }
 
     private void AppendReplacement()
     {
       RaiseErrorOccurred(HtmlParseError.Null);
-      StringBuffer.Append(Symbols.Replacement);
+      _base.StringBuffer.Append(Symbols.Replacement);
     }
 
     private HtmlNode CreateIfAppropriate(Char c)
@@ -2591,12 +2602,12 @@
       var isspace = c.IsSpaceCharacter();
       var isclosed = c == Symbols.GreaterThan;
       var isslash = c == Symbols.Solidus;
-      var hasLength = StringBuffer.Length == _lastStartTag.Length;
+      var hasLength = _base.StringBuffer.Length == _lastStartTag.Length;
 
-      if (hasLength && (isspace || isclosed || isslash) && StringBuffer.ToString().Is(_lastStartTag))
+      if (hasLength && (isspace || isclosed || isslash) && _base.StringBuffer.ToString().Is(_lastStartTag))
       {
         var tag = NewTagClose();
-        StringBuffer.Clear();
+        _base.StringBuffer.Clear();
 
         if (isspace)
         {
@@ -2673,6 +2684,266 @@
       return true;
     }
 
+    protected override void Dispose(bool disposing)
+    {
+      _base.Dispose();
+    }
+    #endregion
+
+    #region XmlReader
+
+    private int _attrIndex;
+    private int _depth = 0;
+
+    public override int AttributeCount
+    {
+      get
+      {
+        var tag = _current as HtmlStartTag;
+        if (tag == null)
+          return 0;
+        return tag.Attributes.Count;
+      }
+    }
+
+    public override string BaseURI
+    {
+      get
+      {
+        return string.Empty;
+      }
+    }
+
+    public override int Depth
+    {
+      get
+      {
+        return 0;
+      }
+    }
+
+    public override bool EOF
+    {
+      get
+      {
+        return _current != null && _current.Type == HtmlTokenType.EndOfFile;
+      }
+    }
+
+    public override bool IsEmptyElement
+    {
+      get
+      {
+        var tag = _current as HtmlStartTag;
+        if (tag == null)
+          return false;
+        return tag.IsSelfClosing || HtmlTextWriter.VoidElements.Contains(tag.Value);
+      }
+    }
+
+    public override string LocalName
+    {
+      get
+      {
+        if (_attrIndex >= 0)
+          return ((HtmlStartTag)_current).Attributes[_attrIndex].Key;
+        if (_attrIndex < -1)
+          return string.Empty;
+        if (_current == null)
+          return string.Empty;
+        if (_current.Type == HtmlTokenType.EndTag
+          || _current.Type == HtmlTokenType.StartTag
+          || _current.Type == HtmlTokenType.Doctype)
+          return _current.Value;
+        return string.Empty;
+      }
+    }
+
+    public override string NamespaceURI
+    {
+      get
+      {
+        return string.Empty;
+      }
+    }
+
+    private XmlNameTable _table = new NameTable();
+    public override XmlNameTable NameTable
+    {
+      get { return _table; }
+    }
+
+    public override XmlNodeType NodeType
+    {
+      get
+      {
+        if (_current == null)
+          return XmlNodeType.None;
+        if (_attrIndex >= 0)
+          return XmlNodeType.Attribute;
+        if (_attrIndex < -1)
+          return XmlNodeType.Text;
+        switch (_current.Type)
+        {
+          case HtmlTokenType.Comment:
+            return XmlNodeType.Comment;
+          case HtmlTokenType.Doctype:
+            return XmlNodeType.DocumentType;
+          case HtmlTokenType.EndTag:
+            return XmlNodeType.EndElement;
+          case HtmlTokenType.StartTag:
+            return XmlNodeType.Element;
+          case HtmlTokenType.Text:
+            var val = _current.Value ?? "";
+            for (var i = 0; i < val.Length; i++ )
+            {
+              if (!char.IsWhiteSpace(val[i]))
+                return XmlNodeType.Text;
+            }
+            return _depth > 0 ? XmlNodeType.SignificantWhitespace : XmlNodeType.Whitespace;
+        }
+        return XmlNodeType.None;
+      }
+    }
+
+    public override string Prefix
+    {
+      get
+      {
+        return string.Empty;
+      }
+    }
+
+    public override ReadState ReadState
+    {
+      get
+      {
+        if (_current == null)
+          return ReadState.Initial;
+        if (_current.Type == HtmlTokenType.EndOfFile)
+          return ReadState.EndOfFile;
+        return ReadState.Interactive;
+      }
+    }
+
+    public override string Value
+    {
+      get
+      {
+        if (_attrIndex >= 0)
+          return ((HtmlStartTag)_current).Attributes[_attrIndex].Value;
+        if (_attrIndex < -1)
+          return ((HtmlStartTag)_current).Attributes[_attrIndex * -1 - 2].Value;
+        if (_current == null)
+          return string.Empty;
+        switch (_current.Type)
+        {
+          case HtmlTokenType.Comment:
+          case HtmlTokenType.Text:
+            return _current.Value;
+        }
+        return string.Empty;
+      }
+    }
+
+
+    public override string GetAttribute(int i)
+    {
+      var tag = _current as HtmlStartTag;
+      if (tag == null)
+        return string.Empty;
+      return tag.Attributes[i].Value;
+    }
+
+    public override string GetAttribute(string name)
+    {
+      return GetAttribute(name, null);
+    }
+
+    public override string GetAttribute(string name, string namespaceURI)
+    {
+      var tag = _current as HtmlStartTag;
+      if (tag == null)
+        return string.Empty;
+      return tag[name];
+    }
+
+    public override string LookupNamespace(string prefix)
+    {
+      return string.Empty;
+    }
+
+    public override bool MoveToAttribute(string name)
+    {
+      return MoveToAttribute(name, null);
+    }
+
+    public override bool MoveToAttribute(string name, string ns)
+    {
+      var tag = _current as HtmlStartTag;
+      if (tag != null)
+      {
+        for (var i = 0; i < tag.Attributes.Count; i++)
+        {
+          if (string.Equals(tag.Attributes[i].Key, name, StringComparison.OrdinalIgnoreCase))
+          {
+            _attrIndex = i;
+            return true;
+          }
+        }
+      }
+      _attrIndex = -1;
+      return false;
+    }
+
+    public override bool MoveToElement()
+    {
+      _attrIndex = -1;
+      return _current != null && _current.Type == HtmlTokenType.StartTag;
+    }
+
+    public override bool MoveToFirstAttribute()
+    {
+      var tag = _current as HtmlStartTag;
+      if (tag == null || tag.Attributes.Count < 1)
+      {
+        _attrIndex = -1;
+        return false;
+      }
+      _attrIndex = 0;
+      return true;
+    }
+
+    public override bool MoveToNextAttribute()
+    {
+      var tag = _current as HtmlStartTag;
+      if (tag == null || _attrIndex + 1 >= tag.Attributes.Count)
+      {
+        _attrIndex = -1;
+        return false;
+      }
+      _attrIndex++;
+      return true;
+    }
+
+    public override bool ReadAttributeValue()
+    {
+      if (_attrIndex < -1)
+      {
+        _attrIndex = _attrIndex * -1 - 2;
+        return false;
+      }
+      else
+      {
+        _attrIndex = _attrIndex * -1 - 2;
+        return true;
+      }
+    }
+
+    public override void ResolveEntity()
+    {
+      // Do nothing
+    }
     #endregion
   }
 }

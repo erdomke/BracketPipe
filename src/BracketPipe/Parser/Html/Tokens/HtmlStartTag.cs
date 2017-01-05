@@ -92,6 +92,20 @@ namespace BracketPipe
       return this;
     }
 
+    public bool TryGetValue(string name, out string value)
+    {
+      for (var i = 0; i < _attributes.Count; i++)
+      {
+        if (_attributes[i].Key == name)
+        {
+          value = _attributes[i].Value;
+          return true;
+        }
+      }
+      value = string.Empty;
+      return false;
+    }
+
     /// <summary>
     /// Adds a new attribute to the list of attributes. The value will
     /// be set to an empty string.
@@ -119,6 +133,18 @@ namespace BracketPipe
     IEnumerator IEnumerable.GetEnumerator()
     {
       return GetEnumerator();
+    }
+
+    internal override void AddToDebugDisplay(StringBuilder builder)
+    {
+      builder.Append('<').Append(Value);
+      foreach (var attr in _attributes)
+      {
+        builder.Append(' ').Append(attr.Key);
+        if (!string.IsNullOrEmpty(attr.Value))
+          builder.Append('=').Append('"').Append(attr.Value).Append('"');
+      }
+      builder.Append('>');
     }
 
     #endregion

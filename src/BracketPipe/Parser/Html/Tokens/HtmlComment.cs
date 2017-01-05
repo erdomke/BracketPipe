@@ -27,6 +27,12 @@ namespace BracketPipe
     {
     }
 
+    internal override void AddToDebugDisplay(StringBuilder builder)
+    {
+      builder.Append("<!--");
+      builder.Append(Value);
+      builder.Append("-->");
+    }
     #endregion
   }
 }
