@@ -156,6 +156,7 @@ namespace BracketPipe
                 else
                   newTag.Attributes.Add(attr);
               }
+              newTag.IsSelfClosing = tag.IsSelfClosing;
               yield return newTag;
             }
             else

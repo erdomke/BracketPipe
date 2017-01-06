@@ -591,6 +591,14 @@ namespace BracketPipe
       }
     }
 
+
+#if !PORTABLE
+    public override void Close()
+    {
+      
+    }
+#endif
+
     private enum InternalState
     {
       Start = 0,

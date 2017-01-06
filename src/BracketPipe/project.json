@@ -42,7 +42,7 @@
     "net35": {
       "frameworkAssemblies": {
         "System.Core": "",
-        "System.Xml": "",
+        "System.Xml": ""
       }
     }
   }

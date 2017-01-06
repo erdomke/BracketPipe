@@ -607,7 +607,10 @@ namespace BracketPipe
         }
 
         if (selfClose)
+        {
+          _writer.Write(' ');
           _writer.Write('/');
+        }
         _writer.Write('>');
         _state = InternalState.Content;
       }

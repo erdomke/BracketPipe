@@ -46,6 +46,18 @@ namespace BracketPipe.Core.Tests
     }
 
     [Test]
+    public void RoundTrip_Svg02()
+    {
+      //var html = @"<svg xmlns=""http://www.w3.org/2000/svg""><path d=""M182,65 L256,93 L354,65"" /></svg>";
+      var html = @"<svg version=""1.1"" xmlns:user=""urn:user-scripts"" xmlns:msxsl=""urn:schemas-microsoft-com:xslt"" xmlns:aras=""http://www.aras.com"" xmlns:data=""http://www.aras.com/customer"" xmlns=""http://www.w3.org/2000/svg"" xmlns:xlink=""http://www.w3.org/1999/xlink""><defs><marker id=""Triangle"" viewBox=""0 0 10 6"" refX=""22"" refY=""3"" markerWidth=""10"" markerHeight=""6"" markerUnits=""userSpaceOnUse"" orient=""auto"" style=""fill:#999""><path d=""M 0 0 L 10 3 L 0 6 z"" /></marker></defs><path id=""path_74BAF626F20A48A59CEACE75D5CE166A"" style=""stroke: rgb(60%, 60%, 60%); fill:none; stroke-width: 1px; marker-end: url(#Triangle)"" d=""M182,65 L256,93 L354,65"" /><path id=""path_00A55285D7EE441E8D08F356B6BED0A9"" style=""stroke: rgb(60%, 60%, 60%); fill:none; stroke-width: 1px; marker-end: url(#Triangle)"" d=""M182,65 L182,20 L540,20"" /><path id=""path_0B14FEF62A4644A7A57903E4F41B0A30"" style=""stroke: rgb(60%, 60%, 60%); fill:none; stroke-width: 1px; marker-end: url(#Triangle)"" d=""M182,65 L182,165 L540,165"" /></svg>";
+      using (var reader = new HtmlReader(html))
+      {
+        var rendered = reader.Minify().ToHtml();
+        Assert.AreEqual(html, rendered);
+      }
+    }
+
+    [Test]
     public void BuildHtml()
     {
       using (var s = new StringWriter())
@@ -253,7 +265,7 @@ namespace BracketPipe.Core.Tests
   <input type=""checkbox"" checked>
 <svg version=""1.1"" id=""Layer_1"" xmlns=""http://www.w3.org/2000/svg"" xmlns:xlink=""http://www.w3.org/1999/xlink"" x=""0px"" y=""0px"" width=""612px"" height=""502.174px"" viewBox=""0 65.326 612 502.174"" enable-background=""new 0 65.326 612 502.174"" xml:space=""preserve"" class=""logo"">
 
-<ellipse class=""ground"" cx=""283.5"" cy=""487.5"" rx=""259"" ry=""80""/>
+<ellipse class=""ground"" cx=""283.5"" cy=""487.5"" rx=""259"" ry=""80"" />
 <path class=""kiwi"" d=""M210.333,65.331C104.367,66.105-12.349,150.637,1.056,276.449c4.303,40.393,18.533,63.704,52.171,79.03
   c36.307,16.544,57.022,54.556,50.406,112.954c-9.935,4.88-17.405,11.031-19.132,20.015c7.531-0.17,14.943-0.312,22.59,4.341
   c20.333,12.375,31.296,27.363,42.979,51.72c1.714,3.572,8.192,2.849,8.312-3.078c0.17-8.467-1.856-17.454-5.226-26.933
@@ -269,9 +281,9 @@ namespace BracketPipe.Core.Tests
   c-15.893-41.125-68.176-93.328-92.13-132.085c-24.581-39.774-14.34-61.243-39.957-91.247
   c-21.326-24.978-47.502-25.803-77.339-17.365c-23.461,6.634-39.234-7.117-52.98-31.273C318.42,87.525,265.838,64.927,210.333,65.331
   z M445.731,203.01c6.12,0,11.112,4.919,11.112,11.038c0,6.119-4.994,11.111-11.112,11.111s-11.038-4.994-11.038-11.111
-  C434.693,207.929,439.613,203.01,445.731,203.01z""/>
+  C434.693,207.929,439.613,203.01,445.731,203.01z"" />
 <filter id=""pictureFilter"">
-  <feGaussianBlur stdDeviation=""15""/>
+  <feGaussianBlur stdDeviation=""15"" />
 </filter>
 </svg>
 </body>

@@ -2944,6 +2944,19 @@
     {
       // Do nothing
     }
+
+#if NET35
+    public override bool HasValue
+    {
+      get { return true; }
+    }
+#endif
+#if !PORTABLE
+    public override void Close()
+    {
+      
+    }
+#endif
     #endregion
   }
 }
