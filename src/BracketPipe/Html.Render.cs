@@ -74,6 +74,58 @@ namespace BracketPipe
     }
 
     /// <summary>
+    /// Convert parsed HTML to markdown
+    /// </summary>
+    public static string ToMarkdown(this IEnumerable<HtmlNode> reader)
+    {
+      using (var sw = new StringWriter())
+      {
+        ToMarkdown(reader, sw, new MarkdownWriterSettings());
+        return sw.ToString();
+      }
+    }
+
+    /// <summary>
+    /// Convert parsed HTML to markdown
+    /// </summary>
+    public static string ToMarkdown(this IEnumerable<HtmlNode> reader, MarkdownWriterSettings settings)
+    {
+      using (var sw = new StringWriter())
+      {
+        ToMarkdown(reader, sw, settings);
+        return sw.ToString();
+      }
+    }
+
+    /// <summary>
+    /// Convert parsed HTML to markdown
+    /// </summary>
+    public static string ToMarkdown(TextSource html, MarkdownWriterSettings settings = null)
+    {
+      var sb = Pool.NewStringBuilder();
+      sb.EnsureCapacity(html.Length);
+      using (var sw = new StringWriter(sb))
+      using (var reader = new HtmlReader(html, false))
+      {
+        reader.ToMarkdown(sw, settings);
+        sw.Flush();
+        return sb.ToPool();
+      }
+    }
+
+    /// <summary>
+    /// Convert parsed HTML to markdown
+    /// </summary>
+    public static void ToMarkdown(this IEnumerable<HtmlNode> reader, TextWriter writer, MarkdownWriterSettings settings)
+    {
+      using (var w = new MarkdownWriter(writer, settings))
+      {
+        ToHtml(reader, w);
+        w.Flush();
+      }
+    }
+
+    /// <summary>
     /// Render parsed HTML to an XML writer
     /// </summary>
     public static void ToHtml(this IEnumerable<HtmlNode> reader, XmlWriter writer)

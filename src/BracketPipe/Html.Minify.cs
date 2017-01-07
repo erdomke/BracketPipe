@@ -14,7 +14,7 @@ namespace BracketPipe
       var sb = Pool.NewStringBuilder();
       sb.EnsureCapacity(html.Length);
       using (var sw = new StringWriter(sb))
-      using (var reader = new HtmlReader(html))
+      using (var reader = new HtmlReader(html, false))
       {
         reader.Minify(settings).ToHtml(sw, new HtmlWriterSettings());
         sw.Flush();
@@ -24,7 +24,7 @@ namespace BracketPipe
 
     public static void Minify(TextSource html, HtmlTextWriter writer, HtmlMinifySettings settings = null)
     {
-      using (var reader = new HtmlReader(html))
+      using (var reader = new HtmlReader(html, false))
       {
         reader.Minify(settings).ToHtml(writer);
       }

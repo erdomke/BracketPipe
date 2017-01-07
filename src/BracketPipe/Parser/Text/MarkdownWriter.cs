@@ -24,10 +24,11 @@ namespace BracketPipe
     private PreserveState _preserveWhitespace = PreserveState.None;
     private bool _outputStarted;
 
-    public MarkdownWriter(TextWriter writer)
+    public MarkdownWriter(TextWriter writer) : this(writer, new MarkdownWriterSettings()) { }
+    public MarkdownWriter(TextWriter writer, MarkdownWriterSettings settings)
     {
       _writer = writer;
-      _settings = new MarkdownWriterSettings();
+      _settings = settings ?? new MarkdownWriterSettings();
     }
 
     public override WriteState WriteState
@@ -138,7 +139,7 @@ namespace BracketPipe
           }
           break;
         case "code":
-          if (_linePrefix.Count < 1)
+          if (_preserveWhitespace == PreserveState.None)
             _writer.Write('`');
           break;
         case "em":
@@ -156,7 +157,9 @@ namespace BracketPipe
         case "h4":
         case "h5":
         case "h6":
+        case "ol":
         case "p":
+        case "ul":
           EndBlock();
           break;
         case "pre":
@@ -253,7 +256,7 @@ namespace BracketPipe
           }
           break;
         case "code":
-          if (_linePrefix.Count < 1)
+          if (_preserveWhitespace == PreserveState.None)
           {
             StartInline();
             _writer.Write('`');
@@ -433,30 +436,24 @@ namespace BracketPipe
                 _minify = MinifyState.Compressed;
                 break;
             }
-            if (_preserveWhitespace == PreserveState.BeforeContent)
-              _preserveWhitespace = PreserveState.Preserve;
 
-            switch (value[i])
+            if (_preserveWhitespace == PreserveState.None)
             {
-              case '\\':
-                _writer.Write(@"\\");
-                break;
-              //case '<':
-              //  _writer.Write(@"\<");
-              //  break;
-              case '*':
-                _writer.Write(@"\*");
-                break;
-              case '[':
-                _writer.Write(@"\[");
-                break;
-              case '`':
-                _writer.Write(@"\`");
-                break;
-              default:
-                _writer.Write(value[i]);
-                break;
+              switch (value[i])
+              {
+                case '\\':
+                case '*':
+                case '[':
+                case '`':
+                  _writer.Write('\\');
+                  break;
+              }
             }
+            else if (_preserveWhitespace == PreserveState.BeforeContent)
+            {
+              _preserveWhitespace = PreserveState.Preserve;
+            }
+            _writer.Write(value[i]);
           }
         }
         _outputStarted = true;

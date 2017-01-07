@@ -13,7 +13,7 @@ BracketPipe is a .NET library for building parsing and processing piplines for w
 
 It can also be viewed as a modern update to previous projects such as the [SgmlReader](https://github.com/MindTouch/SGMLReader) and [Majestic-12 HTML Parser](http://www.majestic12.co.uk/projects/html_parser.php)
 
-## Examples
+## Usage
 
 Use a pipeline to parse, minify, and sanitize HTML;
 
@@ -51,11 +51,13 @@ using (var reader = new HtmlReader(html))
 }
 ```
 
-Sanitize or minify HTML
+Sanitize, minify, or convert HTML
 
 ```csharp
+var html = "Something to <strong>convert</strong>";
 var str = Html.Sanitize(html);
 str = Html.Minify(html);
+str = Html.ToMarkdown(html)
 ```
 
 Write HTML
@@ -94,24 +96,34 @@ using (var w = new HtmlTextWriter(s))
 }
 ```
 
-## High Performance
+## Installing via NuGet
+
+[![NuGet version](https://badge.fury.io/nu/BracketPipe.svg)](https://www.nuget.org/packages/BracketPipe)
+
+    Install-Package BracketPipe
+
+## Performance
 
 Using only the stripped down core of [AngleSharp](https://github.com/AngleSharp/AngleSharp), BracketPipe
-achives incredibly fast performance.  
+achives incredibly fast performance.  Comparison charts each showing the average time over thousands of operations:
 
-* Minification Tasks: **73% of the time** required by [WebMarkupMin](https://github.com/Taritsyn/WebMarkupMin)
-* Sanitization Tasks: **21% of the time** required by [HtmlSanitizer](https://github.com/mganss/HtmlSanitizer) which leverages
-AngleSharp's full DOM parser.
+**Conversion to Markdown**
 
-Comparison charts each showing the average time over 5000 operations (smaller is better):
+Comparison to [ReverseMarkdown](https://github.com/mysticmind/reversemarkdown-net/) and [HTML2Markdown](https://github.com/baynezy/Html2Markdown/);
+
+![Markdown conversion comparsion chart](http://chart.googleapis.com/chart?cht=bhg&chs=400x120&chd=t:1203.8,1148.8,5255.2&chds=0,5300&chxl=1:|Html2Markdown(5255ms)|ReverseMarkdown(1149ms)|BracketPipe(1204ms)&chxt=x,y&chxr=0,0,5300&chco=a347bb)
 
 **Minifying HTML**
 
-![Minification comparsion chart](http://chart.googleapis.com/chart?cht=bhg&chs=400x80&chd=t:647.25,888.25&chds=0,900&chxl=1:|WebMarkupMin(888ms)|BracketPipe(647ms)&chxt=x,y&chxr=0,0,900&chco=a347bb)
+Comparison to [WebMarkupMin](https://github.com/Taritsyn/WebMarkupMin);
+
+![Minification comparsion chart](http://chart.googleapis.com/chart?cht=bhg&chs=400x80&chd=t:853.3,1203&chds=0,1300&chxl=1:|WebMarkupMin(1203ms)|BracketPipe(853ms)&chxt=x,y&chxr=0,0,1300&chco=a347bb)
 
 **Sanitizing HTML**
 
-![Sanitization comparsion chart](http://chart.googleapis.com/chart?cht=bhg&chs=400x80&chd=t:340.875,1594.25&chds=0,1600&chxl=1:|HtmlSanitizer(1594ms)|BracketPipe(341ms)&chxt=x,y&chxr=0,0,1600&chco=a347bb)
+Comparison to [HtmlSanitizer](https://github.com/mganss/HtmlSanitizer)
+
+![Sanitization comparsion chart](http://chart.googleapis.com/chart?cht=bhg&chs=400x80&chd=t:410.8,1983.6&chds=0,2000&chxl=1:|HtmlSanitizer(1983ms)|BracketPipe(410ms)&chxt=x,y&chxr=0,0,2000&chco=a347bb)
 
 ## Standards Conformance
 

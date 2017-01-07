@@ -12,7 +12,7 @@ namespace BracketPipe
     public static string Sanitize(TextSource html, HtmlSanitizeSettings settings = null)
     {
       var sb = new StringBuilder(html.Length);
-      using (var reader = new HtmlReader(html))
+      using (var reader = new HtmlReader(html, false))
       using (var sw = new StringWriter(sb))
       {
         reader.Sanitize(settings).ToHtml(sw, new HtmlWriterSettings());
@@ -22,7 +22,7 @@ namespace BracketPipe
 
     public static void Sanitize(TextSource html, HtmlTextWriter writer, HtmlSanitizeSettings settings = null)
     {
-      using (var reader = new HtmlReader(html))
+      using (var reader = new HtmlReader(html, false))
       {
         reader.Sanitize(settings).ToHtml(writer);
       }

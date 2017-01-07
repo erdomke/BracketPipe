@@ -286,6 +286,7 @@ namespace BracketPipe.Core.Tests
   <feGaussianBlur stdDeviation=""15"" />
 </filter>
 </svg>
+<script src=""file.js""></script>
 </body>
 </html>";
       using (var reader = new HtmlReader(html))

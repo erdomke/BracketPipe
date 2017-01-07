@@ -258,14 +258,14 @@ namespace BracketPipe
       name = tag.Name ?? name;
 
       var inXml = _xmlDepth >= 0;
+      if (inXml)
+        _xmlDepth--;
       if (_state == InternalState.Element)
       {
         CloseCurrElement(inXml || _xHtml);
         if (!forceFull && (VoidElements.Contains(name) || inXml))
           return tag;
       }
-      if (inXml)
-        _xmlDepth--;
       if (_scopes.Count > 0)
         _scopes.RemoveAt(_scopes.Count - 1);
 

@@ -19,7 +19,7 @@
   {
     #region Fields
 
-    private BaseTokenizer _base;
+    private IBaseTokenizer _base;
     private readonly HtmlEntityService _resolver;
     private String _lastStartTag;
     private TextPosition _position;
@@ -44,10 +44,18 @@
     /// See 8.2.4 Tokenization
     /// </summary>
     /// <param name="source">The source code manager.</param>
-    /// <param name="resolver">The entity resolver to use.</param>
-    public HtmlReader(TextSource source)
+    public HtmlReader(TextSource source) : this(source, true) { }
+
+    /// <summary>
+    /// See 8.2.4 Tokenization
+    /// </summary>
+    /// <param name="source">The source code manager.</param>
+    /// <param name="trackPosition">Whether to track the position of a node in the source text.</param>
+    public HtmlReader(TextSource source, bool trackPosition)
     {
-      _base = new BaseTokenizer(source);
+      _base = trackPosition 
+        ? (IBaseTokenizer)new BaseTokenizer(source) 
+        : new BaseTokenizerNoPosition(source);
       State = HtmlParseMode.PCData;
       IsAcceptingCharacterData = false;
       IsStrictMode = false;

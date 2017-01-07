@@ -87,6 +87,7 @@
     <Compile Include="Parser\Css\Tokens\CssUnitToken.cs" />
     <Compile Include="Parser\Css\Tokens\CssUrlToken.cs" />
     <Compile Include="Parser\Html\BaseTokenizer.cs" />
+    <Compile Include="Parser\Html\BaseTokenizerNoPosition.cs" />
     <Compile Include="Parser\Html\HtmlErrorEvent.cs" />
     <Compile Include="Parser\Html\HtmlForeign.cs" />
     <Compile Include="Parser\Html\HtmlParseError.cs" />
@@ -96,6 +97,7 @@
     <Compile Include="Parser\Html\HtmlTextWriter.cs" />
     <Compile Include="Parser\Html\HtmlTokenType.cs" />
     <Compile Include="Parser\Html\HtmlWriterSettings.cs" />
+    <Compile Include="Parser\Html\IBaseTokenizer.cs" />
     <Compile Include="Parser\Html\Tokens\HtmlComment.cs" />
     <Compile Include="Parser\Html\Tokens\HtmlDoctype.cs" />
     <Compile Include="Parser\Html\Tokens\HtmlEndOfFile.cs" />
