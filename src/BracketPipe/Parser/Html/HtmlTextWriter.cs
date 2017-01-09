@@ -147,9 +147,36 @@ namespace BracketPipe
       if (XmlCharType.IsSurrogate((int)ch))
         throw new ArgumentException("Invalid surrogate: Missing low character");
 
-      var num = (int)ch;
-      var text = num.ToString("X", NumberFormatInfo.InvariantInfo);
-      WriteEntityRef("#x" + text);
+      switch (ch)
+      {
+        case '<':
+          WriteEntityRef("lt");
+          break;
+        case '>':
+          WriteEntityRef("gt");
+          break;
+        case '&':
+          WriteEntityRef("amp");
+          break;
+        case '"':
+          WriteEntityRef("quot");
+          break;
+        case '\'':
+          WriteEntityRef("apos");
+          break;
+        default:
+          var num = (int)ch;
+          if (num == 160)
+          {
+            WriteEntityRef("nbsp");
+          }
+          else
+          {
+            var text = num.ToString("X", NumberFormatInfo.InvariantInfo);
+            WriteEntityRef("#x" + text);
+          }
+          break;
+      }
     }
 
     public override void WriteChars(char[] buffer, int index, int count)
@@ -278,6 +305,16 @@ namespace BracketPipe
 
     public override void WriteEntityRef(string name)
     {
+      if (_state == InternalState.AttributeStart)
+      {
+        _writer.Write("=");
+        _writer.Write(_settings.QuoteChar);
+        _state = InternalState.Attribute;
+      }
+
+      if (_state != InternalState.Attribute)
+        CloseCurrElement(false);
+
       WriteInternal('&');
       WriteInternal(name);
       WriteInternal(';');

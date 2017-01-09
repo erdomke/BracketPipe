@@ -193,6 +193,26 @@ namespace BracketPipe.Core.Tests
     }
 
     [Test]
+    public void WriterEntityName()
+    {
+      using (var s = new StringWriter())
+      using (var w = new HtmlTextWriter(s))
+      {
+        w.WriteStartElement("div");
+        w.WriteAttributeString("attr", "&\"");
+        w.WriteEntityRef("nbsp");
+        w.WriteEndElement();
+        w.WriteStartElement("div");
+        w.WriteAttributeString("attr", "&\"");
+        w.WriteCharEntity((char)160);
+        w.WriteEndElement();
+        w.Flush();
+        var str = s.ToString();
+        Assert.AreEqual("<div attr=\"&amp;&quot;\">&nbsp;</div><div attr=\"&amp;&quot;\">&nbsp;</div>", str);
+      }
+    }
+
+    [Test]
     public void WriterAttributeNoValue()
     {
       using (var s = new StringWriter())
