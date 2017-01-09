@@ -195,20 +195,28 @@ namespace BracketPipe.Core.Tests
     [Test]
     public void WriterEntityName()
     {
+      const string ExcelNs = "urn:schemas-microsoft-com:office:excel";
+
       using (var s = new StringWriter())
       using (var w = new HtmlTextWriter(s))
       {
+
+        w.WriteStartElement("body");
+        w.WriteAttributeString("xmlns", "x", null, ExcelNs);
         w.WriteStartElement("div");
         w.WriteAttributeString("attr", "&\"");
+        w.WriteAttributeString("str", ExcelNs, null);
+        w.WriteAttributeString("num", ExcelNs, "");
         w.WriteEntityRef("nbsp");
         w.WriteEndElement();
         w.WriteStartElement("div");
         w.WriteAttributeString("attr", "&\"");
         w.WriteCharEntity((char)160);
         w.WriteEndElement();
+        w.WriteEndElement();
         w.Flush();
         var str = s.ToString();
-        Assert.AreEqual("<div attr=\"&amp;&quot;\">&nbsp;</div><div attr=\"&amp;&quot;\">&nbsp;</div>", str);
+        Assert.AreEqual("<body xmlns:x=\"urn:schemas-microsoft-com:office:excel\"><div attr=\"&amp;&quot;\" x:str x:num>&nbsp;</div><div attr=\"&amp;&quot;\">&nbsp;</div></body>", str);
       }
     }
 

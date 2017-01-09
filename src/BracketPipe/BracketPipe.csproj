@@ -108,6 +108,7 @@
     <Compile Include="Parser\Html\Tokens\HtmlText.cs" />
     <Compile Include="Parser\Text\MarkdownWriter.cs" />
     <Compile Include="Parser\Text\MarkdownWriterSettings.cs" />
+    <Compile Include="Parser\Text\TextileWriter.cs" />
     <Compile Include="Parser\XmlCharType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

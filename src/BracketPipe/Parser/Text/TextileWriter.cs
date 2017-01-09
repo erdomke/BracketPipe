@@ -1,15 +1,15 @@
-﻿using BracketPipe.Extensions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Xml;
 
 namespace BracketPipe
 {
-  public class MarkdownWriter : XmlWriter
+  public class TextileWriter : XmlWriter
   {
     private TextWriter _writer;
     private Stack<HtmlStartTag> _nodes = new Stack<HtmlStartTag>();
@@ -23,9 +23,10 @@ namespace BracketPipe
     private List<string> _linePrefix = new List<string>();
     private PreserveState _preserveWhitespace = PreserveState.None;
     private bool _outputStarted;
+    private bool _lastWasMultiline;
 
-    public MarkdownWriter(TextWriter writer) : this(writer, new MarkdownWriterSettings()) { }
-    public MarkdownWriter(TextWriter writer, MarkdownWriterSettings settings)
+    public TextileWriter(TextWriter writer) : this(writer, new MarkdownWriterSettings()) { }
+    public TextileWriter(TextWriter writer, MarkdownWriterSettings settings)
     {
       _writer = writer;
       _settings = settings ?? new MarkdownWriterSettings();
@@ -138,17 +139,17 @@ namespace BracketPipe
         case "a":
           if (start.TryGetValue("href", out buffer))
           {
-            _writer.Write(']');
-            _writer.Write('(');
-            _writer.Write(buffer);
+            var href = buffer;
             if (start.TryGetValue("title", out buffer))
             {
-              _writer.Write(' ');
-              _writer.Write('"');
+              _writer.Write('(');
               _writer.Write(buffer);
-              _writer.Write('"');
+              _writer.Write(')');
             }
-            _writer.Write(')');
+            _writer.Write('"');
+            _writer.Write(':');
+            _writer.Write(href);
+            _writer.Write(']');
           }
           else if (start.Attributes.Count > 0)
           {
@@ -157,25 +158,59 @@ namespace BracketPipe
           }
           _minify = MinifyState.Compressed;
           break;
+        case "acronym":
+          if (start.TryGetValue("title", out buffer))
+          {
+            _writer.Write('(');
+            _writer.Write(buffer);
+            _writer.Write(')');
+          }
+          break;
         case "b":
-        case "strong":
           if (_boldDepth > _nodes.Count)
           {
-            _writer.Write("**");
+            _writer.Write('*');
+            _writer.Write('*');
             _boldDepth = int.MaxValue;
           }
           break;
+        case "strong":
+          if (_boldDepth > _nodes.Count)
+          {
+            _writer.Write('*');
+            _boldDepth = int.MaxValue;
+          }
+          break;
+        case "cite":
+          _writer.Write('?');
+          _writer.Write('?');
+          break;
         case "code":
           if (_preserveWhitespace == PreserveState.None)
-            _writer.Write('`');
+            _writer.Write('@');
+          break;
+        case "del":
+          _writer.Write('-');
+          _writer.Write(']');
           break;
         case "em":
+          if (_italicDepth > _nodes.Count)
+          {
+            _writer.Write('_');
+            _italicDepth = int.MaxValue;
+          }
+          break;
         case "i":
           if (_italicDepth > _nodes.Count)
           {
-            _writer.Write("*");
+            _writer.Write('_');
+            _writer.Write('_');
             _italicDepth = int.MaxValue;
           }
+          break;
+        case "ins":
+          _writer.Write('+');
+          _writer.Write(']');
           break;
         case "blockquote":
         case "h1":
@@ -184,14 +219,27 @@ namespace BracketPipe
         case "h4":
         case "h5":
         case "h6":
-        case "ol":
         case "p":
+          EndBlock();
+          break;
+        case "ol":
         case "ul":
           EndBlock();
+          if (_linePrefix.Count > 0)
+            _linePrefix.RemoveAt(_linePrefix.Count - 1);
           break;
         case "pre":
           EndBlock();
           _preserveWhitespace = PreserveState.None;
+          _lastWasMultiline = true;
+          break;
+        case "sub":
+          _writer.Write('~');
+          _writer.Write(']');
+          break;
+        case "sup":
+          _writer.Write('^');
+          _writer.Write(']');
           break;
       }
     }
@@ -244,136 +292,32 @@ namespace BracketPipe
 
     public override void WriteStartElement(string prefix, string localName, string ns)
     {
-      WriteStartElementEnd();
+      WriteStartElementEnd(localName);
       var start = new HtmlStartTag(localName.ToLowerInvariant());
       _nodes.Push(start);
-      switch (start.Value)
-      {
-        case "b":
-        case "strong":
-          StartInline();
-          if (_boldDepth > _nodes.Count)
-          {
-            _boldDepth = _nodes.Count;
-            _writer.Write("**");
-          }
-          break;
-        case "blockquote":
-          StartBlock("> ");
-          break;
-        case "br":
-          _minify = MinifyState.LastCharWasSpace;
-          switch (_preserveWhitespace)
-          {
-            case PreserveState.BeforeContent:
-              _preserveWhitespace = PreserveState.Preserve;
-              break;
-            case PreserveState.InternalLineFeed:
-              _writer.Write(_settings.NewLineChars);
-              WritePrefix();
-              _preserveWhitespace = PreserveState.InternalLineFeed;
-              break;
-            case PreserveState.None:
-              _writer.Write('\\');
-              _writer.Write(_settings.NewLineChars);
-              WritePrefix();
-              break;
-            default:
-              _preserveWhitespace = PreserveState.InternalLineFeed;
-              break;
-          }
-          break;
-        case "code":
-          if (_preserveWhitespace == PreserveState.None)
-          {
-            StartInline();
-            _writer.Write('`');
-          }
-          break;
-        case "em":
-        case "i":
-          StartInline();
-          if (_italicDepth > _nodes.Count)
-          {
-            _italicDepth = _nodes.Count;
-            _writer.Write("*");
-          }
-          break;
-        case "h1":
-          StartBlock("# ");
-          break;
-        case "h2":
-          StartBlock("## ");
-          break;
-        case "h3":
-          StartBlock("### ");
-          break;
-        case "h4":
-          StartBlock("#### ");
-          break;
-        case "h5":
-          StartBlock("##### ");
-          break;
-        case "h6":
-          StartBlock("###### ");
-          break;
-        case "title":
-        case "script":
-        case "style":
-          _ignoreDepth = _nodes.Count;
-          break;
-        case "hr":
-          StartBlock("* * *");
-          EndBlock();
-          _writer.Write(_settings.NewLineChars);
-          _minify = MinifyState.LastCharWasSpace;
-          break;
-        case "li":
-          if (_outputStarted)
-            _writer.Write(_settings.NewLineChars);
-          if (_linePrefix.Count > 0 
-            && char.IsDigit(_linePrefix[_linePrefix.Count - 1][0]))
-          {
-            var value = _linePrefix[_linePrefix.Count - 1];
-            value = string.Format("{0}. ", int.Parse(value.Substring(0, value.Length - 2)) + 1);
-            _linePrefix[_linePrefix.Count - 1] = value;
-          }
-          WritePrefix();
-          _minify = MinifyState.LastCharWasSpace;
-          break;
-        case "p":
-          StartBlock("");
-          break;
-        case "pre":
-          StartBlock("    ");
-          _preserveWhitespace = PreserveState.BeforeContent;
-          break;
-        case "ol":
-          StartList("0. ");
-          break;
-        case "ul":
-          StartList("- ");
-          break;
-        
-      }
       _state = InternalState.Element;
+      _lastWasMultiline = false;
     }
 
     private void WritePrefix()
     {
+      var textWritten = false;
       for (var i = 0; i < _linePrefix.Count; i++)
       {
-        // Only indent on nested lists
-        if (i < _linePrefix.Count - 1
-          && (_linePrefix[i][0] == '-' || char.IsDigit(_linePrefix[i][0])))
-          _writer.Write(new string(' ', _linePrefix[i].Length));
-        else
-          _writer.Write(_linePrefix[i]);
+        _writer.Write(_linePrefix[i]);
+        textWritten = textWritten || _linePrefix[i].Length > 0;
       }
+      if (textWritten)
+        _minify = MinifyState.SpaceNeeded;
     }
 
     public override void WriteString(string text)
     {
+      if (_lastWasMultiline && text.Trim().Length > 0)
+      {
+        StartBlock("p", new HtmlStartTag("p"));
+        _lastWasMultiline = false;
+      }
       WriteInternal(text);
     }
 
@@ -465,29 +409,59 @@ namespace BracketPipe
                 break;
             }
 
+            if (_preserveWhitespace == PreserveState.BeforeContent)
+            {
+              _preserveWhitespace = PreserveState.Preserve;
+            }
+
             if (_preserveWhitespace == PreserveState.None)
             {
               switch (value[i])
               {
-                case '\\':
-                case '*':
-                case '[':
-                case '`':
-                  _writer.Write('\\');
+                case '\u201C':
+                case '\u201D':
+                  _writer.Write('"');
+                  break;
+                case '\u2018':
+                case '\u2019':
+                  _writer.Write('\'');
+                  break;
+                case '\u2014':
+                  _writer.Write("--");
+                  break;
+                case '\u2013':
+                  _writer.Write("-");
+                  break;
+                case '\u2026':
+                  _writer.Write("...");
+                  break;
+                case '\u00D7':
+                  _writer.Write('x');
+                  break;
+                case '\u00AE':
+                  _writer.Write("(r)");
+                  break;
+                case '\u2122':
+                  _writer.Write("(tm)");
+                  break;
+                case '\u00A9':
+                  _writer.Write("(c)");
+                  break;
+                default:
+                  _writer.Write(value[i]);
                   break;
               }
             }
-            else if (_preserveWhitespace == PreserveState.BeforeContent)
+            else
             {
-              _preserveWhitespace = PreserveState.Preserve;
+              _writer.Write(value[i]);
             }
-            _writer.Write(value[i]);
           }
         }
         _outputStarted = true;
       }
     }
-    private void WriteStartElementEnd()
+    private void WriteStartElementEnd(string nextTag = null)
     {
       if (_nodes.Count > 0 && _state == InternalState.Element)
       {
@@ -520,28 +494,220 @@ namespace BracketPipe
             else if (!string.IsNullOrEmpty(buffer))
             {
               _writer.Write('[');
+              _writer.Write('"');
+              WriteAttributes(start, _writer);
             }
+            break;
+          case "blockquote":
+            StartBlock("bq", start);
+            if (start.TryGetValue("cite", out buffer))
+            {
+              _writer.Write(':');
+              _writer.Write(buffer);
+            }
+            break;
+          case "b":
+            StartInline();
+            if (_boldDepth > _nodes.Count)
+            {
+              _boldDepth = _nodes.Count;
+              _writer.Write('*');
+              _writer.Write('*');
+              WriteAttributes(start, _writer);
+            }
+            break;
+          case "strong":
+            StartInline();
+            if (_boldDepth > _nodes.Count)
+            {
+              _boldDepth = _nodes.Count;
+              _writer.Write('*');
+              WriteAttributes(start, _writer);
+            }
+            break;
+          case "br":
+            _minify = MinifyState.LastCharWasSpace;
+            switch (_preserveWhitespace)
+            {
+              case PreserveState.BeforeContent:
+                _preserveWhitespace = PreserveState.Preserve;
+                break;
+              case PreserveState.InternalLineFeed:
+                _writer.Write(_settings.NewLineChars);
+                WritePrefix();
+                _preserveWhitespace = PreserveState.InternalLineFeed;
+                break;
+              case PreserveState.None:
+                _writer.Write(_settings.NewLineChars);
+                WritePrefix();
+                break;
+              default:
+                _preserveWhitespace = PreserveState.InternalLineFeed;
+                break;
+            }
+            break;
+          case "cite":
+            StartInline();
+            _writer.Write('?');
+            _writer.Write('?');
+            WriteAttributes(start, _writer);
+            break;
+          case "code":
+            if (_preserveWhitespace == PreserveState.None)
+            {
+              StartInline();
+              _writer.Write('@');
+              WriteAttributes(start, _writer);
+            }
+            break;
+          case "del":
+            StartInline();
+            _writer.Write('[');
+            _writer.Write('-');
+            break;
+          case "div":
+            StartBlock("div", start);
+            break;
+          case "em":
+            StartInline();
+            if (_italicDepth > _nodes.Count)
+            {
+              _italicDepth = _nodes.Count;
+              _writer.Write('_');
+              WriteAttributes(start, _writer);
+            }
+            break;
+          case "i":
+            StartInline();
+            if (_italicDepth > _nodes.Count)
+            {
+              _italicDepth = _nodes.Count;
+              _writer.Write('_');
+              _writer.Write('_');
+              WriteAttributes(start, _writer);
+            }
+            break;
+          case "h1":
+            StartBlock("h1", start);
+            break;
+          case "h2":
+            StartBlock("h2", start);
+            break;
+          case "h3":
+            StartBlock("h3", start);
+            break;
+          case "h4":
+            StartBlock("h4", start);
+            break;
+          case "h5":
+            StartBlock("h5", start);
+            break;
+          case "h6":
+            StartBlock("h6", start);
             break;
           case "img":
             StartInline();
             _writer.Write('!');
-            _writer.Write('[');
-            _writer.Write(start["alt"]);
-            _writer.Write(']');
-            _writer.Write('(');
+            WriteAttributes(start, _writer);
             _writer.Write(start["src"]);
-            if (start.TryGetValue("title", out buffer))
+            if (start.TryGetValue("alt", out buffer))
             {
-              _writer.Write(' ');
-              _writer.Write('"');
+              _writer.Write('(');
               _writer.Write(buffer);
-              _writer.Write('"');
+              _writer.Write(')');
             }
-            _writer.Write(')');
+            _writer.Write('!');
             _minify = MinifyState.Compressed;
+            break;
+          case "ins":
+            StartInline();
+            _writer.Write('[');
+            _writer.Write('+');
+            break;
+          case "title":
+          case "script":
+          case "style":
+            _ignoreDepth = _nodes.Count;
+            break;
+          case "hr":
+            StartBlock("---", start);
+            EndBlock();
+            _writer.Write(_settings.NewLineChars);
+            _minify = MinifyState.LastCharWasSpace;
+            break;
+          case "li":
+            if (_outputStarted)
+              _writer.Write(_settings.NewLineChars);
+            WritePrefix();
+            break;
+          case "p":
+            StartBlock("", start);
+            break;
+          case "pre":
+            if (nextTag == "code")
+              StartBlock("bc", start, true);
+            else
+              StartBlock("pre", start, true);
+            _preserveWhitespace = PreserveState.BeforeContent;
+            break;
+          case "span":
+            _writer.Write('?');
+            WriteAttributes(start, _writer);
+            break;
+          case "sub":
+            StartInline();
+            _writer.Write('[');
+            _writer.Write('~');
+            break;
+          case "sup":
+            StartInline();
+            _writer.Write('[');
+            _writer.Write('^');
+            break;
+          case "ol":
+            StartList("#");
+            break;
+          case "ul":
+            StartList("*");
             break;
         }
         _state = InternalState.Content;
+      }
+    }
+
+    private void WriteAttributes(HtmlStartTag start, TextWriter writer)
+    {
+      string buffer;
+      var inParen = false;
+      if (start.TryGetValue("class", out buffer))
+      {
+        writer.Write('(');
+        writer.Write(buffer);
+        inParen = true;
+      }
+      if (start.TryGetValue("id", out buffer))
+      {
+        if (!inParen)
+          writer.Write('(');
+        writer.Write('#');
+        writer.Write(buffer);
+        inParen = true;
+      }
+      if (inParen)
+      {
+        writer.Write(')');
+      }
+      else if (start.TryGetValue("style", out buffer))
+      {
+        writer.Write('{');
+        writer.Write(buffer.Trim().TrimEnd(';'));
+        writer.Write('}');
+      }
+      else if (start.TryGetValue("lang", out buffer))
+      {
+        writer.Write('[');
+        writer.Write(buffer);
+        writer.Write(']');
       }
     }
 
@@ -564,9 +730,8 @@ namespace BracketPipe
       }
       _linePrefix.Add(prefix ?? string.Empty);
     }
-    private void StartBlock(string prefix)
+    private void StartBlock(string prefix, HtmlStartTag start, bool multiline = false)
     {
-      var prefixRequired = false;
       if (_minify == MinifyState.Compressed
         || _minify == MinifyState.SpaceNeeded
         || _minify == MinifyState.BlockEnd)
@@ -574,18 +739,25 @@ namespace BracketPipe
         _writer.Write(_settings.NewLineChars);
         _writer.Write(_settings.NewLineChars);
         _minify = MinifyState.LastCharWasSpace;
-        prefixRequired = true;
       }
-      _linePrefix.Add(prefix ?? string.Empty);
-      if (prefixRequired || prefix != string.Empty)
-        WritePrefix();
+
+      if (prefix == "" && (_lastWasMultiline || multiline || start.Any(k => k.Key == "class" || k.Key == "id" || k.Key == "style" || k.Key == "lang")))
+        prefix = "p";
+      _writer.Write(prefix);
+      WriteAttributes(start, _writer);
+
+      if (prefix != "")
+      {
+        _writer.Write('.');
+        _minify = MinifyState.SpaceNeeded;
+      }
+      if (multiline)
+        _writer.Write('.');
       _outputStarted = true;
     }
     private void EndBlock()
     {
       _minify = MinifyState.BlockEnd;
-      if (_linePrefix.Count > 0)
-        _linePrefix.RemoveAt(_linePrefix.Count - 1);
     }
 
     private void WriteEscaped(string text)
