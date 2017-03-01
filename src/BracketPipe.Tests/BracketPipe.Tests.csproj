@@ -70,6 +70,7 @@
     <Compile Include="MarkdownTests.cs" />
     <Compile Include="MinificationTests.cs" />
     <Compile Include="OfficialExamples.cs" />
+    <Compile Include="PlainTextTests.cs" />
     <Compile Include="SanitizeTests.cs" />
     <Compile Include="SgmlReaderTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

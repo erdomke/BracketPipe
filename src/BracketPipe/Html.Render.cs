@@ -125,6 +125,47 @@ namespace BracketPipe
       }
     }
 
+
+    /// <summary>
+    /// Convert parsed HTML to plain text
+    /// </summary>
+    public static string ToPlainText(this IEnumerable<HtmlNode> reader)
+    {
+      using (var sw = new StringWriter())
+      {
+        ToPlainText(reader, sw);
+        return sw.ToString();
+      }
+    }
+
+    /// <summary>
+    /// Convert parsed HTML to plain text
+    /// </summary>
+    public static string ToPlainText(TextSource html)
+    {
+      var sb = Pool.NewStringBuilder();
+      sb.EnsureCapacity(html.Length);
+      using (var sw = new StringWriter(sb))
+      using (var reader = new HtmlReader(html, false))
+      {
+        reader.ToPlainText(sw);
+        sw.Flush();
+        return sb.ToPool();
+      }
+    }
+
+    /// <summary>
+    /// Convert parsed HTML to plain text
+    /// </summary>
+    public static void ToPlainText(this IEnumerable<HtmlNode> reader, TextWriter writer)
+    {
+      using (var w = new PlainTextWriter(writer))
+      {
+        ToHtml(reader, w);
+        w.Flush();
+      }
+    }
+
     /// <summary>
     /// Render parsed HTML to an XML writer
     /// </summary>
