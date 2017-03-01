@@ -1143,5 +1143,126 @@ Next line of text";
         Assert.AreEqual(expected, actual);
       }
     }
+
+    [Test]
+    public void ProcessUnmatchedParagraphTags()
+    {
+      const string html = @"<p><b>Information</b><p></p>
+
+<p><ul><li><b>App Number</b>: 13/586,057</li><p></p>
+
+<p><li><b>Publication Number</b>: US 20130055357 A1</li><p></p>
+
+<p><li><b>Assignee</b>: Uniloc Luxembourg S.A.</li><p></p>
+
+<p><li><b>Prior Art Cutoff Date</b>: predating August 15, 2010</li></ul><p></p>
+
+<p><b>Summary</b>: A personal information server provides personal information about an individual to a third-party only when authorized by the individual through use of a previously authenticated computing device. The personal information server authenticates both the computing device used by the third-party to access the personal data and the device used by the individual to grant or deny such access using highly secure digital fingerprints of each. The individual can allow the third-party multiple instances of access to the personal information within restrictions specified by the individual. Other advantages also arise from large-scale tracking of which devices access and control personal information of many people--particularly with respect to identifying and preventing fraud and identity theft.<p></p>
+
+<p><b>Claim 1</b> recites:<br></p>
+
+<blockquote>A method for controlling access to personal information about an individual, the method comprising: receiving data from a third-party device through a computer network that represents a request for the personal information about the individual and that includes a digital fingerprint of the third-party device; sending data representing notification of the request for the personal information of the individual to the individual; receiving authorization data that indicates whether the individual intends to grant the request for the personal information of the individual and a digital fingerprint of a device from which the authorization data is sent; and upon a condition in which both (i) the authorization data indicates that the individual intends to grant the request for the personal information of the individual and (ii) the digital fingerprint of the authorization data matches a digital fingerprint of at least one predetermined authorized device, sending the personal information to the third-party device.</blockquote>
+
+<p><b>Claim 11</b> recites:<br></p>
+
+<blockquote>A computer system comprising: at least one processor; a computer readable medium that is operatively coupled to the processor; network access circuitry that is operatively coupled to the processor; and personal information server logic (i) that executes in the processor from the computer readable medium and (ii) that, when executed by the processor, causes the computer to control access to personal information about an individual by at least: receiving data from a third-party device through a computer network that represents a request for the personal information about the individual and that includes a digital fingerprint of the third-party device; sending data representing notification of the request for the personal information of the individual to the individual; receiving authorization data that indicates whether the individual intends to grant the request for the personal information of the individual and a digital fingerprint of a device from which the authorization data is sent; and upon a condition in which both (i) the authorization data indicates that the individual intends to grant the request for the personal information of the individual and (ii) the digital fingerprint of the authorization data matches a digital fingerprint of at least one predetermined authorized device, sending the personal information to the third-party device.</blockquote>
+
+<p><b>Sample Figures</b><p></p>
+
+<p><img src=""https://i.stack.imgur.com/DLCHb.png"" alt=""Figure 0""></p>
+
+<p><img src=""https://i.stack.imgur.com/kR4vsm.png"" alt=""Figure 1""></p>
+
+<p><img src=""https://i.stack.imgur.com/zB272.png"" alt=""Figure 2""></p>
+
+<p><img src=""https://i.stack.imgur.com/bs7ja.png"" alt=""Figure 3""></p>
+
+<p><img src=""https://i.stack.imgur.com/MPrOu.png"" alt=""Figure 4""></p>
+
+<p><img src=""https://i.stack.imgur.com/l0wno.png"" alt=""Figure 5""></p>
+
+<p><b>WHY IT MATTERS</b>: The primary claim to uniqueness of the personal information server described in this application relates to the ability of the individual to fully control who has access to the personal information.<p></p>
+
+<p><b><i>QUESTION</i></b>: Have you seen anything that was published before August 15, 2010 that describes claim 1 or claim 11, especially a personal information server that gives an individual full control over what other entities have access to personal information about the individual?<p></p>
+
+<p>If so, please submit evidence of that prior art as an answer below. Please submit only one piece of prior art per answer below. We welcome multiple prior art proposals from the same individual; please create separate answers for each one. This is so the community can vet each individual piece of prior art independently.<p></p>
+
+<p><i>For details about what makes good prior art, please see our <a href=""http://patents.stackexchange.com/faq#prior-art"">FAQ</a>. Once you have submitted prior art, check back soon to see if the <a href=""http://patents.stackexchange.com/questions/tagged/prior-art-request+pre-grant"">Ask Patents</a> community have chosen your prior art to be submitted to the United States Patent &amp; Trademark Office.</i><p></p>
+
+<p>If you'd like to contribute in another way, please vote or comment on submissions made below. And we welcome you to <a href=""http://patents.stackexchange.com/questions/tagged/prior-art-request+pre-grant"">post your own request for prior art</a> if you know of another questionable patent or patent application.</p></p>
+";
+      const string expected = @"Information
+
+
+
+
+- App Number: 13/586,057
+
+  
+
+  
+  Publication Number: US 20130055357 A1
+
+  
+
+  
+  Assignee: Uniloc Luxembourg S.A.
+
+  
+
+  
+  Prior Art Cutoff Date: predating August 15, 2010
+
+  
+
+  Summary: A personal information server provides personal information about an individual to a third-party only when authorized by the individual through use of a previously authenticated computing device. The personal information server authenticates both the computing device used by the third-party to access the personal data and the device used by the individual to grant or deny such access using highly secure digital fingerprints of each. The individual can allow the third-party multiple instances of access to the personal information within restrictions specified by the individual. Other advantages also arise from large-scale tracking of which devices access and control personal information of many people--particularly with respect to identifying and preventing fraud and identity theft.
+
+  
+
+  Claim 1 recites:
+  
+
+  A method for controlling access to personal information about an individual, the method comprising: receiving data from a third-party device through a computer network that represents a request for the personal information about the individual and that includes a digital fingerprint of the third-party device; sending data representing notification of the request for the personal information of the individual to the individual; receiving authorization data that indicates whether the individual intends to grant the request for the personal information of the individual and a digital fingerprint of a device from which the authorization data is sent; and upon a condition in which both (i) the authorization data indicates that the individual intends to grant the request for the personal information of the individual and (ii) the digital fingerprint of the authorization data matches a digital fingerprint of at least one predetermined authorized device, sending the personal information to the third-party device.
+
+  Claim 11 recites:
+  
+
+  A computer system comprising: at least one processor; a computer readable medium that is operatively coupled to the processor; network access circuitry that is operatively coupled to the processor; and personal information server logic (i) that executes in the processor from the computer readable medium and (ii) that, when executed by the processor, causes the computer to control access to personal information about an individual by at least: receiving data from a third-party device through a computer network that represents a request for the personal information about the individual and that includes a digital fingerprint of the third-party device; sending data representing notification of the request for the personal information of the individual to the individual; receiving authorization data that indicates whether the individual intends to grant the request for the personal information of the individual and a digital fingerprint of a device from which the authorization data is sent; and upon a condition in which both (i) the authorization data indicates that the individual intends to grant the request for the personal information of the individual and (ii) the digital fingerprint of the authorization data matches a digital fingerprint of at least one predetermined authorized device, sending the personal information to the third-party device.
+
+  Sample Figures
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  WHY IT MATTERS: The primary claim to uniqueness of the personal information server described in this application relates to the ability of the individual to fully control who has access to the personal information.
+
+  
+
+  QUESTION: Have you seen anything that was published before August 15, 2010 that describes claim 1 or claim 11, especially a personal information server that gives an individual full control over what other entities have access to personal information about the individual?
+
+  
+
+  If so, please submit evidence of that prior art as an answer below. Please submit only one piece of prior art per answer below. We welcome multiple prior art proposals from the same individual; please create separate answers for each one. This is so the community can vet each individual piece of prior art independently.
+
+  
+
+  For details about what makes good prior art, please see our FAQ. Once you have submitted prior art, check back soon to see if the Ask Patents community have chosen your prior art to be submitted to the United States Patent & Trademark Office.
+
+  
+
+  If you'd like to contribute in another way, please vote or comment on submissions made below. And we welcome you to post your own request for prior art if you know of another questionable patent or patent application.";
+      CheckConversion(html, expected);
+    }
   }
 }

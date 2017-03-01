@@ -291,6 +291,7 @@ namespace BracketPipe
           if (_outputStarted)
             Write(Environment.NewLine);
           if (_linePrefix.Count > 0
+            && _linePrefix[_linePrefix.Count - 1].Length > 0
             && char.IsDigit(_linePrefix[_linePrefix.Count - 1][0]))
           {
             var value = _linePrefix[_linePrefix.Count - 1];
