@@ -129,6 +129,9 @@ namespace BracketPipe
     public override void WriteEndElement()
     {
       WriteStartElementEnd();
+      if (_nodes.Count <= 0)
+        return;
+        
       var start = _nodes.Pop();
       if (_ignoreDepth > _nodes.Count)
         _ignoreDepth = int.MaxValue;

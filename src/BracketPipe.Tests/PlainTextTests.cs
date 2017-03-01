@@ -1307,5 +1307,30 @@ Would it be better to use a push-pull configuration like the one below ?
 ";
       CheckConversion(html, expected);
     }
+
+    [Test]
+    public void ExtraClosingTag()
+    {
+      const string html = @"<p>I was looking on <a href=""http://booking.com"">booking.com</a> to book some hotels for our trip next year. Quite a few deals have free cancellation until 1 day before arrival, which is always useful. However most of them also have a prepayment of 100% of the first night or even the complete booking ""on the day of booking"". So if I book now, the price for a full night will be charged on my credit card <strong>today</strong> (or at least this week)?</p>
+
+<blockquote>
+  <p><b>Cancellation:</b>   If cancelled or modified up to 1 day
+  before the date of arrival,  no fee will be charged.   If cancelled or modified later or in case
+  of no-show, 100 percent of the first night will be charged. 
+  </p> <p> <b>Prepayment:</b> 100 percent of the first night will be
+  charged on the day of booking. </p></p>
+</blockquote>
+
+<p>If I cancel in time, how sure can I be that I get everything back? Next to that, I'm booking the rooms in USD, but my card and account are in EUR. My bank charges 1,5% fee to change between currencies. When I get my refund, this will be again charged a 1,5% fee? (Not taking into account that the exchange rate between 2 currencies also change over time).</p>
+";
+      const string expected = @"I was looking on booking.com to book some hotels for our trip next year. Quite a few deals have free cancellation until 1 day before arrival, which is always useful. However most of them also have a prepayment of 100% of the first night or even the complete booking ""on the day of booking"". So if I book now, the price for a full night will be charged on my credit card today (or at least this week)?
+
+Cancellation: If cancelled or modified up to 1 day before the date of arrival, no fee will be charged. If cancelled or modified later or in case of no-show, 100 percent of the first night will be charged.
+
+Prepayment: 100 percent of the first night will be charged on the day of booking.
+
+If I cancel in time, how sure can I be that I get everything back? Next to that, I'm booking the rooms in USD, but my card and account are in EUR. My bank charges 1,5% fee to change between currencies. When I get my refund, this will be again charged a 1,5% fee? (Not taking into account that the exchange rate between 2 currencies also change over time).";
+      CheckConversion(html, expected);
+    }
   }
 }
