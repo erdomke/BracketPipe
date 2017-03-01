@@ -1264,5 +1264,48 @@ Next line of text";
   If you'd like to contribute in another way, please vote or comment on submissions made below. And we welcome you to post your own request for prior art if you know of another questionable patent or patent application.";
       CheckConversion(html, expected);
     }
+
+    [Test]
+    public void NestedLinkTest()
+    {
+      const string html = @"<p>I'm thinking about building the DIY RFID reader described here <a href=""http://playground.arduino.cc/Main/DIYRFIDReader"" rel=""nofollow noreferrer""><a href=""http://playground.arduino.cc/Main/DIYRFIDReader"" rel=""nofollow noreferrer"">http://playground.arduino.cc/Main/DIYRFIDReader</a></a>, with an arduino uno.</p>
+
+<p>For the LC filter, I have a 330uH inductor at home (and I'm using a 4.7nF capacitor for C1 instead of the 7nF shown on the schematic, to get at 125khz resonant frequency) and also I'm using 1N4148 diodes instead of 1N914 (I couldn't find them on stock at the local electronics shop).</p>
+
+<p>I did the simulation of the circuit in LT Spice (schematic is quite similar to what the original author has) and it shows we that the current draw from the arduino pin D9 goes up to 400 mA, from what I know the AVR can't source more than 50 mA per pin.</p>
+
+<p>Here's the LTSpice circuit:
+<img src=""https://i.stack.imgur.com/49y7Y.png"" alt=""simulation""></p>
+
+<p>And the simulation result:
+<img src=""https://i.stack.imgur.com/2DqaI.png"" alt=""current draw""></p>
+
+<p>My question is: what will happen in reality when building the circuit, will the pin source less current than the simulation and it will simply work or I run the risk of damaging the pin by attempting to source that much current (perhaps not instant damage, but long term) ? </p>
+
+<p>If there is risk for damaging the pin, what solutions do I have to prevent it? Would a simple current limiting resistor do? </p>
+
+<p>Would it be better to use a push-pull configuration like the one below ?</p>
+
+<p><img src=""https://i.stack.imgur.com/2t1sH.png"" alt=""push-pull config""></p>
+";
+      const string expected = @"I'm thinking about building the DIY RFID reader described here http://playground.arduino.cc/Main/DIYRFIDReader, with an arduino uno.
+
+For the LC filter, I have a 330uH inductor at home (and I'm using a 4.7nF capacitor for C1 instead of the 7nF shown on the schematic, to get at 125khz resonant frequency) and also I'm using 1N4148 diodes instead of 1N914 (I couldn't find them on stock at the local electronics shop).
+
+I did the simulation of the circuit in LT Spice (schematic is quite similar to what the original author has) and it shows we that the current draw from the arduino pin D9 goes up to 400 mA, from what I know the AVR can't source more than 50 mA per pin.
+
+Here's the LTSpice circuit:
+
+And the simulation result:
+
+My question is: what will happen in reality when building the circuit, will the pin source less current than the simulation and it will simply work or I run the risk of damaging the pin by attempting to source that much current (perhaps not instant damage, but long term) ?
+
+If there is risk for damaging the pin, what solutions do I have to prevent it? Would a simple current limiting resistor do?
+
+Would it be better to use a push-pull configuration like the one below ?
+
+";
+      CheckConversion(html, expected);
+    }
   }
 }

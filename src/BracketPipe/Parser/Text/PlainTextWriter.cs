@@ -137,16 +137,19 @@ namespace BracketPipe
       {
         case "a":
           _minify = MinifyState.Compressed;
-          var text = _buffer.ToPool();
-          if (!string.IsNullOrEmpty(start["href"]))
+          if (_buffer != null)
           {
-            _links.Add(new PlainTextLink()
+            var text = _buffer.ToPool();
+            if (!string.IsNullOrEmpty(start["href"]))
             {
-              Href = start["href"],
-              Offset = _pos - text.Length,
-              Tag = start,
-              Text = text
-            });
+              _links.Add(new PlainTextLink()
+              {
+                Href = start["href"],
+                Offset = _pos - text.Length,
+                Tag = start,
+                Text = text
+              });
+            }
           }
           _buffer = null;
           break;
