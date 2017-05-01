@@ -76,29 +76,24 @@ Task("Restore-NuGet-Packages")
   .Does(() =>
 {
   if (FileExists("./src/BracketPipe/project.json"))
-    MoveFile("./src/BracketPipe/project.json", "./src/BracketPipe/__project.json");
+    MoveFile("./src/BracketPipe/project.json", "./src/BracketPipe/__project.__json");
   if (FileExists("./src/BracketPipe/project.lock.json"))
-    MoveFile("./src/BracketPipe/project.lock.json", "./src/BracketPipe/__project.lock.json");
+    MoveFile("./src/BracketPipe/project.lock.json", "./src/BracketPipe/__project.lock.__json");
   
   NuGetRestore("./src/BracketPipe/BracketPipe.Net35.csproj");
   DotNetCoreRestore("./src/BracketPipe/BracketPipe.NetCore.csproj");
 }).OnError(ex => 
 {
-  if (FileExists("./src/BracketPipe/__project.json"))
-    MoveFile("./src/BracketPipe/__project.json", "./src/BracketPipe/project.json");
-  if (FileExists("./src/BracketPipe/__project.lock.json"))
-    MoveFile("./src/BracketPipe/__project.lock.json", "./src/BracketPipe/project.lock.json");
+  if (FileExists("./src/BracketPipe/__project.__json"))
+    MoveFile("./src/BracketPipe/__project.__json", "./src/BracketPipe/project.json");
+  if (FileExists("./src/BracketPipe/__project.lock.__json"))
+    MoveFile("./src/BracketPipe/__project.lock.__json", "./src/BracketPipe/project.lock.json");
 });
 
 Task("Build")
   .IsDependentOn("Restore-NuGet-Packages")
   .Does(() =>
 {
-  if (FileExists("./src/BracketPipe/project.json"))
-    MoveFile("./src/BracketPipe/project.json", "./src/BracketPipe/__project.json");
-  if (FileExists("./src/BracketPipe/project.lock.json"))
-    MoveFile("./src/BracketPipe/project.lock.json", "./src/BracketPipe/__project.lock.json");
-	
   DotNetBuild("./src/BracketPipe/BracketPipe.Net35.csproj", settings =>
     settings.SetConfiguration(configuration));
   
@@ -114,10 +109,10 @@ Task("Build")
     DeleteFile(file);
 }).Finally(() => 
 {
-  if (FileExists("./src/BracketPipe/__project.json"))
-    MoveFile("./src/BracketPipe/__project.json", "./src/BracketPipe/project.json");
-  if (FileExists("./src/BracketPipe/__project.lock.json"))
-    MoveFile("./src/BracketPipe/__project.lock.json", "./src/BracketPipe/project.lock.json");
+  if (FileExists("./src/BracketPipe/__project.__json"))
+    MoveFile("./src/BracketPipe/__project.__json", "./src/BracketPipe/project.json");
+  if (FileExists("./src/BracketPipe/__project.lock.__json"))
+    MoveFile("./src/BracketPipe/__project.lock.__json", "./src/BracketPipe/project.lock.json");
 });
 
 Task("NuGet-Pack")
