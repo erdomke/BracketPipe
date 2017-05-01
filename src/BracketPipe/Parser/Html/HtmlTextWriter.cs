@@ -269,6 +269,15 @@ namespace BracketPipe
     }
     public void WriteEndElement(string name)
     {
+      if (!VoidElements.Contains(name) && !_openTags.Any(t => t.Name == name))
+      {
+        RenderIndent();
+        _writer.Write("</");
+        _writer.Write(name);
+        _writer.Write('>');
+        return;
+      }
+
       if (!VoidElements.Contains(name) || _lastTagName != name)
       {
         var info = WriteEndElement(false, name);

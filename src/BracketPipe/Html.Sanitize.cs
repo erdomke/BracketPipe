@@ -4,11 +4,14 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using BracketPipe.Extensions;
+using System.Text.RegularExpressions;
 
 namespace BracketPipe
 {
   public static partial class Html
   {
+    private static readonly Regex _emailRegex = new Regex(@"^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$");
+
     public static string Sanitize(TextSource html, HtmlSanitizeSettings settings = null)
     {
       var sb = new StringBuilder(html.Length);
@@ -49,7 +52,7 @@ namespace BracketPipe
       foreach (var origToken in reader)
       {
         var token = origToken;
-        if (token.Type == HtmlTokenType.StartTag && !IsValidTagName(token.Value))
+        if (token.Type == HtmlTokenType.StartTag && _emailRegex.IsMatch(token.Value))
           token = new HtmlText(token.Position, "<" + token.Value + ">");
 
         switch (token.Type)
@@ -130,7 +133,9 @@ namespace BracketPipe
           && name[i] != ':'
           && name[i] != '_'
           && name[i] != '-'
-          && name[i] != '.')
+          && name[i] != '.'
+          && name[i] > ' '
+          && name[i] < 127)
           return false;
       }
       return true;
