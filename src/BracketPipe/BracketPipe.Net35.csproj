@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{7FF8BF41-8A15-4CDA-AC3C-2BDBEE7B265C}</ProjectGuid>
+    <ProjectGuid>{5C179E8B-DE92-4BAE-80CD-C7DAD39E94DA}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>BracketPipe</RootNamespace>
