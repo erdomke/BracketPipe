@@ -75,19 +75,12 @@ Task("Restore-NuGet-Packages")
   .IsDependentOn("Patch-Project-Files")
   .Does(() =>
 {
-  if (FileExists("./src/BracketPipe/project.json"))
-    MoveFile("./src/BracketPipe/project.json", "./src/BracketPipe/__project.__json");
-  if (FileExists("./src/BracketPipe/project.lock.json"))
-    MoveFile("./src/BracketPipe/project.lock.json", "./src/BracketPipe/__project.lock.__json");
+	DeleteFiles("./**/project.json");
+	DeleteFiles("./**/project.lock.json");
+	DeleteFiles("./**/global.json");
   
   NuGetRestore("./src/BracketPipe/BracketPipe.Net35.csproj");
   DotNetCoreRestore("./src/BracketPipe/BracketPipe.NetCore.csproj");
-}).OnError(ex => 
-{
-  if (FileExists("./src/BracketPipe/__project.__json"))
-    MoveFile("./src/BracketPipe/__project.__json", "./src/BracketPipe/project.json");
-  if (FileExists("./src/BracketPipe/__project.lock.__json"))
-    MoveFile("./src/BracketPipe/__project.lock.__json", "./src/BracketPipe/project.lock.json");
 });
 
 Task("Build")
@@ -107,12 +100,6 @@ Task("Build")
     .Where(f => !f.ToString().EndsWith("BracketPipe.dll", StringComparison.OrdinalIgnoreCase));
   foreach (var file in files)
     DeleteFile(file);
-}).Finally(() => 
-{
-  if (FileExists("./src/BracketPipe/__project.__json"))
-    MoveFile("./src/BracketPipe/__project.__json", "./src/BracketPipe/project.json");
-  if (FileExists("./src/BracketPipe/__project.lock.__json"))
-    MoveFile("./src/BracketPipe/__project.lock.__json", "./src/BracketPipe/project.lock.json");
 });
 
 Task("NuGet-Pack")
