@@ -46,8 +46,12 @@ namespace BracketPipe
       var inStyle = false;
       settings = settings ?? HtmlSanitizeSettings.ReadOnlyDefault;
 
-      foreach (var token in reader)
+      foreach (var origToken in reader)
       {
+        var token = origToken;
+        if (token.Type == HtmlTokenType.StartTag && !IsValidTagName(token.Value))
+          token = new HtmlText(token.Position, "<" + token.Value + ">");
+
         switch (token.Type)
         {
           case HtmlTokenType.Text:
@@ -114,6 +118,22 @@ namespace BracketPipe
             break;
         }
       }
+    }
+
+    private static bool IsValidTagName(string name)
+    {
+      if (name == null)
+        return false;
+      for (var i = 0; i < name.Length; i++)
+      {
+        if (!char.IsLetterOrDigit(name[i])
+          && name[i] != ':'
+          && name[i] != '_'
+          && name[i] != '-'
+          && name[i] != '.')
+          return false;
+      }
+      return true;
     }
 
     private static IEnumerable<KeyValuePair<string, string>> AllowedAttributes(HtmlStartTag tag, HtmlSanitizeSettings settings)

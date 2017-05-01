@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>BracketPipe</id>
+    <version>0.7.0.18</version>
+    <title>BracketPipe</title>
+    <authors>Eric Domke</authors>
+    <owners>Eric Domke</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <licenseUrl>https://github.com/erdomke/BracketPipe/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/erdomke/BracketPipe</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/erdomke/BracketPipe/master/icon.png</iconUrl>
+    <description>BracketPipe is a .NET library for performing a single-pass streaming parse of angle bracket based hypertext languages like HTML, SVG, and MathML</description>
+    <language>en-US</language>
+    <tags>html,sanitize,minify</tags>
+    <dependencies>
+      <group targetFramework=".NETFramework3.5" />
+      <group targetFramework=".NETFramework4.0">
+        <dependency id="Microsoft.Bcl.Async" version="1.0.168" />
+      </group>
+      <group targetFramework=".NETStandard1.0">
+        <dependency id="NETStandard.Library" version="1.6.0" />
+        <dependency id="Microsoft.NETCore.Portable.Compatibility" version="1.0.1" />
+      </group>
+    </dependencies>
+    <frameworkAssemblies>
+      <frameworkAssembly assemblyName="System.Core" targetFramework=".NETFramework3.5" />
+      <frameworkAssembly assemblyName="System.Xml" targetFramework=".NETFramework3.5" />
+      <frameworkAssembly assemblyName="Microsoft.CSharp" targetFramework=".NETFramework4.0" />
+      <frameworkAssembly assemblyName="System.Core" targetFramework=".NETFramework4.0" />
+      <frameworkAssembly assemblyName="System.Xml" targetFramework=".NETFramework4.0" />
+    </frameworkAssemblies>
+  </metadata>
+</package>

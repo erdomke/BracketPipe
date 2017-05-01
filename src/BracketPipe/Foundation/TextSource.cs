@@ -326,7 +326,7 @@
       return _content.ToString(start, characters);
     }
 
-#if !NET35
+#if INCLUDE_ASYNC
     /// <summary>
     /// Reads the next character from the buffer or underlying stream
     /// asynchronously, if any.
@@ -421,7 +421,8 @@
     #endregion
 
     #region Helpers
-#if !NET35
+
+#if INCLUDE_ASYNC
     async Task DetectByteOrderMarkAsync(CancellationToken cancellationToken)
     {
       var count = await _baseStream.ReadAsync(_buffer, 0, _bufferSize).ConfigureAwait(false);
