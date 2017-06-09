@@ -166,5 +166,13 @@ namespace BracketPipe.Core.Tests
       var input = "<p>http://this<wbr>.is<wbr>.a<wbr>.really<wbr>.long<wbr>.example<wbr>.com/With<wbr>/deeper<wbr>/level<wbr>/pages<wbr>/deeper<wbr>/level<wbr>/pages<wbr>/deeper<wbr>/level<wbr>/pages<wbr>/deeper<wbr>/level<wbr>/pages<wbr>/deeper<wbr>/level<wbr>/pages</p>";
       Assert.AreEqual(input, Html.Minify(input));
     }
+
+
+    [Test]
+    public void Minify_DontConcatenateScriptTags()
+    {
+      var input = "<script>var thing=2;</script><script>var another=4;</script>";
+      Assert.AreEqual(input, Html.Minify(input));
+    }
   }
 }

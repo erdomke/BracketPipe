@@ -139,6 +139,7 @@ namespace BracketPipe
           {
             yield return new HtmlText(node.Position, Js.Minify(new TextSource(builder)));
             builder.ToPool();
+            builder = null;
           }
 
           var tag = node as HtmlStartTag;
