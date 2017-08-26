@@ -4,13 +4,13 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>278dbd37-a01e-4f4e-88ff-1239d409db42</ProjectGuid>
+    <ProjectGuid>{278DBD37-A01E-4F4E-88FF-1239D409DB42}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>BracketPipe</RootNamespace>
     <AssemblyName>BracketPipe</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
-		<TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -26,10 +26,11 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>..\..\publish\BracketPipe\lib\net35</OutputPath>
-		<BaseIntermediateOutputPath>objnet35\</BaseIntermediateOutputPath>
+    <BaseIntermediateOutputPath>objnet35\</BaseIntermediateOutputPath>
     <DefineConstants>TRACE;NET35</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>..\..\publish\BracketPipe\lib\net35\BracketPipe.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -109,9 +110,10 @@
     <Compile Include="Parser\Text\PlainTextLink.cs" />
     <Compile Include="Parser\Text\PlainTextWriter.cs" />
     <Compile Include="Parser\Text\TextileWriter.cs" />
+    <Compile Include="Parser\Text\TextWriterSettings.cs" />
     <Compile Include="Parser\XmlCharType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-		<Compile Include="AssemblyInfo.Version.cs" />
+    <Compile Include="AssemblyInfo.Version.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
@@ -121,5 +123,4 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-
- </Project>
+</Project>

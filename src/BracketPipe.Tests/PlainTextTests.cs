@@ -1087,6 +1087,29 @@ Next line of text";
 2. Item3";
       CheckConversion(html, expected);
     }
+    
+    [Test]
+    public void ElementsToSkip()
+    {
+      const string html = "<noscript>stuff</noscript>";
+      CheckConversion(html, "");
+      var settings = new TextWriterSettings();
+      settings.ElementsToSkip.Remove("noscript");
+      CheckConversion(html, "stuff", settings);
+    }
+
+    [Test]
+    public void SkipHiddenElements()
+    {
+      var html = "<div style=\"display:none;\">stuff</div>";
+      CheckConversion(html, "");
+      html = "<div style=\"display:block;\">stuff</div>";
+      CheckConversion(html, "stuff");
+      html = "<div style=\"display:block;visibility:hidden\">stuff</div>";
+      CheckConversion(html, "");
+      html = "<div style=\"display:block;visibility:visible\">stuff</div>";
+      CheckConversion(html, "stuff");
+    }
 
     [Test]
     public void FullHtmlToPlainText()
@@ -1135,11 +1158,11 @@ Next line of text";
       }
     }
 
-    private void CheckConversion(string html, string expected)
+    private void CheckConversion(string html, string expected, TextWriterSettings settings = null)
     {
       using (var reader = new HtmlReader(html))
       {
-        var actual = reader.ToPlainText();
+        var actual = reader.ToPlainText(settings);
         Assert.AreEqual(expected, actual);
       }
     }

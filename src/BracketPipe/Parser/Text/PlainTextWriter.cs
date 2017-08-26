@@ -19,6 +19,7 @@ namespace BracketPipe
     private PreserveState _preserveWhitespace = PreserveState.None;
     private bool _outputStarted;
     private int _pos = 0;
+    private TextWriterSettings _settings;
 
     private StringBuilder _buffer;
     private List<KeyValuePair<string, string>> _metadata = new List<KeyValuePair<string, string>>();
@@ -27,9 +28,12 @@ namespace BracketPipe
     public ICollection<PlainTextLink> Links { get { return _links; } }
     public ICollection<KeyValuePair<string, string>> Metadata { get { return _metadata; } }
 
-    public PlainTextWriter(TextWriter writer)
+    public PlainTextWriter(TextWriter writer) : this(writer, new TextWriterSettings()) { }
+
+    public PlainTextWriter(TextWriter writer, TextWriterSettings settings)
     {
       _writer = writer;
+      _settings = settings ?? new TextWriterSettings();
     }
 
     public override WriteState WriteState
@@ -282,11 +286,6 @@ namespace BracketPipe
           _buffer = Pool.NewStringBuilder();
           _ignoreDepth = _nodes.Count;
           break;
-        case "script":
-        case "style":
-        case "nav": // skip navigation elements
-          _ignoreDepth = _nodes.Count;
-          break;
         case "hr":
           StartBlock("* * *");
           EndBlock();
@@ -320,7 +319,6 @@ namespace BracketPipe
         case "ul":
           StartList("- ");
           break;
-
       }
       _state = InternalState.Element;
     }
@@ -509,6 +507,12 @@ namespace BracketPipe
                 name = start["property"];
               if (!string.IsNullOrEmpty(name))
                 _metadata.Add(new KeyValuePair<string, string>(name, content));
+            }
+            break;
+          default:
+            if (_settings.SkipElement(start))
+            {
+              _ignoreDepth = _nodes.Count;
             }
             break;
         }

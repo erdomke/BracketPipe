@@ -10,8 +10,13 @@
 #endif
 
   /// <summary>
-  /// A stream abstraction to handle encoding and more.
+  /// A string/stream abstraction to handle encoding.
   /// </summary>
+  /// <remarks>
+  /// Both a <see cref="string"/> and <see cref="Stream"/> are 
+  /// implicitly convertible to <see cref="TextSource"/> and 
+  /// can be used in place of a <see cref="TextSource"/>
+  /// </remarks>
   public sealed class TextSource : TextReader
   {
     #region Fields

@@ -4,11 +4,21 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Xml;
 
 namespace BracketPipe
 {
+  /// <summary>
+  /// Extensions and utility methods for handling HTML
+  /// </summary>
   public static partial class Html
   {
+    /// <summary>
+    /// Compress HTML by removing unnecessary whitespace and comments
+    /// </summary>
+    /// <param name="html">The HTML content to minify. A <see cref="string"/> or <see cref="Stream"/> can also be used.</param>
+    /// <param name="settings">Settings to control how the HTML is compressed</param>
+    /// <returns>An <see cref="HtmlString"/> containing the compressed HTML</returns>
     public static HtmlString Minify(TextSource html, HtmlMinifySettings settings = null)
     {
       var sb = Pool.NewStringBuilder();
@@ -22,7 +32,13 @@ namespace BracketPipe
       }
     }
 
-    public static void Minify(TextSource html, HtmlTextWriter writer, HtmlMinifySettings settings = null)
+    /// <summary>
+    /// Compress HTML by removing unnecessary whitespace and comments
+    /// </summary>
+    /// <param name="html">The HTML content to minify. A <see cref="string"/> or <see cref="Stream"/> can also be used.</param>
+    /// <param name="writer">The writer where the HTML output is written. For best results, use a <see cref="HtmlTextWriter"/></param>
+    /// <param name="settings">Settings to control how the HTML is compressed</param>
+    public static void Minify(TextSource html, XmlWriter writer, HtmlMinifySettings settings = null)
     {
       using (var reader = new HtmlReader(html, false))
       {
@@ -37,6 +53,7 @@ namespace BracketPipe
       SpaceNeeded,
       InlineStartAfterSpace,
     }
+
     private enum ContainingTag : byte
     {
       None,
@@ -44,6 +61,12 @@ namespace BracketPipe
       Script
     }
 
+    /// <summary>
+    /// Compress HTML by removing unnecessary whitespace and comments
+    /// </summary>
+    /// <param name="reader">Stream of <see cref="HtmlNode"/> to minify</param>
+    /// <param name="settings">Settings to control how the HTML is compressed</param>
+    /// <returns>Stream of minified <see cref="HtmlNode"/></returns>
     public static IEnumerable<HtmlNode> Minify(this IEnumerable<HtmlNode> reader, HtmlMinifySettings settings = null)
     {
       settings = settings ?? HtmlMinifySettings.ReadOnlyDefault;

@@ -26,6 +26,7 @@ namespace BracketPipe
     #region Properties
 
     public bool IsTerminated { get; set; }
+    public int ArgumentCount { get { return _arguments.Count; } }
     public IEnumerable<CssToken> ArgumentTokens { get { return _arguments; } }
 
     #endregion

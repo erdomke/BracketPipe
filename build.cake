@@ -95,9 +95,10 @@ Task("Build")
      Configuration = configuration
   });
   
-  CopyFiles("./src/BracketPipe/bin/" + configuration + "/**/BracketPipe.dll", "./publish/BracketPipe/lib/", true);
+  CopyFiles("./src/BracketPipe/bin/" + configuration + "/**/BracketPipe.*", "./publish/BracketPipe/lib/", true);
   var files = GetFiles("./publish/BracketPipe/lib/**/*")
-    .Where(f => !f.ToString().EndsWith("BracketPipe.dll", StringComparison.OrdinalIgnoreCase));
+    .Where(f => !f.ToString().EndsWith("BracketPipe.dll", StringComparison.OrdinalIgnoreCase)
+      && !f.ToString().EndsWith("BracketPipe.xml", StringComparison.OrdinalIgnoreCase));
   foreach (var file in files)
     DeleteFile(file);
 });

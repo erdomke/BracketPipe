@@ -24,6 +24,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
+    <DocumentationFile>bin\Debug\BracketPipe.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -33,6 +34,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
+    <DocumentationFile>bin\Release\BracketPipe.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <!-- A reference to the entire .NET Framework is automatically included -->
@@ -111,9 +113,10 @@
     <Compile Include="Parser\Text\PlainTextLink.cs" />
     <Compile Include="Parser\Text\PlainTextWriter.cs" />
     <Compile Include="Parser\Text\TextileWriter.cs" />
+    <Compile Include="Parser\Text\TextWriterSettings.cs" />
     <Compile Include="Parser\XmlCharType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-		<Compile Include="AssemblyInfo.Version.cs" />
+    <Compile Include="AssemblyInfo.Version.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

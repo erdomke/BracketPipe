@@ -40,10 +40,12 @@
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net40' ">
     <DefineConstants>$(DefineConstants)</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DocumentationFile>bin\Release\net40\BracketPipe.XML</DocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.0' ">
     <DefineConstants>$(DefineConstants);NETSTANDARD1_0;PORTABLE</DefineConstants>
+    <DocumentationFile>bin\Release\netstandard1.0\BracketPipe.XML</DocumentationFile>
   </PropertyGroup>
 
 </Project>

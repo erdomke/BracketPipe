@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using BracketPipe.Extensions;
 using System.Text.RegularExpressions;
+using System.Xml;
 
 namespace BracketPipe
 {
@@ -12,18 +13,40 @@ namespace BracketPipe
   {
     private static readonly Regex _emailRegex = new Regex(@"^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$");
 
-    public static string Sanitize(TextSource html, HtmlSanitizeSettings settings = null)
+    /// <summary>
+    /// Sanitizes the specified HTML, removing scripts, styles, and tags 
+    /// which might pose a security concern
+    /// </summary>
+    /// <param name="html">The HTML content to minify. A <see cref="string"/> or <see cref="Stream"/> can also be used.</param>
+    /// <param name="settings">Settings controlling what CSS and HTML is permitted in the result</param>
+    /// <returns>An <see cref="HtmlString"/> containing only the permitted elements</returns>
+    /// <remarks>
+    /// The goal of sanitization is to prevent XSS patterns
+    /// described on <a href="https://www.owasp.org/index.php/XSS_Filter_Evasion_Cheat_Sheet">XSS Filter Evasion Cheat Sheet</a>
+    /// </remarks>
+    public static HtmlString Sanitize(TextSource html, HtmlSanitizeSettings settings = null)
     {
       var sb = new StringBuilder(html.Length);
       using (var reader = new HtmlReader(html, false))
       using (var sw = new StringWriter(sb))
       {
         reader.Sanitize(settings).ToHtml(sw, new HtmlWriterSettings());
-        return sw.ToString();
+        return new HtmlString(sw.ToString());
       }
     }
 
-    public static void Sanitize(TextSource html, HtmlTextWriter writer, HtmlSanitizeSettings settings = null)
+    /// <summary>
+    /// Sanitizes the specified HTML, removing scripts, styles, and tags 
+    /// which might pose a security concern
+    /// </summary>
+    /// <param name="html">The HTML content to minify. A <see cref="string"/> or <see cref="Stream"/> can also be used.</param>
+    /// <param name="writer">Writer to which the sanitized HTML is written</param>
+    /// <param name="settings">Settings controlling what CSS and HTML is permitted in the result</param>
+    /// <remarks>
+    /// The goal of sanitization is to prevent XSS patterns
+    /// described on <a href="https://www.owasp.org/index.php/XSS_Filter_Evasion_Cheat_Sheet">XSS Filter Evasion Cheat Sheet</a>
+    /// </remarks>
+    public static void Sanitize(TextSource html, XmlWriter writer, HtmlSanitizeSettings settings = null)
     {
       using (var reader = new HtmlReader(html, false))
       {
@@ -32,17 +55,31 @@ namespace BracketPipe
     }
 
     /// <summary>
-    /// Remove possible malicious tags and content from HTML. Attempts to prevent XSS patterns
-    /// described on https://www.owasp.org/index.php/XSS_Filter_Evasion_Cheat_Sheet
+    /// Sanitizes the specified HTML, removing scripts, styles, and tags 
+    /// which might pose a security concern
     /// </summary>
+    /// <param name="reader">A stream of <see cref="HtmlNode"/></param>
+    /// <returns>A stream of sanitized <see cref="HtmlNode"/></returns>
+    /// <remarks>
+    /// The goal of sanitization is to prevent XSS patterns
+    /// described on <a href="https://www.owasp.org/index.php/XSS_Filter_Evasion_Cheat_Sheet">XSS Filter Evasion Cheat Sheet</a>
+    /// </remarks>
     public static IEnumerable<HtmlNode> Sanitize(this IEnumerable<HtmlNode> reader)
     {
       return Sanitize(reader, HtmlSanitizeSettings.ReadOnlyDefault);
     }
+
     /// <summary>
-    /// Remove possible malicious tags and content from HTML. Attempts to prevent XSS patterns
-    /// described on https://www.owasp.org/index.php/XSS_Filter_Evasion_Cheat_Sheet
+    /// Sanitizes the specified HTML, removing scripts, styles, and tags 
+    /// which might pose a security concern
     /// </summary>
+    /// <param name="reader">A stream of <see cref="HtmlNode"/></param>
+    /// <param name="settings">Settings controlling what CSS and HTML is permitted in the result</param>
+    /// <returns>A stream of sanitized <see cref="HtmlNode"/></returns>
+    /// <remarks>
+    /// The goal of sanitization is to prevent XSS patterns
+    /// described on <a href="https://www.owasp.org/index.php/XSS_Filter_Evasion_Cheat_Sheet">XSS Filter Evasion Cheat Sheet</a>
+    /// </remarks>
     public static IEnumerable<HtmlNode> Sanitize(this IEnumerable<HtmlNode> reader, HtmlSanitizeSettings settings)
     {
       var removeDepth = -1;

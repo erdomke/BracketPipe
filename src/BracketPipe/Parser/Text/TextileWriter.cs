@@ -623,11 +623,6 @@ namespace BracketPipe
             _writer.Write('[');
             _writer.Write('+');
             break;
-          case "title":
-          case "script":
-          case "style":
-            _ignoreDepth = _nodes.Count;
-            break;
           case "hr":
             StartBlock("---", start);
             EndBlock();
@@ -668,6 +663,12 @@ namespace BracketPipe
             break;
           case "ul":
             StartList("*");
+            break;
+          default:
+            if (_settings.SkipElement(start))
+            {
+              _ignoreDepth = _nodes.Count;
+            }
             break;
         }
         _state = InternalState.Content;

@@ -5,6 +5,9 @@ using System.Text;
 
 namespace BracketPipe
 {
+  /// <summary>
+  /// Settings used for minifying HTML (i.e. removing white space and comments)
+  /// </summary>
   public class HtmlMinifySettings
   {
     private HashSet<string> _inlineElement;
@@ -13,7 +16,7 @@ namespace BracketPipe
 
 #if NET35
     /// <summary>
-    /// Tags for elements which start a new block
+    /// Tags for elements which appear inline (i.e. within a block)
     /// </summary>
     public HashSet<string> InlineElements { get { return _inlineElement; } }
     /// <summary>
@@ -26,7 +29,7 @@ namespace BracketPipe
     public HashSet<string> PreserveSurroundingSpaceTags { get { return _preserveSurroundingSpaceTags; } }
 #else
     /// <summary>
-    /// Tags for elements which start a new block
+    /// Tags for elements which appear inline (i.e. within a block)
     /// </summary>
     public ISet<string> InlineElements { get { return _inlineElement; } }
     /// <summary>
@@ -119,6 +122,10 @@ namespace BracketPipe
 
     internal static HtmlMinifySettings ReadOnlyDefault { get { return _default; } }
 
+    /// <summary>
+    /// Create a new settings object using default values
+    /// </summary>
+    /// <returns>A new instance of <see cref="HtmlMinifySettings"/></returns>
     public static HtmlMinifySettings Default()
     {
       return new HtmlMinifySettings(true);

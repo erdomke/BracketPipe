@@ -5,7 +5,7 @@ using System.Text;
 
 namespace BracketPipe
 {
-  public class MarkdownWriterSettings
+  public class MarkdownWriterSettings : TextWriterSettings
   {
     public int LineLength { get; set; }
     public string NewLineChars { get; set; }

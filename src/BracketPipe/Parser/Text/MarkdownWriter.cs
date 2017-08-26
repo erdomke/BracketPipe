@@ -9,6 +9,10 @@ using System.Xml;
 
 namespace BracketPipe
 {
+  /// <summary>
+  /// Builds a markdown string from the HTMl written to the instance
+  /// </summary>
+  /// <seealso cref="System.Xml.XmlWriter" />
   public class MarkdownWriter : XmlWriter
   {
     private TextWriter _writer;
@@ -24,13 +28,26 @@ namespace BracketPipe
     private PreserveState _preserveWhitespace = PreserveState.None;
     private bool _outputStarted;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MarkdownWriter"/> class.
+    /// </summary>
+    /// <param name="writer">The writer to output markdown to.</param>
     public MarkdownWriter(TextWriter writer) : this(writer, new MarkdownWriterSettings()) { }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MarkdownWriter"/> class.
+    /// </summary>
+    /// <param name="writer">The writer to output markdown to.</param>
+    /// <param name="settings">The settings.</param>
     public MarkdownWriter(TextWriter writer, MarkdownWriterSettings settings)
     {
       _writer = writer;
       _settings = settings ?? new MarkdownWriterSettings();
     }
 
+    /// <summary>
+    /// Gets the state of the writer.
+    /// </summary>
     public override WriteState WriteState
     {
       get
@@ -39,26 +56,49 @@ namespace BracketPipe
       }
     }
 
+    /// <summary>
+    /// Flushes whatever is in the buffer to the underlying streams and also flushes the underlying stream.
+    /// </summary>
     public override void Flush()
     {
       _writer.Flush();
     }
 
+    /// <summary>
+    /// Not supported
+    /// </summary>
+    /// <param name="ns">The namespace URI whose prefix you want to find.</param>
+    /// <exception cref="NotImplementedException"></exception>
     public override string LookupPrefix(string ns)
     {
       throw new NotImplementedException();
     }
 
+    /// <summary>
+    /// Encodes the specified binary bytes as Base64 and writes out the resulting text.
+    /// </summary>
+    /// <param name="buffer">Byte array to encode.</param>
+    /// <param name="index">The position in the buffer indicating the start of the bytes to write.</param>
+    /// <param name="count">The number of bytes to write.</param>
     public override void WriteBase64(byte[] buffer, int index, int count)
     {
       WriteInternal(Convert.ToBase64String(buffer, index, count));
     }
 
+    /// <summary>
+    /// Writes out a block containing the specified text.
+    /// </summary>
+    /// <param name="text">The text to place inside the block.</param>
     public override void WriteCData(string text)
     {
       WriteInternal(text);
     }
 
+    /// <summary>
+    /// Forces the generation of a character entity for the specified Unicode character value.
+    /// </summary>
+    /// <param name="ch">The Unicode character for which to generate a character entity.</param>
+    /// <exception cref="ArgumentException">Invalid surrogate: Missing low character</exception>
     public override void WriteCharEntity(char ch)
     {
       if (XmlCharType.IsSurrogate((int)ch))
@@ -96,21 +136,42 @@ namespace BracketPipe
       }
     }
 
+    /// <summary>
+    /// Writes text one buffer at a time.
+    /// </summary>
+    /// <param name="buffer">Character array containing the text to write.</param>
+    /// <param name="index">The position in the buffer indicating the start of the text to write.</param>
+    /// <param name="count">The number of characters to write.</param>
     public override void WriteChars(char[] buffer, int index, int count)
     {
       WriteInternal(new string(buffer, index, count));
     }
 
+    /// <summary>
+    /// Does nothing
+    /// </summary>
+    /// <param name="text">Text to place inside the comment.</param>
     public override void WriteComment(string text)
     {
       // Do nothing
     }
 
+    /// <summary>
+    /// Does nothing
+    /// </summary>
+    /// <param name="name">The name of the DOCTYPE. This must be non-empty.</param>
+    /// <param name="pubid">If non-null it also writes PUBLIC "pubid" "sysid" where <paramref name="pubid" /> and <paramref name="sysid" /> are replaced with the value of the given arguments.</param>
+    /// <param name="sysid">If <paramref name="pubid" /> is null and <paramref name="sysid" /> is non-null it writes SYSTEM "sysid" where <paramref name="sysid" /> is replaced with the value of this argument.</param>
+    /// <param name="subset">If non-null it writes [subset] where subset is replaced with the value of this argument.</param>
     public override void WriteDocType(string name, string pubid, string sysid, string subset)
     {
       // Do nothing
     }
 
+    /// <summary>
+    /// Closes the previous <see cref="M:System.Xml.XmlWriter.WriteStartAttribute(System.String,System.String)" /> call.
+    /// </summary>
+    /// <exception cref="InvalidOperationException"></exception>
     public override void WriteEndAttribute()
     {
       if (_nodes.Count < 1)
@@ -120,11 +181,17 @@ namespace BracketPipe
       _state = InternalState.Element;
     }
 
+    /// <summary>
+    /// Does nothing
+    /// </summary>
     public override void WriteEndDocument()
     {
       // Do nothing
     }
 
+    /// <summary>
+    /// Closes one element and pops the corresponding namespace scope.
+    /// </summary>
     public override void WriteEndElement()
     {
       WriteStartElementEnd();
@@ -196,6 +263,10 @@ namespace BracketPipe
       }
     }
 
+    /// <summary>
+    /// Writes out an entity reference as &amp;name;.
+    /// </summary>
+    /// <param name="name">The name of the entity reference.</param>
     public override void WriteEntityRef(string name)
     {
       WriteInternal("&");
@@ -203,26 +274,52 @@ namespace BracketPipe
       WriteInternal(";");
     }
 
+    /// <summary>
+    /// Closes one element and pops the corresponding namespace scope.
+    /// </summary>
     public override void WriteFullEndElement()
     {
       WriteEndElement();
     }
 
+    /// <summary>
+    /// Not supported
+    /// </summary>
+    /// <param name="name">The name of the processing instruction.</param>
+    /// <param name="text">The text to include in the processing instruction.</param>
+    /// <exception cref="NotSupportedException"></exception>
     public override void WriteProcessingInstruction(string name, string text)
     {
       throw new NotSupportedException();
     }
 
+    /// <summary>
+    /// Writes raw markup manually from a string.
+    /// </summary>
+    /// <param name="data">String containing the text to write.</param>
     public override void WriteRaw(string data)
     {
       _writer.Write(data);
     }
 
+    /// <summary>
+    /// Writes raw markup manually from a character buffer.
+    /// </summary>
+    /// <param name="buffer">Character array containing the text to write.</param>
+    /// <param name="index">The position within the buffer indicating the start of the text to write.</param>
+    /// <param name="count">The number of characters to write.</param>
     public override void WriteRaw(char[] buffer, int index, int count)
     {
       _writer.Write(buffer, index, count);
     }
 
+    /// <summary>
+    /// Writes the start of an attribute with the specified prefix, local name, and namespace URI.
+    /// </summary>
+    /// <param name="prefix">The namespace prefix of the attribute.</param>
+    /// <param name="localName">The local name of the attribute.</param>
+    /// <param name="ns">The namespace URI for the attribute.</param>
+    /// <exception cref="InvalidOperationException"></exception>
     public override void WriteStartAttribute(string prefix, string localName, string ns)
     {
       if (_nodes.Count < 1)
@@ -232,16 +329,29 @@ namespace BracketPipe
       _state = InternalState.Attribute;
     }
 
+    /// <summary>
+    /// Does nothing
+    /// </summary>
     public override void WriteStartDocument()
     {
       // Do nothing
     }
 
+    /// <summary>
+    /// Does nothing
+    /// </summary>
+    /// <param name="standalone">If true, it writes "standalone=yes"; if false, it writes "standalone=no".</param>
     public override void WriteStartDocument(bool standalone)
     {
       // Do nothing
     }
 
+    /// <summary>
+    /// Writes the specified start tag and associates it with the given namespace and prefix.
+    /// </summary>
+    /// <param name="prefix">The namespace prefix of the element.</param>
+    /// <param name="localName">The local name of the element.</param>
+    /// <param name="ns">The namespace URI to associate with the element.</param>
     public override void WriteStartElement(string prefix, string localName, string ns)
     {
       WriteStartElementEnd();
@@ -317,11 +427,6 @@ namespace BracketPipe
         case "h6":
           StartBlock("###### ");
           break;
-        case "title":
-        case "script":
-        case "style":
-          _ignoreDepth = _nodes.Count;
-          break;
         case "hr":
           StartBlock("* * *");
           EndBlock();
@@ -354,7 +459,6 @@ namespace BracketPipe
         case "ul":
           StartList("- ");
           break;
-        
       }
       _state = InternalState.Element;
     }
@@ -372,11 +476,21 @@ namespace BracketPipe
       }
     }
 
+    /// <summary>
+    /// Writes the given text content.
+    /// </summary>
+    /// <param name="text">The text to write.</param>
     public override void WriteString(string text)
     {
       WriteInternal(text);
     }
 
+    /// <summary>
+    /// Generates and writes the surrogate character entity for the surrogate character pair.
+    /// </summary>
+    /// <param name="lowChar">The low surrogate. This must be a value between 0xDC00 and 0xDFFF.</param>
+    /// <param name="highChar">The high surrogate. This must be a value between 0xD800 and 0xDBFF.</param>
+    /// <exception cref="InvalidOperationException">Invalid surrogate pair</exception>
     public override void WriteSurrogateCharEntity(char lowChar, char highChar)
     {
       if (!XmlCharType.IsLowSurrogate((int)lowChar) || !XmlCharType.IsHighSurrogate((int)highChar))
@@ -388,6 +502,10 @@ namespace BracketPipe
       WriteInternal(";");
     }
 
+    /// <summary>
+    /// Writes out the given white space.
+    /// </summary>
+    /// <param name="ws">The string of white space characters.</param>
     public override void WriteWhitespace(string ws)
     {
       WriteInternal(ws);
@@ -487,6 +605,7 @@ namespace BracketPipe
         _outputStarted = true;
       }
     }
+
     private void WriteStartElementEnd()
     {
       if (_nodes.Count > 0 && _state == InternalState.Element)
@@ -540,6 +659,12 @@ namespace BracketPipe
             _writer.Write(')');
             _minify = MinifyState.Compressed;
             break;
+          default:
+            if (_settings.SkipElement(start))
+            {
+              _ignoreDepth = _nodes.Count;
+            }
+            break;
         }
         _state = InternalState.Content;
       }
@@ -553,6 +678,7 @@ namespace BracketPipe
         _minify = MinifyState.LastCharWasSpace;
       }
     }
+
     private void StartList(string prefix)
     {
       if (_minify == MinifyState.Compressed
@@ -564,6 +690,7 @@ namespace BracketPipe
       }
       _linePrefix.Add(prefix ?? string.Empty);
     }
+
     private void StartBlock(string prefix)
     {
       var prefixRequired = false;
@@ -581,6 +708,7 @@ namespace BracketPipe
         WritePrefix();
       _outputStarted = true;
     }
+
     private void EndBlock()
     {
       _minify = MinifyState.BlockEnd;

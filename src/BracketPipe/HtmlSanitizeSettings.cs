@@ -5,6 +5,9 @@ using System.Text;
 
 namespace BracketPipe
 {
+  /// <summary>
+  /// Settings controlling what CSS and HTML is permitted
+  /// </summary>
   public class HtmlSanitizeSettings
   {
     private HashSet<string> _allowedAttributes;
@@ -75,6 +78,9 @@ namespace BracketPipe
     public ISet<string> UriAttributes { get { return _uriAttributes; } }
 #endif
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="HtmlSanitizeSettings"/> class.
+    /// </summary>
     public HtmlSanitizeSettings()
     {
       _allowedAttributes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -471,6 +477,10 @@ namespace BracketPipe
 
     internal static HtmlSanitizeSettings ReadOnlyDefault { get { return _default; } }
 
+    /// <summary>
+    /// Create a new settings object using default values
+    /// </summary>
+    /// <returns>A new instance of <see cref="HtmlMinifySettings"/></returns>
     public static HtmlSanitizeSettings Default()
     {
       return new HtmlSanitizeSettings(true);
