@@ -660,7 +660,7 @@ namespace BracketPipe
             _minify = MinifyState.Compressed;
             break;
           default:
-            if (_settings.SkipElement(start))
+            if (_settings.ShouldSkipElement(start))
             {
               _ignoreDepth = _nodes.Count;
             }

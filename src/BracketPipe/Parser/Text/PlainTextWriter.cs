@@ -510,7 +510,7 @@ namespace BracketPipe
             }
             break;
           default:
-            if (_settings.SkipElement(start))
+            if (_settings.ShouldSkipElement(start))
             {
               _ignoreDepth = _nodes.Count;
             }

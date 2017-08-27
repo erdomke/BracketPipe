@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace BracketPipe
@@ -32,7 +33,24 @@ namespace BracketPipe
     /// </value>
     public HashSet<string> ElementsToSkip { get { return _elementsToSkip; } }
 
-    internal bool SkipElement(HtmlStartTag start)
+    /// <summary>
+    /// Function used to determine whether to skip the element.
+    /// </summary>
+    /// <remarks>
+    /// The first argument is the element in question, the second argument
+    /// is the default function for calculating whether to skip the 
+    /// element
+    /// </remarks>
+    public Func<HtmlStartTag, Func<HtmlStartTag, bool>, bool> SkipElement { get; set; }
+
+    internal bool ShouldSkipElement(HtmlStartTag start)
+    {
+      if (SkipElement == null)
+        return SkipElementDefault(start);
+      return SkipElement(start, SkipElementDefault);
+    }
+
+    private bool SkipElementDefault(HtmlStartTag start)
     {
       if (_elementsToSkip.Contains(start.Value))
         return true;
@@ -55,7 +73,7 @@ namespace BracketPipe
           }
         }
       }
-      
+
       return false;
     }
   }
