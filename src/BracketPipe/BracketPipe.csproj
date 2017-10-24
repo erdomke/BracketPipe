@@ -37,10 +37,6 @@
     <DocumentationFile>bin\Release\BracketPipe.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <!-- A reference to the entire .NET Framework is automatically included -->
-    <None Include="project.json" />
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="Css\CombinatorSymbols.cs" />
     <Compile Include="Css\FunctionNames.cs" />
     <Compile Include="Extensions\CharExtensions.cs" />
@@ -117,6 +113,16 @@
     <Compile Include="Parser\XmlCharType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="AssemblyInfo.Version.cs" />
+    <Compile Include="Textile\ParseOutput.cs" />
+    <Compile Include="Textile\ParseState.cs" />
+    <Compile Include="Textile\States\BaseState.cs" />
+    <Compile Include="Textile\States\DoubleCharInlineState.cs" />
+    <Compile Include="Textile\States\IInlineState.cs" />
+    <Compile Include="Textile\States\Inlines.cs" />
+    <Compile Include="Textile\States\ParagraphState.cs" />
+    <Compile Include="Textile\States\SingleCharInlineState.cs" />
+    <Compile Include="Textile\Textile.cs" />
+    <Compile Include="Textile\TextileParseSettings.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

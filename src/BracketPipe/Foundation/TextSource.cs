@@ -218,6 +218,41 @@
 
     #endregion
 
+    /// <summary>
+    /// Returns a <see cref="System.String" /> that represents the full text buffer.
+    /// </summary>
+    /// <returns>
+    /// A <see cref="System.String" /> that represents the full text buffer.
+    /// </returns>
+    public override string ToString()
+    {
+      return _content.ToString();
+    }
+    
+    /// <summary>
+    /// Converts the value of a substring of this buffer to a <see cref="System.String" />.
+    /// </summary>
+    /// <param name="start">The starting position of the substring in this instance.</param>
+    /// <param name="length">The length of the substring.</param>
+    /// <returns>
+    /// A <see cref="System.String" /> whose value is the same as the specified substring of this buffer.
+    /// </returns>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="start"/> or <paramref name="length"/>
+    /// is less than zero.
+    /// -or- The sum of <paramref name="start"/> and <paramref name="length"/>
+    /// is greater than the length of the current buffer.</exception>
+    public string ToString(int start, int length)
+    {
+      return _content.ToString(start, length);
+    }
+
+    public char[] ToCharArray(int start, int length)
+    {
+      var dest = new char[length];
+      _content.CopyTo(start, dest, 0, length);
+      return dest;
+    }
+
     #region Text Methods
 
     /// <summary>Reads the next character without changing the state of the reader or the character source. Returns the next available character without actually reading it from the reader.</summary>
@@ -586,7 +621,7 @@
     }
 
     #endregion
-
+    
     public static implicit operator TextSource(string value)
     {
       return new TextSource(value);

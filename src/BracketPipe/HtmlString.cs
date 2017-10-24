@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
 
 namespace BracketPipe
 {
@@ -16,7 +12,7 @@ namespace BracketPipe
     , IEquatable<HtmlString>
   {
     private readonly string _html;
-    
+
     /// <summary>
     /// Gets the number of characters in the current <see cref="HtmlString"/> object.
     /// </summary>

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Xml;
 
@@ -34,7 +33,7 @@ namespace BracketPipe
       }
       return builder;
     }
-    
+
     /// <summary>
     /// Formats the value of the current instance with HTML encoding.
     /// </summary>
@@ -44,7 +43,7 @@ namespace BracketPipe
     {
       return formattable.ToString(null, HtmlFormatProvider.Instance);
     }
-    
+
     /// <summary>
     /// Replaces the format items in a specified string with the HTML-encoded 
     /// string representations of corresponding objects in a specified array. 

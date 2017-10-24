@@ -6,6 +6,7 @@
   using System.Collections;
   using System.Xml;
   using System.Linq;
+  using System.Xml.Linq;
 
   /// <summary>
   /// Performs the tokenization of the source code. Follows the tokenization algorithm at:
@@ -53,8 +54,8 @@
     /// <param name="trackPosition">Whether to track the position of a node in the source text.</param>
     public HtmlReader(TextSource source, bool trackPosition)
     {
-      _base = trackPosition 
-        ? (IBaseTokenizer)new BaseTokenizer(source) 
+      _base = trackPosition
+        ? (IBaseTokenizer)new BaseTokenizer(source)
         : new BaseTokenizerNoPosition(source);
       State = HtmlParseMode.PCData;
       IsAcceptingCharacterData = false;
@@ -2745,26 +2746,27 @@
         var tag = _current as HtmlStartTag;
         if (tag == null)
           return false;
-        return tag.IsSelfClosing || HtmlTextWriter.VoidElements.Contains(tag.Value);
+        return tag.IsEmpty;
       }
     }
 
-    public override string LocalName
+    public override string LocalName { get { return GetName().Last(); } }
+
+    private readonly static string[] _emptyStringArray = new string[] { "" };
+
+    private string[] GetName()
     {
-      get
-      {
-        if (_attrIndex >= 0)
-          return ((HtmlStartTag)_current).Attributes[_attrIndex].Key;
-        if (_attrIndex < -1)
-          return string.Empty;
-        if (_current == null)
-          return string.Empty;
-        if (_current.Type == HtmlTokenType.EndTag
-          || _current.Type == HtmlTokenType.StartTag
-          || _current.Type == HtmlTokenType.Doctype)
-          return _current.Value;
-        return string.Empty;
-      }
+      if (_attrIndex >= 0)
+        return ((HtmlStartTag)_current).Attributes[_attrIndex].Key.Split(':');
+      if (_attrIndex < -1)
+        return _emptyStringArray;
+      if (_current == null)
+        return _emptyStringArray;
+      if (_current.Type == HtmlTokenType.EndTag
+        || _current.Type == HtmlTokenType.StartTag
+        || _current.Type == HtmlTokenType.Doctype)
+        return _current.Value.Split(':');
+      return _emptyStringArray;
     }
 
     public override string NamespaceURI
@@ -2803,7 +2805,7 @@
             return XmlNodeType.Element;
           case HtmlTokenType.Text:
             var val = _current.Value ?? "";
-            for (var i = 0; i < val.Length; i++ )
+            for (var i = 0; i < val.Length; i++)
             {
               if (!char.IsWhiteSpace(val[i]))
                 return XmlNodeType.Text;
@@ -2818,6 +2820,9 @@
     {
       get
       {
+        //var name = GetName();
+        //if (name.Length > 1)
+        //  return name[0];
         return string.Empty;
       }
     }
@@ -2951,6 +2956,25 @@
     public override void ResolveEntity()
     {
       // Do nothing
+    }
+
+    public IEnumerable<XElement> Elements(Func<HtmlStartTag, bool> predicate = null)
+    {
+      predicate = predicate ?? (n => true);
+
+      MoveToContent();
+      var continueNoRead = true;
+      while (continueNoRead || Read())
+      {
+        continueNoRead = false;
+        if (Current.Type == HtmlTokenType.StartTag && predicate((HtmlStartTag)Current))
+        {
+          var el = XNode.ReadFrom(this) as XElement;
+          if (el != null)
+            yield return el;
+          continueNoRead = true;
+        }
+      }
     }
 
 #if NET35

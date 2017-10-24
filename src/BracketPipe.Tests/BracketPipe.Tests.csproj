@@ -75,6 +75,7 @@
     <Compile Include="SgmlReaderTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="HtmlTokenization.cs" />
+    <Compile Include="TextileTest.cs" />
     <Compile Include="TextileTests.cs" />
     <Compile Include="XmlReaderTest.cs" />
   </ItemGroup>

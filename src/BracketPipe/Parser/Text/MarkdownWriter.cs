@@ -1,9 +1,7 @@
-﻿using BracketPipe.Extensions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Xml;
 
@@ -436,7 +434,7 @@ namespace BracketPipe
         case "li":
           if (_outputStarted)
             _writer.Write(_settings.NewLineChars);
-          if (_linePrefix.Count > 0 
+          if (_linePrefix.Count > 0
             && char.IsDigit(_linePrefix[_linePrefix.Count - 1][0]))
           {
             var value = _linePrefix[_linePrefix.Count - 1];

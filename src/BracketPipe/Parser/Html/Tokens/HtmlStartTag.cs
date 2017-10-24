@@ -10,9 +10,7 @@ namespace BracketPipe
   {
     #region Fields
 
-    readonly List<KeyValuePair<String, String>> _attributes = new List<KeyValuePair<string, string>>();
-
-    Boolean _selfClosing;
+    private readonly List<KeyValuePair<String, String>> _attributes = new List<KeyValuePair<string, string>>();
 
     #endregion
 
@@ -29,11 +27,15 @@ namespace BracketPipe
     /// <summary>
     /// Gets or sets the state of the self-closing flag.
     /// </summary>
-    public override Boolean IsSelfClosing
-    {
-      get { return _selfClosing; }
-      set { _selfClosing = value; }
-    }
+    public override bool IsSelfClosing { get; set; }
+
+    /// <summary>
+    /// Gets a value indicating whether this tag is empty (contains no children).
+    /// </summary>
+    /// <value>
+    ///   <c>true</c> if this instance is empty; otherwise, <c>false</c>.
+    /// </value>
+    public bool IsEmpty { get { return IsSelfClosing || HtmlTextWriter.VoidElements.Contains(Value); } }
 
     /// <summary>
     /// Gets the value of the attribute with the given name or an empty
@@ -75,7 +77,7 @@ namespace BracketPipe
 
     public HtmlStartTag(String name) : base(TextPosition.Empty, name) { }
     internal HtmlStartTag(TextPosition position) : base(position) { }
-    public HtmlStartTag(TextPosition position, String name) : base (position, name) { }
+    public HtmlStartTag(TextPosition position, String name) : base(position, name) { }
 
     #endregion
 
