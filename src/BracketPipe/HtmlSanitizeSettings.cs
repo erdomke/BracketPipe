@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace BracketPipe
@@ -75,6 +75,15 @@ namespace BracketPipe
     /// </summary>
     public ISet<string> UriAttributes { get { return _uriAttributes; } }
 #endif
+
+    /// <summary>
+    /// How to handle pseudo tags in e-mail (e.g. To: Melissa Hayden &lt;mbratu.ext@example.com&gt;&lt;br&gt;)
+    /// </summary>
+    public SanitizeBehavior EmailLinkPseudoTags { get; set; } = SanitizeBehavior.Encode;
+    /// <summary>
+    /// How to escape URLs
+    /// </summary>
+    public UriFormat UriFormat { get; set; } = UriFormat.UriEscaped;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="HtmlSanitizeSettings"/> class.

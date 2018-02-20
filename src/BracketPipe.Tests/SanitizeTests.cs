@@ -1,4 +1,4 @@
-﻿using NUnit.Framework;
+using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,11 +10,11 @@ namespace BracketPipe.Core.Tests
   [TestFixture]
   class SanitizeTests
   {
-    private void TestSanitize(string input, string expected, HtmlSanitizeSettings settings = null)
+    private void TestSanitize(string input, string expected, HtmlSanitizeSettings settings = null, HtmlWriterSettings writerSettings = null)
     {
       using (var reader = new HtmlReader(input))
       {
-        var rendered = reader.Sanitize(settings ?? HtmlSanitizeSettings.Default()).ToHtml();
+        var rendered = reader.Sanitize(settings ?? HtmlSanitizeSettings.Default()).ToHtml(writerSettings);
         Assert.AreEqual(expected, rendered);
       }
     }
@@ -229,6 +229,58 @@ S
       var styleSettings = HtmlSanitizeSettings.Default();
       styleSettings.AllowedTags.Add("style");
       TestSanitize(sheet, expected, styleSettings);
+    }
+
+    [Test]
+    public void Sanitize_DontEncodeUrls()
+    {
+      const string input = "<div><img src=\"data:image/png;base64, iVBORw0KGgoAAAANSU\"></div>";
+      var settings = HtmlSanitizeSettings.Default();
+      settings.AllowedSchemes.Add("data");
+      settings.UriFormat = UriFormat.SafeUnescaped;
+      TestSanitize(input, input, settings);
+    }
+
+    [Test]
+    public void Sanitize_WeirdEmailTags()
+    {
+      var input = @"<div>
+  To: Melissa Last <name.ext@example.com><br>
+  Subject: RE: Expedia Ads
+  <br><br>
+  <http: www.marriott..com bosnt>
+  <br><br>Check out the riverbend Restaurant
+  <http: www.marriott.com hotels hotel-information restaurant bosnt-boston-marriott-newton></http:>
+  <br><br>[FB-FindUsonFacebook-online-1024]
+  <https: www.facebook.com bostonmarriottnewton></https:>
+</div>";
+      var settings = HtmlSanitizeSettings.Default();
+      settings.EmailLinkPseudoTags = SanitizeBehavior.Allow;
+      TestSanitize(input, input, settings);
+
+      settings.EmailLinkPseudoTags = SanitizeBehavior.Encode;
+      TestSanitize(input, @"<div>
+  To: Melissa Last &lt;name.ext@example.com&gt;<br>
+  Subject: RE: Expedia Ads
+  <br><br>
+  &lt;http: www.marriott..com bosnt&gt;
+  <br><br>Check out the riverbend Restaurant
+  &lt;http: www.marriott.com hotels hotel-information restaurant bosnt-boston-marriott-newton&gt;&lt;/http:&gt;
+  <br><br>[FB-FindUsonFacebook-online-1024]
+  &lt;https: www.facebook.com bostonmarriottnewton&gt;&lt;/https:&gt;
+</div>", settings);
+
+      settings.EmailLinkPseudoTags = SanitizeBehavior.Discard;
+      TestSanitize(input, @"<div>
+  To: Melissa Last <br>
+  Subject: RE: Expedia Ads
+  <br><br>
+  
+  <br><br>Check out the riverbend Restaurant
+  
+  <br><br>[FB-FindUsonFacebook-online-1024]
+  
+</div>", settings);
     }
   }
 }

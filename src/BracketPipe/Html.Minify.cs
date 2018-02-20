@@ -1,4 +1,4 @@
-﻿using BracketPipe.Extensions;
+using BracketPipe.Extensions;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -206,12 +206,24 @@ namespace BracketPipe
 
 
           if (node.Type == HtmlTokenType.StartTag && settings.PreserveInnerSpaceTags.Contains(node.Value))
+          {
             tagState = ContainingTag.WhitespacePreserve;
-          else if (node.Type == HtmlTokenType.StartTag && node.Value == "script")
-            tagState = ContainingTag.Script;
-          else if (node.Type == HtmlTokenType.EndTag &&
-            (settings.PreserveInnerSpaceTags.Contains(node.Value) || node.Value == "script"))
+          }
+          else if (tag?.Value == "script")
+          {
+            var type = tag["type"];
+            if (string.IsNullOrEmpty(type))
+              type = "application/javascript";
+            if (settings.ScriptTypesToCompress.Contains(type))
+              tagState = ContainingTag.Script;
+            else
+              tagState = ContainingTag.WhitespacePreserve;
+          }
+          else if (node.Type == HtmlTokenType.EndTag
+            && (settings.PreserveInnerSpaceTags.Contains(node.Value) || node.Value == "script"))
+          {
             tagState = ContainingTag.None;
+          }
         }
       }
     }

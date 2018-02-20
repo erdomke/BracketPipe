@@ -1,4 +1,4 @@
-﻿using BracketPipe.Extensions;
+using BracketPipe.Extensions;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,8 +11,6 @@ namespace BracketPipe
 {
   public static partial class Html
   {
-    private static readonly Regex _emailRegex = new Regex(@"^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$");
-
     /// <summary>
     /// Sanitizes the specified HTML, removing scripts, styles, and tags 
     /// which might pose a security concern
@@ -89,8 +87,23 @@ namespace BracketPipe
       foreach (var origToken in reader)
       {
         var token = origToken;
-        if (token.Type == HtmlTokenType.StartTag && _emailRegex.IsMatch(token.Value))
-          token = new HtmlText(token.Position, "<" + token.Value + ">");
+        if ((token.Type == HtmlTokenType.StartTag || token.Type == HtmlTokenType.EndTag)
+          && IsLinkPsuedoTag(token.Value))
+        {
+          if (settings.EmailLinkPseudoTags == SanitizeBehavior.Allow || settings.EmailLinkPseudoTags == SanitizeBehavior.Encode)
+          {
+            var builder = Pool.NewStringBuilder();
+            token.AddToDebugDisplay(builder);
+            token = new HtmlText(token.Position, builder.ToPool())
+            {
+              Encode = settings.EmailLinkPseudoTags == SanitizeBehavior.Encode
+            };
+          }
+          else
+          {
+            token = new HtmlText("");
+          }
+        }
 
         switch (token.Type)
         {
@@ -176,6 +189,16 @@ namespace BracketPipe
           return false;
       }
       return true;
+    }
+
+    private static bool IsLinkPsuedoTag(string name)
+    {
+      if (name.StartsWith("http:", StringComparison.OrdinalIgnoreCase) || name.StartsWith("https:", StringComparison.OrdinalIgnoreCase))
+        return true;
+      var atIdx = name.IndexOf('@');
+      if (atIdx < 0)
+        return false;
+      return name.IndexOf('.', atIdx) > 0;
     }
 
     private static IEnumerable<KeyValuePair<string, string>> AllowedAttributes(HtmlStartTag tag, HtmlSanitizeSettings settings)
@@ -270,7 +293,9 @@ namespace BracketPipe
 
       try
       {
-        return uri.IsAbsoluteUri ? uri.AbsoluteUri : uri.GetComponents(UriComponents.SerializationInfoString, UriFormat.UriEscaped);
+        return uri.IsAbsoluteUri
+          ? uri.GetComponents(UriComponents.AbsoluteUri, settings.UriFormat)
+          : uri.GetComponents(UriComponents.SerializationInfoString, settings.UriFormat);
       }
       catch (Exception)
       {

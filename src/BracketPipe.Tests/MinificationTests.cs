@@ -1,4 +1,4 @@
-﻿using NUnit.Framework;
+using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -173,6 +173,20 @@ namespace BracketPipe.Core.Tests
     {
       var input = "<script>var thing=2;</script><script>var another=4;</script>";
       Assert.AreEqual(input, Html.Minify(input));
+    }
+
+    [Test]
+    public void Minify_MinifyScriptTags()
+    {
+      var input = @"<script>function (thing, another) {
+  var inner = Math.pow(2, 3);
+  return inner;
+}</script>";
+      Assert.AreEqual("<script>function(thing,another){var inner=Math.pow(2,3);return inner;}</script>", Html.Minify(input));
+
+      var settings = HtmlMinifySettings.Default();
+      settings.ScriptTypesToCompress.Clear();
+      Assert.AreEqual(input, Html.Minify(input, settings));
     }
   }
 }

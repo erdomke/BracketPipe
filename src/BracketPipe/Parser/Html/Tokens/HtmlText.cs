@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,6 +9,7 @@ namespace BracketPipe
   {
     #region Properties
 
+    public bool Encode { get; set; } = true;
     public override HtmlTokenType Type { get { return HtmlTokenType.Text; } }
 
     #endregion

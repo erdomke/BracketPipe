@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace BracketPipe
@@ -8,9 +8,10 @@ namespace BracketPipe
   /// </summary>
   public class HtmlMinifySettings
   {
-    private HashSet<string> _inlineElement;
-    private HashSet<string> _preserveInnerSpaceTags;
-    private HashSet<string> _preserveSurroundingSpaceTags;
+    private readonly HashSet<string> _inlineElement;
+    private readonly HashSet<string> _preserveInnerSpaceTags;
+    private readonly HashSet<string> _preserveSurroundingSpaceTags;
+    private readonly HashSet<string> _scriptTypesToCompress;
 
 #if NET35
     /// <summary>
@@ -25,6 +26,10 @@ namespace BracketPipe
     /// Tags for which surrounding space should be preserved
     /// </summary>
     public HashSet<string> PreserveSurroundingSpaceTags { get { return _preserveSurroundingSpaceTags; } }
+    /// <summary>
+    /// Script MIME types to to compress.
+    /// </summary>
+    public HashSet<string> ScriptTypesToCompress { get { return _scriptTypesToCompress; } }
 #else
     /// <summary>
     /// Tags for elements which appear inline (i.e. within a block)
@@ -38,6 +43,10 @@ namespace BracketPipe
     /// Tags for which surrounding space should be preserved
     /// </summary>
     public ISet<string> PreserveSurroundingSpaceTags { get { return _preserveSurroundingSpaceTags; } }
+    /// <summary>
+    /// Script MIME types to to compress.
+    /// </summary>
+    public ISet<string> ScriptTypesToCompress { get { return _scriptTypesToCompress; } }
 #endif
 
     public HtmlMinifySettings()
@@ -45,11 +54,12 @@ namespace BracketPipe
       _inlineElement = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
       _preserveInnerSpaceTags = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
       _preserveSurroundingSpaceTags = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+      _scriptTypesToCompress = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
     }
 
     private HtmlMinifySettings(bool setDefaults)
     {
-      _inlineElement = new HashSet<string>(new string[]
+      _inlineElement = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
       {
         "a",
         "abbr",
@@ -100,20 +110,24 @@ namespace BracketPipe
         "u",
         "var",
         "wbr"
-      }, StringComparer.OrdinalIgnoreCase);
-      _preserveInnerSpaceTags = new HashSet<string>(new string[]
+      };
+      _preserveInnerSpaceTags = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
       {
         "pre",
         "textarea",
         "style",
-      }, StringComparer.OrdinalIgnoreCase);
-      _preserveSurroundingSpaceTags = new HashSet<string>(new string[]
+      };
+      _preserveSurroundingSpaceTags = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
       {
         "img",
         "input",
         "wbr",
-      }, StringComparer.OrdinalIgnoreCase);
-
+      };
+      _scriptTypesToCompress = new HashSet<string>()
+      {
+        "application/javascript",
+        "application/json",
+      };
     }
 
     private static HtmlMinifySettings _default = new HtmlMinifySettings(true);

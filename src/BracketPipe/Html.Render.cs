@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -237,7 +237,10 @@ namespace BracketPipe
         switch (token.Type)
         {
           case HtmlTokenType.Text:
-            writer.WriteString(token.Value);
+            if (((HtmlText)token).Encode)
+              writer.WriteString(token.Value);
+            else
+              writer.WriteRaw(token.Value);
             break;
           case HtmlTokenType.Comment:
             if (htmlWriter == null)

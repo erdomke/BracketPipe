@@ -72,7 +72,7 @@ namespace BracketPipe
     public HtmlTextWriter(TextWriter writer, HtmlWriterSettings settings)
     {
       _writer = writer;
-      _settings = settings;
+      _settings = settings ?? new HtmlWriterSettings();
     }
 
     public override WriteState WriteState
