@@ -1,4 +1,4 @@
-﻿namespace BracketPipe
+namespace BracketPipe
 {
   using BracketPipe.Extensions;
   using System;
@@ -228,7 +228,7 @@
     {
       return _content.ToString();
     }
-    
+
     /// <summary>
     /// Converts the value of a substring of this buffer to a <see cref="System.String" />.
     /// </summary>
@@ -314,15 +314,15 @@
 
       if (end <= _content.Length)
       {
-        _index += count;
         _content.CopyTo(_index, buffer, index, count);
+        _index += count;
         return count;
       }
 
       ExpandBuffer(Math.Max(_bufferSize, count));
-      _index += count;
       count = Math.Min(count, _content.Length - start);
       _content.CopyTo(_index, buffer, index, count);
+      _index += count;
       return count;
     }
 
@@ -621,7 +621,7 @@
     }
 
     #endregion
-    
+
     public static implicit operator TextSource(string value)
     {
       return new TextSource(value);

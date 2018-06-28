@@ -1,4 +1,4 @@
-﻿using NUnit.Framework;
+using Xunit;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace BracketPipe.Tests
 {
-  [TestFixture]
-  class OfficialExamples
+
+  public class OfficialExamples
   {
-    [Test]
+    [Fact]
     public void Example_KitchenSink()
     {
       var html = @"<div>  <script>alert('xss');</script>
@@ -19,12 +19,12 @@ namespace BracketPipe.Tests
       using (var reader = new HtmlReader(html))
       {
         var result = (string)reader.Sanitize().Minify().ToHtml();
-        Assert.AreEqual(@"<div><a href=""http://www.google.com/"">Google</a> <a href=""http://www.yahoo.com/"">Yahoo</a></div>"
+        Assert.Equal(@"<div><a href=""http://www.google.com/"">Google</a> <a href=""http://www.yahoo.com/"">Yahoo</a></div>"
           , result);
       }
     }
 
-    [Test]
+    [Fact]
     public void Example_ParseLinks()
     {
       var html = @"<html>  <body>  <script>alert('xss');</script>
@@ -37,7 +37,8 @@ namespace BracketPipe.Tests
           .Where(t => t.Value == "a")
           .Select(t => t["href"])
           .ToArray();
-        CollectionAssert.AreEqual(new string[]
+
+        Assert.Equal(new string[]
         {
           "http://www.google.com/",
           "http://www.yahoo.com/"

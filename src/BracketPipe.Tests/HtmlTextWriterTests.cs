@@ -1,4 +1,4 @@
-﻿using NUnit.Framework;
+using Xunit;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,24 +10,23 @@ using System.Xml.Linq;
 
 namespace BracketPipe.Core.Tests
 {
-  [TestFixture]
-  class HtmlTextWriterTests
+  public class HtmlTextWriterTests
   {
-    [Test]
+    [Fact]
     public void Format_Basic()
     {
-      Assert.AreEqual("<p style=\"a&lt;&gt;&amp;&quot;&apos;b\">a&lt;&gt;&amp;&quot;&apos;b</p><div>c'd</div>", Html.Format("<p style=\"{0}\">{0}</p>{1:!}", "a<>&\"'b", "<div>c'd</div>"));
+      Assert.Equal("<p style=\"a&lt;&gt;&amp;&quot;&apos;b\">a&lt;&gt;&amp;&quot;&apos;b</p><div>c'd</div>", Html.Format("<p style=\"{0}\">{0}</p>{1:!}", "a<>&\"'b", "<div>c'd</div>"));
     }
-    [Test]
+    [Fact]
     public void Format_Formattable()
     {
       var escape = "a<>&\"'b";
       var raw = "<div>c'd</div>";
 
-      Assert.AreEqual("<p style=\"a&lt;&gt;&amp;&quot;&apos;b\">a&lt;&gt;&amp;&quot;&apos;b</p><div>c'd</div>", Html.Format((IFormattable)$"<p style=\"{escape}\">{escape}</p>{raw:!}"));
+      Assert.Equal("<p style=\"a&lt;&gt;&amp;&quot;&apos;b\">a&lt;&gt;&amp;&quot;&apos;b</p><div>c'd</div>", Html.Format((IFormattable)$"<p style=\"{escape}\">{escape}</p>{raw:!}"));
     }
 
-    [Test]
+    [Fact]
     public void XmlToHtml()
     {
       using (var s = new StringWriter())
@@ -41,11 +40,11 @@ namespace BracketPipe.Core.Tests
         xml.WriteTo(w);
         w.Flush();
 
-        Assert.AreEqual("<body><div style=\"color:red\">A &gt; value</div><input type=\"text\" value=\"start\"><p>para &amp; more</p></body>", s.ToString());
+        Assert.Equal("<body><div style=\"color:red\">A &gt; value</div><input type=\"text\" value=\"start\"><p>para &amp; more</p></body>", s.ToString());
       }
     }
 
-    [Test]
+    [Fact]
     public void RoundTrip_Svg02()
     {
       //var html = @"<svg xmlns=""http://www.w3.org/2000/svg""><path d=""M182,65 L256,93 L354,65"" /></svg>";
@@ -53,11 +52,11 @@ namespace BracketPipe.Core.Tests
       using (var reader = new HtmlReader(html))
       {
         var rendered = reader.Minify().ToHtml();
-        Assert.AreEqual(html, rendered);
+        Assert.Equal(html, rendered);
       }
     }
 
-    [Test]
+    [Fact]
     public void BuildHtml()
     {
       using (var s = new StringWriter())
@@ -72,11 +71,11 @@ namespace BracketPipe.Core.Tests
             ["p"].Text("para & more")["/p"]
           ["/body"]
          ["/html"].Flush();
-        Assert.AreEqual("<html><body><div style=\"color:red\" id=\"1234\">A &gt; value</div><input type=\"text\" value=\"start\"><p>para &amp; more</p></body></html>", s.ToString());
+        Assert.Equal("<html><body><div style=\"color:red\" id=\"1234\">A &gt; value</div><input type=\"text\" value=\"start\"><p>para &amp; more</p></body></html>", s.ToString());
       }
     }
 
-    [Test]
+    [Fact]
     public void WriterNamespaceDefault()
     {
       using (var s = new StringWriter())
@@ -88,11 +87,11 @@ namespace BracketPipe.Core.Tests
         w.WriteEndElement();
         w.Flush();
         var str = s.ToString();
-        Assert.AreEqual("<root xmlns=\"urn:1\"><item xmlns=\"urn:2\"></item></root>", str);
+        Assert.Equal("<root xmlns=\"urn:1\"><item xmlns=\"urn:2\"></item></root>", str);
       }
     }
 
-    [Test]
+    [Fact]
     public void WriterNamespaceNestedSameDefault()
     {
       using (var s = new StringWriter())
@@ -104,11 +103,11 @@ namespace BracketPipe.Core.Tests
         w.WriteEndElement();
         w.Flush();
         var str = s.ToString();
-        Assert.AreEqual("<root xmlns=\"urn:1\"><item></item></root>", str);
+        Assert.Equal("<root xmlns=\"urn:1\"><item></item></root>", str);
       }
     }
 
-    [Test]
+    [Fact]
     public void WriterNamespaceManualDeclaration()
     {
       using (var s = new StringWriter())
@@ -123,11 +122,11 @@ namespace BracketPipe.Core.Tests
         w.WriteEndElement();
         w.Flush();
         var str = s.ToString();
-        Assert.AreEqual("<root xmlns:x=\"urn:1\"><x:item></x:item><x:item></x:item></root>", str);
+        Assert.Equal("<root xmlns:x=\"urn:1\"><x:item></x:item><x:item></x:item></root>", str);
       }
     }
 
-    [Test]
+    [Fact]
     public void WriterNamespaceOverrideCurrent()
     {
       using (var s = new StringWriter())
@@ -140,11 +139,11 @@ namespace BracketPipe.Core.Tests
         w.WriteEndElement();
         w.Flush();
         var str = s.ToString();
-        Assert.AreEqual("<x:root xmlns:x=\"123\"><item xmlns:x=\"abc\"></item></x:root>", str);
+        Assert.Equal("<x:root xmlns:x=\"123\"><item xmlns:x=\"abc\"></item></x:root>", str);
       }
     }
 
-    [Test]
+    [Fact]
     public void WriterNamespaceManualOverride()
     {
       using (var s = new StringWriter())
@@ -155,11 +154,11 @@ namespace BracketPipe.Core.Tests
         w.WriteEndElement();
         w.Flush();
         var str = s.ToString();
-        Assert.AreEqual("<x:node xmlns:x=\"order\"></x:node>", str);
+        Assert.Equal("<x:node xmlns:x=\"order\"></x:node>", str);
       }
     }
 
-    [Test]
+    [Fact]
     public void WriterNamespaceMultipleDeclarations()
     {
       using (var s = new StringWriter())
@@ -172,11 +171,11 @@ namespace BracketPipe.Core.Tests
         w.WriteEndElement();
         w.Flush();
         var str = s.ToString();
-        Assert.AreEqual("<x:root xmlns:x=\"urn:1\"><y:item y:abc=\"xyz\" xmlns:y=\"urn:1\"></y:item></x:root>", str);
+        Assert.Equal("<x:root xmlns:x=\"urn:1\"><y:item y:abc=\"xyz\" xmlns:y=\"urn:1\"></y:item></x:root>", str);
       }
     }
 
-    [Test]
+    [Fact]
     public void WriterCharacterConversion()
     {
       using (var s = new StringWriter())
@@ -188,11 +187,11 @@ namespace BracketPipe.Core.Tests
         w.WriteEndElement();
         w.Flush();
         var str = s.ToString();
-        Assert.AreEqual("<myRoot attr=\"&amp;&quot;\">&lt;&amp;&gt;</myRoot>", str);
+        Assert.Equal("<myRoot attr=\"&amp;&quot;\">&lt;&amp;&gt;</myRoot>", str);
       }
     }
 
-    [Test]
+    [Fact]
     public void WriterEntityName()
     {
       const string ExcelNs = "urn:schemas-microsoft-com:office:excel";
@@ -216,11 +215,11 @@ namespace BracketPipe.Core.Tests
         w.WriteEndElement();
         w.Flush();
         var str = s.ToString();
-        Assert.AreEqual("<body xmlns:x=\"urn:schemas-microsoft-com:office:excel\"><div attr=\"&amp;&quot;\" x:str x:num>&nbsp;</div><div attr=\"&amp;&quot;\">&nbsp;</div></body>", str);
+        Assert.Equal("<body xmlns:x=\"urn:schemas-microsoft-com:office:excel\"><div attr=\"&amp;&quot;\" x:str x:num>&nbsp;</div><div attr=\"&amp;&quot;\">&nbsp;</div></body>", str);
       }
     }
 
-    [Test]
+    [Fact]
     public void WriterAttributeNoValue()
     {
       using (var s = new StringWriter())
@@ -232,11 +231,11 @@ namespace BracketPipe.Core.Tests
         w.WriteEndElement();
         w.Flush();
         var str = s.ToString();
-        Assert.AreEqual("<input type=\"text\" required>", str);
+        Assert.Equal("<input type=\"text\" required>", str);
       }
     }
 
-    [Test]
+    [Fact]
     public void RoundTrip_Basic()
     {
       var html = @"<!DOCTYPE html>
@@ -264,22 +263,22 @@ namespace BracketPipe.Core.Tests
       using (var reader = new HtmlReader(html))
       {
         var rendered = reader.ToHtml();
-        Assert.AreEqual(html, rendered);
+        Assert.Equal(html, rendered);
       }
     }
 
-    [Test]
+    [Fact]
     public void RoundTrip_VoidElementCloseTag()
     {
       var html = @"<p><img src></img></p>";
       using (var reader = new HtmlReader(html))
       {
         var rendered = reader.ToHtml();
-        Assert.AreEqual(@"<p><img src></p>", rendered);
+        Assert.Equal(@"<p><img src></p>", rendered);
       }
     }
 
-    [Test]
+    [Fact]
     public void RoundTrip_Svg()
     {
       var html = @"<html>
@@ -320,23 +319,40 @@ namespace BracketPipe.Core.Tests
       using (var reader = new HtmlReader(html))
       {
         var rendered = reader.ToHtml();
-        Assert.AreEqual(html, rendered);
+        Assert.Equal(html, rendered);
       }
     }
 
-    [Test]
+    [Fact]
     public void RoundTrip_EntityName()
     {
       var html = @"<p>a&PlusMinus;b</p>";
       using (var reader = new HtmlReader(html))
       {
         var rendered = reader.ToHtml();
-        Assert.AreEqual(@"<p>a±b</p>", rendered);
+        Assert.Equal(@"<p>a±b</p>", rendered);
+      }
+    }
+
+    [Fact]
+    public void RoundTrip_SciptTagWithXml()
+    {
+      var html = @"<script type=""text/xml""><first><another attr=""value"" /></first></script>";
+      using (var reader = new HtmlReader(html))
+      {
+        var rendered = reader.ToHtml();
+        Assert.Equal(html, rendered);
+      }
+
+      using (var reader = new HtmlReader(html))
+      {
+        var rendered = reader.Minify().ToHtml();
+        Assert.Equal(html, rendered);
       }
     }
 
 
-    [Test]
+    [Fact]
     public void RoundTrip_MathMl()
     {
       var html = @"<html xmlns=""http://www.w3.org/1999/xhtml"" lang=""en"" xml:lang=""en"">
@@ -369,7 +385,7 @@ namespace BracketPipe.Core.Tests
       using (var reader = new HtmlReader(html))
       {
         var rendered = reader.ToHtml();
-        Assert.AreEqual(html, rendered);
+        Assert.Equal(html, rendered);
       }
     }
   }

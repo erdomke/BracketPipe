@@ -1,20 +1,34 @@
-﻿using BracketPipe;
-using NUnit.Framework;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO;
+using System.Reflection;
+using Xunit;
 
 namespace BracketPipe.Tests
 {
-  [TestFixture]
-  class GenerateNodesTest
+  public class GenerateNodesTest
   {
-    [Test]
+    [Fact]
     public void HtmlFromNodes()
     {
-      Assert.AreEqual("<!DOCTYPE html><body><div id=\"first\" class=\"start\"><p style=\"color:red;\">Paragraph text</p></div></body>", GetHtml().ToHtml());
+      Assert.Equal("<!DOCTYPE html><body><div id=\"first\" class=\"start\"><p style=\"color:red;\">Paragraph text</p></div></body>", GetHtml().ToHtml());
+    }
+
+    [Fact]
+    public void ReadToEnd()
+    {
+      var origString = default(string);
+      using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("BracketPipe.Tests.LongSample.html"))
+      using (var reader = new StreamReader(stream))
+      {
+        origString = reader.ReadToEnd();
+      }
+
+      using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("BracketPipe.Tests.LongSample.html"))
+      {
+        var source = new TextSource(stream);
+        var newString = source.ReadToEnd();
+        Assert.Equal(origString, newString);
+      }
     }
 
     private IEnumerable<HtmlNode> GetHtml()

@@ -1,4 +1,4 @@
-using NUnit.Framework;
+using Xunit;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,26 +7,26 @@ using System.Threading.Tasks;
 
 namespace BracketPipe.Core.Tests
 {
-  [TestFixture]
-  class SanitizeTests
+
+  public class SanitizeTests
   {
     private void TestSanitize(string input, string expected, HtmlSanitizeSettings settings = null, HtmlWriterSettings writerSettings = null)
     {
       using (var reader = new HtmlReader(input))
       {
         var rendered = reader.Sanitize(settings ?? HtmlSanitizeSettings.Default()).ToHtml(writerSettings);
-        Assert.AreEqual(expected, rendered);
+        Assert.Equal(expected, rendered);
       }
     }
 
-    [Test]
+    [Fact]
     public void Sanitize_Basic()
     {
       TestSanitize(@"<div><p>stuff <img src=""javascript:alert('hit')"" /> <img data-test=""something"" src=""thing.png"" /> <img src=""http://www.google.com/thing.png"" /> and more</p></div><div><script>alert('bad stuff');</script>With content</div>"
         , "<div><p>stuff  <img src=\"thing.png\"> <img src=\"http://www.google.com/thing.png\"> and more</p></div><div>With content</div>");
     }
 
-    [Test]
+    [Fact]
     public void Sanitize_CheatSheet_Anchor()
     {
       TestSanitize("<a href=\"'';!--\"<XSS>=&{()}\">", @"<a href=""'';!--"">=&amp;{()}""&gt;");
@@ -37,7 +37,7 @@ namespace BracketPipe.Core.Tests
       TestSanitize("<A HREF=\"http://www.codeplex.com?url=<<SCRIPT>alert(\"XSS\");//<</SCRIPT>\">XSS</A>", @"<a href=""http://www.codeplex.com/?url=%3C%3CSCRIPT%3Ealert("">""&gt;XSS</a>");
     }
 
-    [Test]
+    [Fact]
     public void Sanitize_CheatSheet_Script()
     {
       TestSanitize(@"<p><SCRIPT SRC=http://xss.rocks/xss.js></SCRIPT></p>", "<p></p>");
@@ -49,7 +49,7 @@ namespace BracketPipe.Core.Tests
       TestSanitize(@"<p><SCRIPT SRC=//xss.rocks/.j></SCRIPT></p>", "<p></p>");
     }
 
-    [Test]
+    [Fact]
     public void Sanitize_CheatSheet_Img()
     {
       TestSanitize(@"<p><IMG SRC=""javascript:alert('XSS');""></p>", "<p></p>");
@@ -113,7 +113,7 @@ S
       TestSanitize(@"<p><IMAGE src=http://xss.rocks/scriptlet.html <</p>", "<p>");
     }
 
-    [Test]
+    [Fact]
     public void Sanitize_CheatSheet_Body()
     {
       TestSanitize(@"<p><BODY onload!#$%&()*~+-_.,:;?@[/|\]^`=alert(""XSS"")></BODY></p>", "<p></p>");
@@ -125,7 +125,7 @@ S
       TestSanitize(@"<BODY ONLOAD=alert('XSS')></BODY>", "<body></body>", bodySettings);
     }
 
-    [Test]
+    [Fact]
     public void Sanitize_CheatSheet_StyleAttr()
     {
       TestSanitize(@"<IMG src=""#"" STYLE=""width:100px;xss:5px;background:expr/*XSS*/ession(alert('XSS'));height:100px;"">", @"<img src=""#"" style=""width:100px;height:100px;"">");
@@ -147,7 +147,7 @@ S
       TestSanitize("<Div style=\"background-color: expression(<SCRIPT/SRC=\"http://ha.ckers.org/xss.js\"></SCRIPT>)\">", "<div>)\"&gt;");
     }
 
-    [Test]
+    [Fact]
     public void Sanitize_CheatSheetStyleSheet()
     {
       var styleSettings = HtmlSanitizeSettings.Default();
@@ -161,7 +161,7 @@ S
       TestSanitize(@"<STYLE type=""text/css"">BODY{background:url(""javascript:alert('XSS')"")}</STYLE>", @"<style type=""text/css"">BODY{}</style>", styleSettings);
     }
 
-    [Test]
+    [Fact]
     public void Sanitize_CheatSheet_Meta()
     {
       TestSanitize(@"<p><LINK REL=""stylesheet"" HREF=""javascript:alert('XSS');""></p>", @"<p></p>");
@@ -172,7 +172,7 @@ S
       TestSanitize(@"<p><META HTTP-EQUIV=""refresh"" CONTENT=""0; URL=http://;URL=javascript:alert('XSS');""></p>", @"<p></p>");
     }
 
-    [Test]
+    [Fact]
     public void Sanitize_CheatSheet_Other()
     {
       TestSanitize(@"<p><iframe src=http://xss.rocks/scriptlet.html <</p>", "<p>");
@@ -203,7 +203,7 @@ S
       TestSanitize(@"<p><BGSOUND SRC=""javascript:alert('XSS');""></p>", "<p><bgsound></p>", bgsoundSettings);
     }
 
-    [Test]
+    [Fact]
     public void Sanitize_StyleSheet()
     {
       var sheet = @"<style>@import 'custom.css';
@@ -231,7 +231,7 @@ S
       TestSanitize(sheet, expected, styleSettings);
     }
 
-    [Test]
+    [Fact]
     public void Sanitize_DontEncodeUrls()
     {
       const string input = "<div><img src=\"data:image/png;base64, iVBORw0KGgoAAAANSU\"></div>";
@@ -241,7 +241,7 @@ S
       TestSanitize(input, input, settings);
     }
 
-    [Test]
+    [Fact]
     public void Sanitize_WeirdEmailTags()
     {
       var input = @"<div>

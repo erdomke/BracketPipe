@@ -1,4 +1,4 @@
-﻿using NUnit.Framework;
+using Xunit;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,10 +10,10 @@ namespace BracketPipe.Core.Tests
   /// <summary>
   /// Tests lifted from the SgmlReader project
   /// </summary>
-  [TestFixture]
-  class SgmlReaderTests
+
+  public class SgmlReaderTests
   {
-    [Test]
+    [Fact]
     public void RoundTrip_Word()
     {
       var html = @"<html xmlns:v=""urn:schemas-microsoft-com:vml""
@@ -41,7 +41,7 @@ Symbol'><span style='mso-list:Ignore'>·<span style='font:7.0pt ""Times New Roma
       using (var reader = new HtmlReader(html))
       {
         var rendered = reader.ToHtml();
-        Assert.AreEqual(@"<html xmlns:v=""urn:schemas-microsoft-com:vml"" xmlns:o=""urn:schemas-microsoft-com:office:office"" xmlns:w=""urn:schemas-microsoft-com:office:word"" xmlns:m=""http://schemas.microsoft.com/office/2004/12/omml"" xmlns=""http://www.w3.org/TR/REC-html40"">
+        Assert.Equal(@"<html xmlns:v=""urn:schemas-microsoft-com:vml"" xmlns:o=""urn:schemas-microsoft-com:office:office"" xmlns:w=""urn:schemas-microsoft-com:office:word"" xmlns:m=""http://schemas.microsoft.com/office/2004/12/omml"" xmlns=""http://www.w3.org/TR/REC-html40"">
 
 <body lang=""EN-US"" style=""tab-interval:.5in"">
 
@@ -61,7 +61,7 @@ Symbol""><span style=""mso-list:Ignore"">·<span style=""font:7.0pt &quot;Times 
       }
     }
 
-    [Test]
+    [Fact]
     public void RoundTrip_SgmlReader02()
     {
       var html = @"<html>
@@ -71,14 +71,14 @@ Symbol""><span style=""mso-list:Ignore"">·<span style=""font:7.0pt &quot;Times 
       using (var reader = new HtmlReader(html))
       {
         var rendered = reader.ToHtml();
-        Assert.AreEqual(@"<html>
+        Assert.Equal(@"<html>
 <body><span text=""foo&gt;bar""></span>
 </body>
 </html>", rendered);
       }
     }
 
-    [Test]
+    [Fact]
     public void RoundTrip_SgmlReader03()
     {
       var html = @"<html>
@@ -88,14 +88,14 @@ Symbol""><span style=""mso-list:Ignore"">·<span style=""font:7.0pt &quot;Times 
       using (var reader = new HtmlReader(html))
       {
         var rendered = reader.ToHtml();
-        Assert.AreEqual(@"<html>
+        Assert.Equal(@"<html>
 <body><span text=""foo&lt;bar""></span>
 </body>
 </html>", rendered);
       }
     }
 
-    [Test]
+    [Fact]
     public void RoundTrip_SgmlReader04()
     {
       var html = @"<html>
@@ -106,7 +106,7 @@ Symbol""><span style=""mso-list:Ignore"">·<span style=""font:7.0pt &quot;Times 
       using (var reader = new HtmlReader(html))
       {
         var rendered = reader.ToHtml();
-        Assert.AreEqual(@"<html>
+        Assert.Equal(@"<html>
 <body>
 <tag>&amp;test&nbsp;&nbsp; blah blah</tag>
 </body>
@@ -114,7 +114,7 @@ Symbol""><span style=""mso-list:Ignore"">·<span style=""font:7.0pt &quot;Times 
       }
     }
 
-    [Test]
+    [Fact]
     public void RoundTrip_SgmlReader05()
     {
       var html = @"<html>
@@ -125,7 +125,7 @@ Symbol""><span style=""mso-list:Ignore"">·<span style=""font:7.0pt &quot;Times 
       using (var reader = new HtmlReader(html))
       {
         var rendered = reader.ToHtml();
-        Assert.AreEqual(@"<html>
+        Assert.Equal(@"<html>
 <body>
 <p>bad char: <span>􀀀</span></p>
 </body>
@@ -133,7 +133,7 @@ Symbol""><span style=""mso-list:Ignore"">·<span style=""font:7.0pt &quot;Times 
       }
     }
 
-    [Test]
+    [Fact]
     public void RoundTrip_SgmlReader06()
     {
       var html = @"<html>
@@ -147,7 +147,7 @@ prefix = st1 ns = ""urn:schemas-microsoft-com:office:smarttags""
       using (var reader = new HtmlReader(html))
       {
         var rendered = reader.ToHtml();
-        Assert.AreEqual(@"<html>
+        Assert.Equal(@"<html>
 <body>
 <p class=""MsoNormal"" dir=""ltr"" style=""MARGIN: 0pt;"" align=""left""><!--?xml:namespace
 prefix = st1 ns = ""urn:schemas-microsoft-com:office:smarttags""
@@ -157,7 +157,7 @@ prefix = st1 ns = ""urn:schemas-microsoft-com:office:smarttags""
       }
     }
 
-    [Test]
+    [Fact]
     public void RoundTrip_SgmlReader07()
     {
       var html = @"<html>
@@ -168,7 +168,7 @@ prefix = st1 ns = ""urn:schemas-microsoft-com:office:smarttags""
       using (var reader = new HtmlReader(html))
       {
         var rendered = reader.ToHtml();
-        Assert.AreEqual(@"<html>
+        Assert.Equal(@"<html>
 <body>
 <div style=""top:214px; left:139px; position:absolute; font-size:26px;""><nobr><span style=""font-family:"" wingdings 2"";""></span></nobr></div>
 </body>
@@ -176,7 +176,7 @@ prefix = st1 ns = ""urn:schemas-microsoft-com:office:smarttags""
       }
     }
 
-    [Test]
+    [Fact]
     public void RoundTrip_SgmlReader08()
     {
       var html = @"<html>
@@ -190,11 +190,11 @@ var test = '<div>""test""</div>';
       using (var reader = new HtmlReader(html))
       {
         var rendered = reader.ToHtml();
-        Assert.AreEqual(html, rendered);
+        Assert.Equal(html, rendered);
       }
     }
 
-    [Test]
+    [Fact]
     public void RoundTrip_SgmlReader09()
     {
       var html = @"<html>
@@ -203,13 +203,13 @@ var test = '<div>""test""</div>';
       using (var reader = new HtmlReader(html))
       {
         var rendered = reader.ToHtml();
-        Assert.AreEqual(@"<html>
+        Assert.Equal(@"<html>
 <body>This <p>is bad </p> XHTML.</body>
 </html>", rendered);
       }
     }
 
-    [Test]
+    [Fact]
     public void RoundTrip_SgmlReader11()
     {
       var html = @"<html>
@@ -218,24 +218,24 @@ var test = '<div>""test""</div>';
       using (var reader = new HtmlReader(html))
       {
         var rendered = reader.ToHtml();
-        Assert.AreEqual(@"<html>
+        Assert.Equal(@"<html>
 <body><a href=""http://www.cnn.com/"" title=""cnn.com"">cnn</a></body>
 </html>", rendered);
       }
     }
 
-    [Test]
+    [Fact]
     public void RoundTrip_SgmlReader15()
     {
       var html = @"<html xmlns=""http://www.w3.org/1999/xhtml""><head /><body><table u1:str="""" x:str=""""></table></body></html>";
       using (var reader = new HtmlReader(html))
       {
         var rendered = reader.ToHtml();
-        Assert.AreEqual(@"<html xmlns=""http://www.w3.org/1999/xhtml""><head></head><body><table u1:str x:str></table></body></html>", rendered);
+        Assert.Equal(@"<html xmlns=""http://www.w3.org/1999/xhtml""><head></head><body><table u1:str x:str></table></body></html>", rendered);
       }
     }
 
-    [Test]
+    [Fact]
     public void RoundTrip_SgmlReader18()
     {
       var html = @"<html>
@@ -246,7 +246,7 @@ var test = '<div>""test""</div>';
       using (var reader = new HtmlReader(html))
       {
         var rendered = reader.ToHtml();
-        Assert.AreEqual(@"<html>
+        Assert.Equal(@"<html>
     <body>
         <script type=""text/javascript"">/*<![CDATA[*/ /*<![CDATA[*/ test /*]]>*/ /*]]&gt;*/</script>
     </body>
@@ -254,7 +254,7 @@ var test = '<div>""test""</div>';
       }
     }
 
-    [Test]
+    [Fact]
     public void RoundTrip_SgmlReader21()
     {
       var html = @"<html><body>
@@ -267,7 +267,7 @@ var test = '<div>""test""</div>';
       using (var reader = new HtmlReader(html))
       {
         var rendered = reader.ToHtml();
-        Assert.AreEqual(@"<html><body>
+        Assert.Equal(@"<html><body>
 <p class=""MsoNormal"">
   <span style=""font-size: 10pt;"" arial , sans-serif ;; font-family:dummy: font-family: font-family:foo: arial; font-size: 13.3333px;>
     <span class=""Apple-style-span"" style=""font-family: Arial; font-size: 13.3333px;"">-lm</span>
@@ -277,51 +277,51 @@ var test = '<div>""test""</div>';
       }
     }
 
-    [Test]
+    [Fact]
     public void RoundTrip_SgmlReader22()
     {
       var html = @"﻿<html><body>do <![if !supportLists]>not<![endif]> lose this text</body></html>";
       using (var reader = new HtmlReader(html))
       {
         var rendered = reader.ToHtml();
-        Assert.AreEqual(@"﻿<html><body>do <![if !supportLists]>not<![endif]> lose this text</body></html>", rendered);
+        Assert.Equal(@"﻿<html><body>do <![if !supportLists]>not<![endif]> lose this text</body></html>", rendered);
       }
     }
 
-    [Test]
+    [Fact]
     public void RoundTrip_SgmlReader23()
     {
       var html = @"﻿<html xmlns=""http://implicit"" xmlns:n=""http://explicit""><foo attr1=""1"" n:attr2=""2"" /><n:foo attr1=""1"" n:attr2=""2"" /></html>";
       using (var reader = new HtmlReader(html))
       {
         var rendered = reader.ToHtml();
-        Assert.AreEqual(@"﻿<html xmlns=""http://implicit"" xmlns:n=""http://explicit""><foo attr1=""1"" n:attr2=""2""></foo><n:foo attr1=""1"" n:attr2=""2""></n:foo></html>", rendered);
+        Assert.Equal(@"﻿<html xmlns=""http://implicit"" xmlns:n=""http://explicit""><foo attr1=""1"" n:attr2=""2""></foo><n:foo attr1=""1"" n:attr2=""2""></n:foo></html>", rendered);
       }
     }
 
-    [Test]
+    [Fact]
     public void RoundTrip_SgmlReader24()
     {
       var html = @"﻿<html xmlns:n=""http://explicit""><foo attr1=""1"" n:attr2=""2"" /><n:foo attr1=""1"" n:attr2=""2"" /></html>";
       using (var reader = new HtmlReader(html))
       {
         var rendered = reader.ToHtml();
-        Assert.AreEqual(@"﻿<html xmlns:n=""http://explicit""><foo attr1=""1"" n:attr2=""2""></foo><n:foo attr1=""1"" n:attr2=""2""></n:foo></html>", rendered);
+        Assert.Equal(@"﻿<html xmlns:n=""http://explicit""><foo attr1=""1"" n:attr2=""2""></foo><n:foo attr1=""1"" n:attr2=""2""></n:foo></html>", rendered);
       }
     }
 
-    [Test]
+    [Fact]
     public void RoundTrip_SgmlReader28()
     {
       var html = @"<html xmlns:o=""http://microsoft.com""><body>A<o:p></o:p>B<o:p></o:p></body></html>";
       using (var reader = new HtmlReader(html))
       {
         var rendered = reader.ToHtml();
-        Assert.AreEqual(@"<html xmlns:o=""http://microsoft.com""><body>A<o:p></o:p>B<o:p></o:p></body></html>", rendered);
+        Assert.Equal(@"<html xmlns:o=""http://microsoft.com""><body>A<o:p></o:p>B<o:p></o:p></body></html>", rendered);
       }
     }
 
-    [Test]
+    [Fact]
     public void RoundTrip_SgmlReader33()
     {
       var html = @"<!DOCTYPE html PUBLIC ""-//W3C//DTD HTML 4.01 Transitional//EN"">
@@ -329,12 +329,12 @@ var test = '<div>""test""</div>';
       using (var reader = new HtmlReader(html))
       {
         var rendered = reader.ToHtml();
-        Assert.AreEqual(@"<!DOCTYPE html PUBLIC ""-//W3C//DTD HTML 4.01 Transitional//EN"">
+        Assert.Equal(@"<!DOCTYPE html PUBLIC ""-//W3C//DTD HTML 4.01 Transitional//EN"">
 <html>", rendered);
       }
     }
 
-    [Test]
+    [Fact]
     public void RoundTrip_SgmlReader34()
     {
       var html = @"<HTML><BODY>
@@ -344,14 +344,14 @@ var test = '<div>""test""</div>';
       using (var reader = new HtmlReader(html))
       {
         var rendered = reader.ToHtml();
-        Assert.AreEqual(@"<html><body>
+        Assert.Equal(@"<html><body>
 <link href=""a.css"" type=""text/css"" rel=""stylesheet"">
 </body>
 </html> ", rendered);
       }
     }
 
-    [Test]
+    [Fact]
     public void RoundTrip_SgmlReader36()
     {
       var html = @"<html>
@@ -367,7 +367,7 @@ var test = '<div>""test""</div>';
       using (var reader = new HtmlReader(html))
       {
         var rendered = reader.ToHtml();
-        Assert.AreEqual(@"<html>
+        Assert.Equal(@"<html>
 <head>
 <script language=""JavaScript"">
 <!--
@@ -380,18 +380,18 @@ var test = '<div>""test""</div>';
       }
     }
 
-    [Test]
+    [Fact]
     public void RoundTrip_SgmlReader39()
     {
       var html = @"<html><class=""black"">Text………</html>";
       using (var reader = new HtmlReader(html))
       {
         var rendered = reader.ToHtml();
-        Assert.AreEqual(@"<html><class=""black"">Text………</class=""black""></html>", rendered);
+        Assert.Equal(@"<html><class=""black"">Text………</class=""black""></html>", rendered);
       }
     }
 
-    [Test]
+    [Fact]
     public void RoundTrip_SgmlReader41()
     {
       var html = @"﻿<html>
@@ -400,24 +400,24 @@ var test = '<div>""test""</div>';
       using (var reader = new HtmlReader(html))
       {
         var rendered = reader.ToHtml();
-        Assert.AreEqual(@"﻿<html>
+        Assert.Equal(@"﻿<html>
   <img src=""img.gif"" height""4"" width=""2"">
 </html>", rendered);
       }
     }
 
-    [Test]
+    [Fact]
     public void RoundTrip_SgmlReader46()
     {
       var html = @"blah <b>foo</b>";
       using (var reader = new HtmlReader(html))
       {
         var rendered = reader.ToHtml();
-        Assert.AreEqual(html, rendered);
+        Assert.Equal(html, rendered);
       }
     }
 
-    [Test]
+    [Fact]
     public void RoundTrip_SgmlReader48()
     {
       var html = @"﻿﻿<html>
@@ -426,13 +426,13 @@ var test = '<div>""test""</div>';
       using (var reader = new HtmlReader(html))
       {
         var rendered = reader.ToHtml();
-        Assert.AreEqual(@"﻿﻿<html>
+        Assert.Equal(@"﻿﻿<html>
 <body>
 <p>ZZZ test Z</p>", rendered);
       }
     }
 
-    [Test]
+    [Fact]
     public void RoundTrip_SgmlReader55()
     {
       var html = @"﻿<html>
@@ -441,53 +441,53 @@ var test = '<div>""test""</div>';
       using (var reader = new HtmlReader(html))
       {
         var rendered = reader.ToHtml();
-        Assert.AreEqual(@"﻿<html>
+        Assert.Equal(@"﻿<html>
   <body style=""&amp;&quot;&lt;&gt;'"">&amp;""&lt;&gt;'</body>
 </html>", rendered);
       }
     }
 
-    [Test]
+    [Fact]
     public void RoundTrip_SgmlReader57()
     {
       var html = @"<p>&#</p>";
       using (var reader = new HtmlReader(html))
       {
         var rendered = reader.ToHtml();
-        Assert.AreEqual(@"<p>&amp;#</p>", rendered);
+        Assert.Equal(@"<p>&amp;#</p>", rendered);
       }
     }
 
-    [Test]
+    [Fact]
     public void RoundTrip_SgmlReader58()
     {
       var html = @"<p>&#;</p>";
       using (var reader = new HtmlReader(html))
       {
         var rendered = reader.ToHtml();
-        Assert.AreEqual(@"<p>&amp;#;</p>", rendered);
+        Assert.Equal(@"<p>&amp;#;</p>", rendered);
       }
     }
 
-    [Test]
+    [Fact]
     public void RoundTrip_SgmlReader59()
     {
       var html = @"<p>&#x</p>";
       using (var reader = new HtmlReader(html))
       {
         var rendered = reader.ToHtml();
-        Assert.AreEqual(@"<p>&amp;#x</p>", rendered);
+        Assert.Equal(@"<p>&amp;#x</p>", rendered);
       }
     }
 
-    [Test]
+    [Fact]
     public void RoundTrip_SgmlReader60()
     {
       var html = @"<p>&#x;</p>";
       using (var reader = new HtmlReader(html))
       {
         var rendered = reader.ToHtml();
-        Assert.AreEqual(@"<p>&amp;#x;</p>", rendered);
+        Assert.Equal(@"<p>&amp;#x;</p>", rendered);
       }
     }
   }

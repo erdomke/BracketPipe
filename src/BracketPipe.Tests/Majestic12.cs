@@ -1,4 +1,4 @@
-﻿using NUnit.Framework;
+using Xunit;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,15 +7,15 @@ using System.Threading.Tasks;
 
 namespace BracketPipe.Core.Tests
 {
-  [TestFixture]
-  class Majestic12
+
+  public class Majestic12
   {
     private void TestParser(string data, string expected)
     {
       using (var reader = new HtmlReader(data))
       {
         var rendered = reader.ToHtml();
-        Assert.AreEqual(expected, rendered);
+        Assert.Equal(expected, rendered);
       }
     }
     private void TestParser(string data)
@@ -24,7 +24,7 @@ namespace BracketPipe.Core.Tests
     }
 
 
-    [Test]
+    [Fact]
     public void Majestic12_OpenTagsWithoutAttributes()
     {
       TestParser("<p>");
@@ -53,7 +53,7 @@ namespace BracketPipe.Core.Tests
     }
 
 
-    [Test]
+    [Fact]
     public void Majestic12_OpenTagsWithAttributes()
     {
       TestParser("<td x:num=\"38669\" abc=xl29 z:num=\"12345\">", "<td x:num=\"38669\" abc=\"xl29\" z:num=\"12345\">");
@@ -71,7 +71,7 @@ namespace BracketPipe.Core.Tests
       TestParser("<a href>", "<a href>");
     }
 
-    [Test]
+    [Fact]
     public void Majestic12_Text()
     {
       // empty text
@@ -87,7 +87,7 @@ namespace BracketPipe.Core.Tests
       TestParser("some text with wrong entities &", "some text with wrong entities &amp;");
     }
 
-    [Test]
+    [Fact]
     public void Majestic12_Script()
     {
       TestParser("<SCRipt> some javascript here</SCRI blah", "<script> some javascript here</SCRI blah");
@@ -101,7 +101,7 @@ namespace BracketPipe.Core.Tests
       TestParser("<script><!-- some javascript here<b>--></script>", "<script><!-- some javascript here<b>--></script>");
     }
 
-    [Test]
+    [Fact]
     public void Majestic12_ClosedTagsWithoutAttributes()
     {
       TestParser("</p>");
@@ -127,7 +127,7 @@ namespace BracketPipe.Core.Tests
       TestParser("<CLass / >", "<class>");
     }
 
-    [Test]
+    [Fact]
     public void Majestic12_CrlfBeforeClose()
     {
       TestParser(@"<SPAN font-weight:bold; color:#000000""

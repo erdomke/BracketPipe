@@ -1,4 +1,4 @@
-﻿using NUnit.Framework;
+using Xunit;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace BracketPipe.Tests
 {
-  [TestFixture]
-  class PlainTextTests
+
+  public class PlainTextTests
   {
-    [Test]
+    [Fact]
     public void Convert_WhenThereAreHtmlLinks_ThenConvertToMarkDownLinks()
     {
       const string html = @"So this is <a href=""http://www.simonbaynes.com/"">a link</a>. Convert it";
@@ -19,7 +19,7 @@ namespace BracketPipe.Tests
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereAreHtmlLinksWithAttributesAfterTheHref_ThenConvertToMarkDownLink()
     {
       const string html = @"So this is <a href=""http://www.simonbaynes.com/"" alt=""example"">a link</a>. Convert it";
@@ -28,7 +28,7 @@ namespace BracketPipe.Tests
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereAreHtmlLinksWithAttributesBeforeTheHref_ThenConvertToMarkDownLink()
     {
       const string html = @"So this is <a alt=""example"" href=""http://www.simonbaynes.com/"">a link</a>. Convert it";
@@ -37,7 +37,7 @@ namespace BracketPipe.Tests
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereAreHtmlLinksWithTitleAttributeAfterTheHref_ThenConvertToMarkDownLink()
     {
       const string html = @"So this is <a href=""http://www.simonbaynes.com/"" title=""example"">a link</a>. Convert it";
@@ -47,7 +47,7 @@ namespace BracketPipe.Tests
     }
 
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereAreHtmlLinksWithTitleAttributeBeforeTheHref_ThenConvertToMarkDownLink()
     {
       const string html = @"So this is <a title=""example"" href=""http://www.simonbaynes.com/"">a link</a>. Convert it";
@@ -56,7 +56,7 @@ namespace BracketPipe.Tests
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereAreMultipleHtmlLinks_ThenConvertThemToMarkDownLinks()
     {
       const string html = @"So this is <a href=""http://www.simonbaynes.com/"">a link</a> and so is <a href=""http://www.google.com/"">this</a>. Convert them";
@@ -65,7 +65,7 @@ namespace BracketPipe.Tests
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereAreEmptyLinks_ThenRemoveThemFromResult()
     {
       const string html = @"So this is <a name=""curio""></a> and so is <a href=""http://www.google.com/"">this</a>. Convert them";
@@ -74,7 +74,7 @@ namespace BracketPipe.Tests
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereAreStrongTags_ThenConvertToMarkDownDoubleAsterisks()
     {
       const string html = @"So this text is <strong>bold</strong>. Convert it.";
@@ -84,7 +84,7 @@ namespace BracketPipe.Tests
     }
 
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereAreMultipleStrongTags_ThenConvertToMarkDownDoubleAsterisks()
     {
       const string html = @"So this text is <strong>bold</strong> and <strong>is this</strong>. Convert it.";
@@ -93,7 +93,7 @@ namespace BracketPipe.Tests
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereAreBoldTags_ThenConvertToMarkDownDoubleAsterisks()
     {
       const string html = @"So this text is <b>bold</b>. Convert it.";
@@ -102,7 +102,7 @@ namespace BracketPipe.Tests
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereAreEmphsisTags_ThenConvertToMarkDownSingleAsterisk()
     {
       const string html = @"So this text is <em>italic</em>. Convert it.";
@@ -111,7 +111,7 @@ namespace BracketPipe.Tests
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereAreItalicTags_ThenConvertToMarkDownSingleAsterisk()
     {
       const string html = @"So this text is <i>italic</i>. Convert it.";
@@ -120,7 +120,7 @@ namespace BracketPipe.Tests
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereAreBreakTags_ThenConvertToMarkDownDoubleSpacesWitCarriageReturns()
     {
       const string html = @"So this text has a break.<br/>Convert it.";
@@ -130,7 +130,7 @@ Convert it.";
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereAreBreakTagsWithWhitespace_ThenConvertToMarkDownDoubleSpacesWitCarriageReturns()
     {
       const string html = @"So this text has a break.<br />Convert it.";
@@ -140,7 +140,7 @@ Convert it.";
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereAreBreakTagsThatAreNotSelfClosing_ThenConvertToMarkDownDoubleSpacesWitCarriageReturns()
     {
       const string html = @"So this text has a break.<br>Convert it.";
@@ -151,7 +151,7 @@ Convert it.";
     }
 
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereAreCodeTags_ThenReplaceWithBackTick()
     {
       const string html = @"So this text has code <code>alert();</code>. Convert it.";
@@ -160,7 +160,7 @@ Convert it.";
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereMultilineCodeTags_ThenReplaceWithMultilineMarkdownBlock001()
     {
       const string html = @"So this text has multiline code.
@@ -175,7 +175,7 @@ Convert it.";
     }
 
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereMultilineCodeTags_ThenReplaceWithMultilineMarkdownBlock002()
     {
       const string html = @"So this text has multiline code.
@@ -189,7 +189,7 @@ Convert it.";
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereAreH1Tags_ThenReplaceWithMarkDownHeader()
     {
       const string html = @"This code has a <h1>header</h1>. Convert it.";
@@ -203,7 +203,7 @@ header
     }
 
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereAreH2Tags_ThenReplaceWithMarkDownHeader()
     {
       const string html = @"This code has a <h2>header</h2>. Convert it.";
@@ -216,7 +216,7 @@ header
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereAreH3Tags_ThenReplaceWithMarkDownHeader()
     {
       const string html = @"This code has a <h3>header</h3>. Convert it.";
@@ -229,7 +229,7 @@ header
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereAreH4Tags_ThenReplaceWithMarkDownHeader()
     {
       const string html = @"This code has a <h4>header</h4>. Convert it.";
@@ -242,7 +242,7 @@ header
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereAreH5Tags_ThenReplaceWithMarkDownHeader()
     {
       const string html = @"This code has a <h5>header</h5>. Convert it.";
@@ -255,7 +255,7 @@ header
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereAreH6Tags_ThenReplaceWithMarkDownHeader()
     {
       const string html = @"This code has a <h6>header</h6>. Convert it.";
@@ -268,7 +268,7 @@ header
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereAreH1TagsWithAttributes_ThenReplaceWithMarkDownHeader()
     {
       const string html = @"This code has a <h1 title=""header"">header</h1>. Convert it.";
@@ -282,7 +282,7 @@ header
     }
 
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereAreH2TagsWithAttributes_ThenReplaceWithMarkDownHeader()
     {
       const string html = @"This code has a <h2 title=""header"">header</h2>. Convert it.";
@@ -295,7 +295,7 @@ header
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereAreH3TagsWithAttributes_ThenReplaceWithMarkDownHeader()
     {
       const string html = @"This code has a <h3 title=""header"">header</h3>. Convert it.";
@@ -308,7 +308,7 @@ header
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereAreH4TagsWithAttributes_ThenReplaceWithMarkDownHeader()
     {
       const string html = @"This code has a <h4 title=""header"">header</h4>. Convert it.";
@@ -321,7 +321,7 @@ header
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereAreH5TagsWithAttributes_ThenReplaceWithMarkDownHeader()
     {
       const string html = @"This code has a <h5 title=""header"">header</h5>. Convert it.";
@@ -334,7 +334,7 @@ header
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereAreH6TagsWithAttributes_ThenReplaceWithMarkDownHeader()
     {
       const string html = @"This code has a <h6 title=""header"">header</h6>. Convert it.";
@@ -347,7 +347,7 @@ header
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereAreBlockquoteTags_ThenReplaceWithMarkDownBlockQuote()
     {
       const string html = @"This code has a <blockquote>blockquote</blockquote>. Convert it.";
@@ -360,7 +360,7 @@ blockquote
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereIsABlockquoteTagWithNestedHtml_ThenReplaceWithMarkDownBlockQuote()
     {
       const string html = @"<blockquote><em>“Qualquer coisa que possas fazer ou sonhar, podes começá-la. A ousadia encerra em si mesma genialidade, poder e magia.<br />Ouse fazer, e o poder lhe será dado!”</em><br /><strong>— Johann Wolfgang von Goethe</strong></blockquote>";
@@ -372,7 +372,7 @@ Ouse fazer, e o poder lhe será dado!”
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereIsAMultilineBlockquoteTag_ThenReplaceWithMarkDownBlockQuote()
     {
       const string html = @"<blockquote>
@@ -386,7 +386,7 @@ Ouse fazer, e o poder lhe será dado!”
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereIsABlockquoteTagWithAttributes_ThenReplaceWithMarkDownBlockQuote()
     {
       const string html = @"This code has a <blockquote id=""thing"">blockquote</blockquote>. Convert it.";
@@ -399,7 +399,7 @@ blockquote
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereAreParagraphTags_ThenReplaceWithDoubleLineBreakBeforeAndOneAfter()
     {
       const string html = @"This code has no markup.<p>This code is in a paragraph.</p>Convert it!";
@@ -412,7 +412,7 @@ Convert it!";
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereAreParagraphTagsWithAttributes_ThenReplaceWithDoubleLineBreakBeforeAndOneAfter()
     {
       const string html = @"This code has no markup.<p class=""something"">This code is in a paragraph.</p>Convert it!";
@@ -425,7 +425,7 @@ Convert it!";
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereAreParagraphTagsWithNewLinesInThem_ThenReplaceWithMarkdownParagraphButNoBreakTags()
     {
       const string html = @"<p>
@@ -438,7 +438,7 @@ Convert it!";
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereAreHorizontalRuleTags_ThenReplaceWithMarkDownHorizontalRule()
     {
       const string html = @"This code is seperated by a horizonrtal rule.<hr/>Convert it!";
@@ -450,7 +450,7 @@ Convert it!";
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereAreHorizontalRuleTagsWithWhiteSpace_ThenReplaceWithMarkDownHorizontalRule()
     {
       const string html = @"This code is seperated by a horizonrtal rule.<hr />Convert it!";
@@ -462,7 +462,7 @@ Convert it!";
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereAreHorizontalRuleTagsWithAttributes_ThenReplaceWithMarkDownHorizontalRule()
     {
       const string html = @"This code is seperated by a horizonrtal rule.<hr class=""something"" />Convert it!";
@@ -474,7 +474,7 @@ Convert it!";
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereAreHorizontalRuleTagsThatAreNonSelfClosing_ThenReplaceWithMarkDownHorizontalRule()
     {
       const string html = @"This code is seperated by a horizonrtal rule.<hr>Convert it!";
@@ -486,7 +486,7 @@ Convert it!";
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereAreImgTags_ThenReplaceWithMarkdownImage()
     {
       const string html = @"This code is with and image <img alt=""something"" title=""convert"" src=""https://assets-cdn.github.com/images/spinners/octocat-spinner-32.gif"" /> Convert it!";
@@ -496,7 +496,7 @@ Convert it!";
     }
 
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereAreImgTagsWithoutATitle_ThenReplaceWithMarkdownImage()
     {
       const string html = @"This code is with an image <img alt=""something"" src=""https://assets-cdn.github.com/images/spinners/octocat-spinner-32.gif"" /> Convert it!";
@@ -505,7 +505,7 @@ Convert it!";
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereArePreTags_ThenReplaceWithMarkdownPre()
     {
       const string html = @"This code is with a pre tag <pre>
@@ -517,7 +517,7 @@ Convert it!";
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereAreOtherTagsNestedInThePreTag_ThenReplaceWithMarkdownPre()
     {
       const string html = @"<pre><code>Install-Package Html2Markdown
@@ -527,7 +527,7 @@ Convert it!";
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereAreMultiplePreTags_ThenReplaceWithMarkdownPre()
     {
       const string html = @"<h2>Installing via NuGet</h2>
@@ -552,7 +552,7 @@ Usage
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereAreUnorderedLists_ThenReplaceWithMarkdownLists()
     {
       const string html = @"This code is with an unordered list.<ul><li>Yes</li><li>No</li></ul>";
@@ -564,7 +564,7 @@ Usage
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereAreOrderedLists_ThenReplaceWithMarkdownLists()
     {
       const string html = @"This code is with an unordered list.<ol><li>Yes</li><li>No</li></ol>";
@@ -576,7 +576,7 @@ Usage
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereIsAnUnorderedListWithANestedOrderList_ThenReplaceWithMarkdownLists()
     {
       const string html = @"This code is with an unordered list.<ul><li>Yes</li><li><ol><li>No</li><li>Maybe</li></ol></li></ul>";
@@ -590,7 +590,7 @@ Usage
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereIsAnOrderedListWithANestedUnorderList_ThenReplaceWithMarkdownLists()
     {
       const string html = @"This code is with an unordered list.<ol><li>Yes</li><li><ul><li>No</li><li>Maybe</li></ul></li></ol>";
@@ -604,7 +604,7 @@ Usage
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereIsAnHtmlDoctype_ThenRemoveFromResult()
     {
       const string html = @"<!DOCTYPE HTML PUBLIC ""-//W3C//DTD XHTML 1.0 Strict//EN"" ""http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"">
@@ -614,7 +614,7 @@ Doctypes should be removed";
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereIsAnHtmlTag_ThenRemoveFromResult()
     {
       const string html = @"<html>
@@ -625,7 +625,7 @@ Doctypes should be removed";
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereIsAnHtmlTagWithAttributes_ThenRemoveFromResult()
     {
       const string html = @"<html xmlns=""http://www.w3.org/1999/xhtml"" xml:lang=""pt-br"">
@@ -636,7 +636,7 @@ Doctypes should be removed";
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereIsASingleLineComment_ThenRemoveFromResult()
     {
       const string html = @"<!-- a comment -->
@@ -646,7 +646,7 @@ Doctypes should be removed";
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereIsAMultiLineComment_ThenRemoveFromResult()
     {
       const string html = @"<!-- 
@@ -658,7 +658,7 @@ a comment
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereIsAHeadTag_ThenRemoveFromResult()
     {
       const string html = @"<head>
@@ -669,7 +669,7 @@ a comment
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereIsAHeadTagWithAttributes_ThenRemoveFromResult()
     {
       const string html = @"<head id=""something"">
@@ -680,7 +680,7 @@ a comment
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereIsAMetaTag_ThenRemoveFromResult()
     {
       const string html = @"<meta name=""language"" content=""pt-br"">
@@ -690,7 +690,7 @@ a comment
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereIsATitleTag_ThenRemoveFromResult()
     {
       const string html = @"<title>Remove me</title>
@@ -700,7 +700,7 @@ a comment
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereIsATitleTagWithAttributes_ThenRemoveFromResult()
     {
       const string html = @"<title id=""something"">Remove me</title>
@@ -710,7 +710,7 @@ a comment
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereIsALinkTag_ThenRemoveFromResult()
     {
       const string html = @"<link type=""text/css"" rel=""stylesheet"" href=""https://dl.dropboxusercontent.com/u/28729896/modelo-similar-blog-ss-para-sublime-text.css"">
@@ -720,7 +720,7 @@ a comment
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereIsABodyTag_ThenRemoveFromResult()
     {
       const string html = @"<body>
@@ -731,7 +731,7 @@ a comment
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereIsABodyTagWithAttributes_ThenRemoveFromResult()
     {
       const string html = @"<body id=""something"">
@@ -742,7 +742,7 @@ a comment
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereIsAnAmpersandEntity_ThenReplaceWithActualCharacter()
     {
       const string html = @"<p>Enties like &amp; should be converted</p>";
@@ -751,7 +751,7 @@ a comment
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereIsAnLessThanEntity_ThenReplaceWithActualCharacter()
     {
       const string html = @"<p>Enties like &lt; should be converted</p>";
@@ -760,7 +760,7 @@ a comment
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereIsAGreaterThanEntity_ThenReplaceWithActualCharacter()
     {
       const string html = @"<p>Enties like &gt; should be converted</p>";
@@ -769,7 +769,7 @@ a comment
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void Convert_WhenThereIsABulletEntity_ThenReplaceWithActualCharacter()
     {
       const string html = @"<p>Enties like &#8226; should be converted</p>";
@@ -777,7 +777,7 @@ a comment
 
       CheckConversion(html, expected);
     }
-    [Test]
+    [Fact]
     public void Convert_ComplexTest_001()
     {
       const string html =
@@ -962,15 +962,15 @@ If you want to play with this application you can fork or browse it on GitHub.";
         reader.ToHtml(w);
         w.Flush();
         var actual = writer.ToString();
-        Assert.AreEqual(expected, actual);
+        Assert.Equal(expected, actual);
 
-        Assert.AreEqual(8, w.Links.Count);
-        Assert.AreEqual("http://bayn.es/real-time-web-applications-with-server-sent-events-pt-1/", w.Links.First().Href);
-        Assert.AreEqual("Building Web Apps with Server-Sent Events - Part 1", w.Links.First().Text);
+        Assert.Equal(8, w.Links.Count);
+        Assert.Equal("http://bayn.es/real-time-web-applications-with-server-sent-events-pt-1/", w.Links.First().Href);
+        Assert.Equal("Building Web Apps with Server-Sent Events - Part 1", w.Links.First().Text);
       }
     }
 
-    [Test]
+    [Fact]
     public void Convert_ComplexTest_002()
     {
       const string html = @"<p>Some other HTML</p>
@@ -989,7 +989,7 @@ Ouse fazer, e o poder lhe será dado!”
     }
 
     //https://github.com/mysticmind/reversemarkdown-net/blob/master/src/ReverseMarkdown.Test/ConverterTests.cs
-    [Test]
+    [Fact]
     public void WhenThereIsEncompassingStrongOrBTag_ThenConvertToMarkdownDoubleAstericks_AnyStrongOrBTagsInsideAreIgnored()
     {
       const string html = @"<strong>Paragraph is encompassed with strong tag and also has <b>bold</b> text words within it</strong>";
@@ -997,7 +997,7 @@ Ouse fazer, e o poder lhe será dado!”
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void WhenThereIsSingleAsterickInText_ThenConvertToMarkdownEscapedAsterick()
     {
       const string html = @"This is a sample(*) paragraph";
@@ -1005,7 +1005,7 @@ Ouse fazer, e o poder lhe será dado!”
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void WhenThereIsEncompassingEmOrITag_ThenConvertToMarkdownSingleAstericks_AnyEmOrITagsInsideAreIgnored()
     {
       const string html = @"<em>This is a <span><i>sample</i></span> paragraph</em>";
@@ -1013,7 +1013,7 @@ Ouse fazer, e o poder lhe será dado!”
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void WhenThereIsEmptyBlockquoteTag_ThenConvertToMarkdownBlockquote()
     {
       const string html = @"This text has <blockquote></blockquote>. This text appear after header.";
@@ -1025,7 +1025,7 @@ Ouse fazer, e o poder lhe será dado!”
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void WhenThereIsParagraphTag_ThenConvertToMarkdownDoubleLineBreakBeforeAndAfter()
     {
       const string html = @"This text has markup <p>paragraph.</p> Next line of text";
@@ -1037,7 +1037,7 @@ Next line of text";
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void WhenThereIsEmptyPreTag_ThenConvertToMarkdownPre()
     {
       const string html = @"This text has pre tag content <pre><br/ ></pre>Next line of text";
@@ -1049,7 +1049,7 @@ Next line of text";
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void WhenListItemTextContainsLeadingAndTrailingSpacesAndTabs_TheConvertToMarkdownListItemWithSpacesAndTabsStripped()
     {
       const string html = @"<ol><li>	    This is a text with leading and trailing spaces and tabs		</li></ol>";
@@ -1057,7 +1057,7 @@ Next line of text";
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void WhenListContainsNewlineAndTabBetweenTagBorders_CleanupAndConvertToMarkdown()
     {
       const string html = @"<ol>
@@ -1071,7 +1071,7 @@ Next line of text";
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void WhenListContainsMultipleParagraphs_ConvertToMarkdownAndIndentSiblings()
     {
       const string html = @"<ol>
@@ -1087,8 +1087,8 @@ Next line of text";
 2. Item3";
       CheckConversion(html, expected);
     }
-    
-    [Test]
+
+    [Fact]
     public void ElementsToSkip()
     {
       const string html = "<noscript>stuff</noscript>";
@@ -1098,7 +1098,7 @@ Next line of text";
       CheckConversion(html, "stuff", settings);
     }
 
-    [Test]
+    [Fact]
     public void SkipHiddenElements()
     {
       var html = "<div style=\"display:none;\">stuff</div>";
@@ -1111,7 +1111,7 @@ Next line of text";
       CheckConversion(html, "stuff");
     }
 
-    [Test]
+    [Fact]
     public void FullHtmlToPlainText()
     {
       const string html = @"<!DOCTYPE html>
@@ -1146,7 +1146,7 @@ Next line of text";
         reader.ToHtml(w);
         w.Flush();
         var actual = writer.ToString();
-        Assert.AreEqual(expected, actual);
+        Assert.Equal(expected, actual);
 
         var meta = new List<KeyValuePair<string, string>>()
         {
@@ -1154,7 +1154,7 @@ Next line of text";
           new KeyValuePair<string, string>("description", "The HTML5 Herald"),
           new KeyValuePair<string, string>("author", "SitePoint"),
         };
-        CollectionAssert.AreEqual(meta, w.Metadata);
+        Assert.Equal(meta, w.Metadata);
       }
     }
 
@@ -1163,11 +1163,11 @@ Next line of text";
       using (var reader = new HtmlReader(html))
       {
         var actual = reader.ToPlainText(settings);
-        Assert.AreEqual(expected, actual);
+        Assert.Equal(expected, actual);
       }
     }
 
-    [Test]
+    [Fact]
     public void ProcessUnmatchedParagraphTags()
     {
       const string html = @"<p><b>Information</b><p></p>
@@ -1288,7 +1288,7 @@ Next line of text";
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void NestedLinkTest()
     {
       const string html = @"<p>I'm thinking about building the DIY RFID reader described here <a href=""http://playground.arduino.cc/Main/DIYRFIDReader"" rel=""nofollow noreferrer""><a href=""http://playground.arduino.cc/Main/DIYRFIDReader"" rel=""nofollow noreferrer"">http://playground.arduino.cc/Main/DIYRFIDReader</a></a>, with an arduino uno.</p>
@@ -1331,7 +1331,7 @@ Would it be better to use a push-pull configuration like the one below ?
       CheckConversion(html, expected);
     }
 
-    [Test]
+    [Fact]
     public void ExtraClosingTag()
     {
       const string html = @"<p>I was looking on <a href=""http://booking.com"">booking.com</a> to book some hotels for our trip next year. Quite a few deals have free cancellation until 1 day before arrival, which is always useful. However most of them also have a prepayment of 100% of the first night or even the complete booking ""on the day of booking"". So if I book now, the price for a full night will be charged on my credit card <strong>today</strong> (or at least this week)?</p>
