@@ -1,4 +1,4 @@
-﻿namespace BracketPipe
+namespace BracketPipe
 {
   using BracketPipe.Extensions;
   using System;
@@ -12,7 +12,7 @@
   /// Performs the tokenization of the source code. Follows the tokenization algorithm at:
   /// http://www.w3.org/html/wg/drafts/html/master/syntax.html
   /// </summary>
-  public sealed class HtmlReader : XmlReader
+  public sealed class HtmlReader : HtmlXmlReader
     , IEnumerator<HtmlNode>
     , IEnumerable<HtmlNode>
     , IXmlLineInfo
@@ -111,7 +111,6 @@
     /// <returns>Returns <c>true</c> if more nodes are available, <c>false</c> otherwise</returns>
     public override bool Read()
     {
-      _attrIndex = -1;
       var current = _base.Advance();
       _position = _base.GetCurrentPosition();
 
@@ -137,11 +136,7 @@
             break;
         }
 
-        if (_current.Type == HtmlTokenType.StartTag
-          && !IsEmptyElement)
-          _depth++;
-        else if (_current.Type == HtmlTokenType.EndTag)
-          _depth--;
+        OnAfterRead();
 
         var tag = _current as HtmlTagNode;
         if (_svgDepth < 0
@@ -2697,298 +2692,6 @@
     {
       _base.Dispose();
     }
-    #endregion
-
-    #region XmlReader
-
-    private int _attrIndex;
-    private int _depth = 0;
-
-    public override int AttributeCount
-    {
-      get
-      {
-        var tag = _current as HtmlStartTag;
-        if (tag == null)
-          return 0;
-        return tag.Attributes.Count;
-      }
-    }
-
-    public override string BaseURI
-    {
-      get
-      {
-        return string.Empty;
-      }
-    }
-
-    public override int Depth
-    {
-      get
-      {
-        return 0;
-      }
-    }
-
-    public override bool EOF
-    {
-      get
-      {
-        return _current != null && _current.Type == HtmlTokenType.EndOfFile;
-      }
-    }
-
-    public override bool IsEmptyElement
-    {
-      get
-      {
-        var tag = _current as HtmlStartTag;
-        if (tag == null)
-          return false;
-        return tag.IsEmpty;
-      }
-    }
-
-    public override string LocalName { get { return GetName().Last(); } }
-
-    private readonly static string[] _emptyStringArray = new string[] { "" };
-
-    private string[] GetName()
-    {
-      if (_attrIndex >= 0)
-        return ((HtmlStartTag)_current).Attributes[_attrIndex].Key.Split(':');
-      if (_attrIndex < -1)
-        return _emptyStringArray;
-      if (_current == null)
-        return _emptyStringArray;
-      if (_current.Type == HtmlTokenType.EndTag
-        || _current.Type == HtmlTokenType.StartTag
-        || _current.Type == HtmlTokenType.Doctype)
-        return _current.Value.Split(':');
-      return _emptyStringArray;
-    }
-
-    public override string NamespaceURI
-    {
-      get
-      {
-        return string.Empty;
-      }
-    }
-
-    private XmlNameTable _table = new NameTable();
-    public override XmlNameTable NameTable
-    {
-      get { return _table; }
-    }
-
-    public override XmlNodeType NodeType
-    {
-      get
-      {
-        if (_current == null)
-          return XmlNodeType.None;
-        if (_attrIndex >= 0)
-          return XmlNodeType.Attribute;
-        if (_attrIndex < -1)
-          return XmlNodeType.Text;
-        switch (_current.Type)
-        {
-          case HtmlTokenType.Comment:
-            return XmlNodeType.Comment;
-          case HtmlTokenType.Doctype:
-            return XmlNodeType.DocumentType;
-          case HtmlTokenType.EndTag:
-            return XmlNodeType.EndElement;
-          case HtmlTokenType.StartTag:
-            return XmlNodeType.Element;
-          case HtmlTokenType.Text:
-            var val = _current.Value ?? "";
-            for (var i = 0; i < val.Length; i++)
-            {
-              if (!char.IsWhiteSpace(val[i]))
-                return XmlNodeType.Text;
-            }
-            return _depth > 0 ? XmlNodeType.SignificantWhitespace : XmlNodeType.Whitespace;
-        }
-        return XmlNodeType.None;
-      }
-    }
-
-    public override string Prefix
-    {
-      get
-      {
-        //var name = GetName();
-        //if (name.Length > 1)
-        //  return name[0];
-        return string.Empty;
-      }
-    }
-
-    public override ReadState ReadState
-    {
-      get
-      {
-        if (_current == null)
-          return ReadState.Initial;
-        if (_current.Type == HtmlTokenType.EndOfFile)
-          return ReadState.EndOfFile;
-        return ReadState.Interactive;
-      }
-    }
-
-    public override string Value
-    {
-      get
-      {
-        if (_attrIndex >= 0)
-          return ((HtmlStartTag)_current).Attributes[_attrIndex].Value;
-        if (_attrIndex < -1)
-          return ((HtmlStartTag)_current).Attributes[_attrIndex * -1 - 2].Value;
-        if (_current == null)
-          return string.Empty;
-        switch (_current.Type)
-        {
-          case HtmlTokenType.Comment:
-          case HtmlTokenType.Text:
-            return _current.Value;
-        }
-        return string.Empty;
-      }
-    }
-
-
-    public override string GetAttribute(int i)
-    {
-      var tag = _current as HtmlStartTag;
-      if (tag == null)
-        return string.Empty;
-      return tag.Attributes[i].Value;
-    }
-
-    public override string GetAttribute(string name)
-    {
-      return GetAttribute(name, null);
-    }
-
-    public override string GetAttribute(string name, string namespaceURI)
-    {
-      var tag = _current as HtmlStartTag;
-      if (tag == null)
-        return string.Empty;
-      return tag[name];
-    }
-
-    public override string LookupNamespace(string prefix)
-    {
-      return string.Empty;
-    }
-
-    public override bool MoveToAttribute(string name)
-    {
-      return MoveToAttribute(name, null);
-    }
-
-    public override bool MoveToAttribute(string name, string ns)
-    {
-      var tag = _current as HtmlStartTag;
-      if (tag != null)
-      {
-        for (var i = 0; i < tag.Attributes.Count; i++)
-        {
-          if (string.Equals(tag.Attributes[i].Key, name, StringComparison.OrdinalIgnoreCase))
-          {
-            _attrIndex = i;
-            return true;
-          }
-        }
-      }
-      _attrIndex = -1;
-      return false;
-    }
-
-    public override bool MoveToElement()
-    {
-      _attrIndex = -1;
-      return _current != null && _current.Type == HtmlTokenType.StartTag;
-    }
-
-    public override bool MoveToFirstAttribute()
-    {
-      var tag = _current as HtmlStartTag;
-      if (tag == null || tag.Attributes.Count < 1)
-      {
-        _attrIndex = -1;
-        return false;
-      }
-      _attrIndex = 0;
-      return true;
-    }
-
-    public override bool MoveToNextAttribute()
-    {
-      var tag = _current as HtmlStartTag;
-      if (tag == null || _attrIndex + 1 >= tag.Attributes.Count)
-      {
-        _attrIndex = -1;
-        return false;
-      }
-      _attrIndex++;
-      return true;
-    }
-
-    public override bool ReadAttributeValue()
-    {
-      if (_attrIndex < -1)
-      {
-        _attrIndex = _attrIndex * -1 - 2;
-        return false;
-      }
-      else
-      {
-        _attrIndex = _attrIndex * -1 - 2;
-        return true;
-      }
-    }
-
-    public override void ResolveEntity()
-    {
-      // Do nothing
-    }
-
-    public IEnumerable<XElement> Elements(Func<HtmlStartTag, bool> predicate = null)
-    {
-      predicate = predicate ?? (n => true);
-
-      MoveToContent();
-      var continueNoRead = true;
-      while (continueNoRead || Read())
-      {
-        continueNoRead = false;
-        if (Current.Type == HtmlTokenType.StartTag && predicate((HtmlStartTag)Current))
-        {
-          var el = XNode.ReadFrom(this) as XElement;
-          if (el != null)
-            yield return el;
-          continueNoRead = true;
-        }
-      }
-    }
-
-#if NET35
-    public override bool HasValue
-    {
-      get { return true; }
-    }
-#endif
-#if !PORTABLE
-    public override void Close()
-    {
-      
-    }
-#endif
     #endregion
   }
 }

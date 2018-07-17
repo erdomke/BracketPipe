@@ -80,6 +80,16 @@ namespace BracketPipe
     }
 
     /// <summary>
+    /// Creates an XML reader from the list of nodes.
+    /// </summary>
+    /// <param name="reader">A stream of <see cref="HtmlNode"/></param>
+    /// <returns>An <see cref="XmlReader"/></returns>
+    public static XmlReader AsXmlReader(this IEnumerable<HtmlNode> reader)
+    {
+      return new HtmlXmlReader(reader);
+    }
+
+    /// <summary>
     /// Render parsed HTML to a string
     /// </summary>
     /// <param name="reader">A stream of <see cref="HtmlNode"/></param>

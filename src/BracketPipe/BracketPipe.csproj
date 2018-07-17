@@ -95,6 +95,7 @@
     <Compile Include="Parser\Html\HtmlTextWriter.cs" />
     <Compile Include="Parser\Html\HtmlTokenType.cs" />
     <Compile Include="Parser\Html\HtmlWriterSettings.cs" />
+    <Compile Include="Parser\Html\HtmlXmlReader.cs" />
     <Compile Include="Parser\Html\IBaseTokenizer.cs" />
     <Compile Include="Parser\Html\Tokens\HtmlComment.cs" />
     <Compile Include="Parser\Html\Tokens\HtmlDoctype.cs" />
