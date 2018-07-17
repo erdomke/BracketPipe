@@ -14,35 +14,8 @@ namespace BracketPipe
     private readonly IEnumerator<HtmlNode> _enumerator;
 
     private int _attrIndex;
-    private int _depth = 0;
-
-    private HtmlNode Current { get { return _enumerator.Current; } }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="HtmlXmlReader"/> class.
-    /// </summary>
-    protected HtmlXmlReader()
-    {
-      _enumerator = this as IEnumerator<HtmlNode>;
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="HtmlXmlReader"/> class.
-    /// </summary>
-    /// <param name="enumerator">The enumerator.</param>
-    public HtmlXmlReader(IEnumerator<HtmlNode> enumerator)
-    {
-      _enumerator = enumerator;
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="HtmlXmlReader"/> class.
-    /// </summary>
-    /// <param name="enumerable">The enumerable.</param>
-    public HtmlXmlReader(IEnumerable<HtmlNode> enumerable)
-    {
-      _enumerator = enumerable.GetEnumerator();
-    }
+    private int _depth;
+    private ReadState _state = ReadState.Initial;
 
     /// <summary>
     /// Gets the number of attributes on the current node.
@@ -83,13 +56,7 @@ namespace BracketPipe
     /// <summary>
     /// Gets a value indicating whether the reader is positioned at the end of the stream.
     /// </summary>
-    public override bool EOF
-    {
-      get
-      {
-        return Current != null && Current.Type == HtmlTokenType.EndOfFile;
-      }
-    }
+    public override bool EOF { get { return _state == ReadState.EndOfFile; } }
 
     /// <summary>
     /// Gets a value indicating whether the current node is an empty element (for example, &lt;MyElement/&gt;).
@@ -201,16 +168,34 @@ namespace BracketPipe
     /// <summary>
     /// Gets the state of the reader.
     /// </summary>
-    public override ReadState ReadState
+    public override ReadState ReadState { get { return _state; } }
+
+    private HtmlNode Current { get { return _enumerator.Current; } }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="HtmlXmlReader"/> class.
+    /// </summary>
+    protected HtmlXmlReader()
     {
-      get
-      {
-        if (Current == null)
-          return ReadState.Initial;
-        if (Current.Type == HtmlTokenType.EndOfFile)
-          return ReadState.EndOfFile;
-        return ReadState.Interactive;
-      }
+      _enumerator = this as IEnumerator<HtmlNode>;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="HtmlXmlReader"/> class.
+    /// </summary>
+    /// <param name="enumerator">The enumerator.</param>
+    public HtmlXmlReader(IEnumerator<HtmlNode> enumerator)
+    {
+      _enumerator = enumerator;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="HtmlXmlReader"/> class.
+    /// </summary>
+    /// <param name="enumerable">The enumerable.</param>
+    public HtmlXmlReader(IEnumerable<HtmlNode> enumerable)
+    {
+      _enumerator = enumerable.GetEnumerator();
     }
 
     /// <summary>
@@ -414,20 +399,24 @@ namespace BracketPipe
     public override bool Read()
     {
       var result = _enumerator.MoveNext();
-      OnAfterRead();
+      OnAfterRead(result);
       return result;
     }
 
     /// <summary>
     /// Tracking code called after each read operation.
     /// </summary>
-    protected virtual void OnAfterRead()
+    protected virtual void OnAfterRead(bool success)
     {
       _attrIndex = -1;
-      if (Current.Type == HtmlTokenType.StartTag && !IsEmptyElement)
-        _depth++;
-      else if (Current.Type == HtmlTokenType.EndTag)
-        _depth--;
+      _state = success ? ReadState.Interactive : ReadState.EndOfFile;
+      if (success)
+      {
+        if (Current.Type == HtmlTokenType.StartTag && !IsEmptyElement)
+          _depth++;
+        else if (Current.Type == HtmlTokenType.EndTag)
+          _depth--;
+      }
     }
 
 #if NET35

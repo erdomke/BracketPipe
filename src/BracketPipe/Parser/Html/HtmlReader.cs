@@ -136,7 +136,7 @@ namespace BracketPipe
             break;
         }
 
-        OnAfterRead();
+        OnAfterRead(true);
 
         var tag = _current as HtmlTagNode;
         if (_svgDepth < 0
@@ -189,6 +189,7 @@ namespace BracketPipe
         return true;
       }
 
+      OnAfterRead(false);
       _current = NewEof(acceptable: true);
       return false;
     }
