@@ -104,7 +104,7 @@ namespace BracketPipe.Tests
   <script src=""js/scripts.js""></script>
 </body>
 </html>";
-      const string expectedNoIndent = "<!DOCTYPE html[]><html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\" />\n\n  <title>The HTML5 Herald</title>\n  <meta name=\"description\" content=\"The HTML5 Herald\" />\n  <meta name=\"author\" content=\"SitePoint\" />\n\n  <link rel=\"stylesheet\" href=\"css/styles.css?v=1.0\" />\n\n  <!--[if lt IE 9]>\n    <script src=\"https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.js\"></script>\n  <![endif]-->\n</head>\n\n<body>\n  <input type=\"text\" required=\"\" />\n  <script src=\"js/scripts.js\"></script>\n</body>\n</html>";
+      const string expectedNoIndent = "<!DOCTYPE html[]><html lang=\"en\"><head><meta charset=\"utf-8\" /><title>The HTML5 Herald</title><meta name=\"description\" content=\"The HTML5 Herald\" /><meta name=\"author\" content=\"SitePoint\" /><link rel=\"stylesheet\" href=\"css/styles.css?v=1.0\" /><!--[if lt IE 9]>\n    <script src=\"https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.js\"></script>\n  <![endif]--></head><body><input type=\"text\" required=\"\" /><script src=\"js/scripts.js\"></script></body></html>";
 
       TestXmlVariants(html, expected, expectedNoIndent);
     }

@@ -142,10 +142,19 @@ namespace BracketPipe
             var val = Current.Value ?? "";
             for (var i = 0; i < val.Length; i++)
             {
-              if (!char.IsWhiteSpace(val[i]))
-                return XmlNodeType.Text;
+              switch (val[i])
+              {
+                case '\t':
+                case '\r':
+                case '\n':
+                case ' ':
+                  // The core whitespace characters
+                  break;
+                default:
+                  return XmlNodeType.Text;
+              }
             }
-            return _depth > 0 ? XmlNodeType.SignificantWhitespace : XmlNodeType.Whitespace;
+            return XmlNodeType.Whitespace;
         }
         return XmlNodeType.None;
       }
