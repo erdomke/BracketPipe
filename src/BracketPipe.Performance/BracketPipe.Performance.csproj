@@ -76,7 +76,7 @@
   <ItemGroup>
     <ProjectReference Include="..\BracketPipe\BracketPipe.csproj">
       <Project>{7ff8bf41-8a15-4cda-ac3c-2bdbee7b265c}</Project>
-      <Name>AngleParse</Name>
+      <Name>BracketPipe</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -467,6 +467,7 @@ namespace BracketPipe
       {
         // Only indent on nested lists
         if (i < _linePrefix.Count - 1
+          && _linePrefix[i].Length > 0
           && (_linePrefix[i][0] == '-' || char.IsDigit(_linePrefix[i][0])))
           _writer.Write(new string(' ', _linePrefix[i].Length));
         else
