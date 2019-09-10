@@ -149,7 +149,12 @@ namespace BracketPipe
             }
             else
             {
-              yield return new HtmlText(node.Position, " ");
+              // Inline elements can render spaces, otherwise spaces shouldn't be rendered between elements
+              if ((node.Type == HtmlTokenType.StartTag || node.Type == HtmlTokenType.EndTag)
+                && settings.InlineElements.Contains(node.Value))
+              {
+                yield return new HtmlText(node.Position, " ");
+              }
               if (settings.PreserveSurroundingSpaceTags.Contains(node.Value))
                 state = MinifyState.Compressed;
               else

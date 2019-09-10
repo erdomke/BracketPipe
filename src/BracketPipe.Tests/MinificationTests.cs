@@ -167,7 +167,6 @@ namespace BracketPipe.Core.Tests
       Assert.Equal(input, Html.Minify(input));
     }
 
-
     [Fact]
     public void Minify_DontConcatenateScriptTags()
     {
@@ -187,6 +186,14 @@ namespace BracketPipe.Core.Tests
       var settings = HtmlMinifySettings.Default();
       settings.ScriptTypesToCompress.Clear();
       Assert.Equal(input, Html.Minify(input, settings));
+    }
+
+    [Fact]
+    public void Minify_NoSpaceBetweenNestedElements()
+    {
+      Assert.Equal("<div>Foo</div><div></div>",
+  Html.Minify(@"<div>Foo</div>
+<div></div>"));
     }
   }
 }
